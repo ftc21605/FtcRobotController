@@ -33,8 +33,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -72,10 +74,10 @@ public class MotorTest4 extends OpMode
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftDriveFront  = hardwareMap.get(DcMotor.class, "motor1");
-        rightDriveFront = hardwareMap.get(DcMotor.class, "motor0");
-        leftDriveBack  = hardwareMap.get(DcMotor.class, "motor3");
-        rightDriveBack = hardwareMap.get(DcMotor.class, "motor2");
+        leftDriveFront  = hardwareMap.get(DcMotor.class, "frontleft");
+        rightDriveFront = hardwareMap.get(DcMotor.class, "frontright");
+        leftDriveBack  = hardwareMap.get(DcMotor.class, "backleft");
+        rightDriveBack = hardwareMap.get(DcMotor.class, "backright");
 
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
@@ -85,6 +87,7 @@ public class MotorTest4 extends OpMode
         rightDriveFront.setDirection(DcMotor.Direction.FORWARD);
         leftDriveBack.setDirection(DcMotor.Direction.REVERSE);
         rightDriveBack.setDirection(DcMotor.Direction.FORWARD);
+
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
