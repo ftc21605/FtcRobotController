@@ -64,18 +64,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "Wallace TeleOp w elevator limit", group = "Wallace")
+@TeleOp(name = "DriverCode", group = "Wallace")
 //@Disabled
-public class TeleopWithElevatorLimit extends LinearOpMode {
+public class Driver1 extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
-    private DcMotorSimple leftBackDrive = null;
+    private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    private DcMotor elevator = null;
-    private Servo grabber = null;
+
     static final double CLOSE_POS = 0.57;     // Maximum rotational position
     static final double OPEN_POS = 0.37;     // Minimum rotational position
     int countopen = 0;
@@ -95,10 +94,10 @@ public class TeleopWithElevatorLimit extends LinearOpMode {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "motor1");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "motor0");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "motor3");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "motor2");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
     //    grabber = hardwareMap.get(Servo.class, "grabber");
         // ########################################################################################
@@ -116,29 +115,12 @@ public class TeleopWithElevatorLimit extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
 
-// elevator motor setup
-       // elevator = hardwareMap.get(DcMotor.class, "elevator");
-        elevator.setDirection(DcMotor.Direction.REVERSE);
-        elevator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // set to break on zero power to hold position
-        // hokey way to reset encoder
-        elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         //elevatorposition_start = elevator.getCurrentPosition();
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        int elevatorposition_start = elevator.getCurrentPosition();
-        int elevator_moveto = elevatorposition_start;
-        double elevator_fixed_speed = 0;
-        double elevatorPower = 0;
-        boolean move_up = true;
-        boolean dpad_pressed = false;
-        int move_down_offset = 0;
 
-        boolean open = false;
-        boolean pushed = false;
-        double grabber_position = CLOSE_POS; // Start at halfway position
-        grabber.setPosition(grabber_position);
         waitForStart();
         runtime.reset();
 
@@ -180,125 +162,13 @@ public class TeleopWithElevatorLimit extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
-// elevator
-            int current_elevator_position = elevator.getCurrentPosition() - elevatorposition_start;
-            if (gamepad1.a) {
-                elevator_moveto = LOW_POLE;
-                if (current_elevator_position < LOW_POLE) {
-                    elevatorPower = LOW_POLE_SPEED;
-                    move_up = true;
-                } else if (current_elevator_position > LOW_POLE) {
-                    move_up = false;
-                    elevatorPower = DOWN_SPEED; //-LOW_POLE_SPEED;
-                    move_down_offset = 50;
-                } else {
-                    elevatorPower = 0;
-                }
-            }
-            if (gamepad1.b) {
-                elevator_moveto = MEDIUM_POLE;
-                if (current_elevator_position < MEDIUM_POLE) {
-                    elevatorPower = MEDIUM_POLE_SPEED;
-                    move_up = true;
-                } else if (current_elevator_position > MEDIUM_POLE) {
-                    move_up = false;
-                    elevatorPower = DOWN_SPEED; //-MEDIUM_POLE_SPEED;
-                    move_down_offset = 120;
-                } else {
-                    elevatorPower = 0;
-                }
-            }
-            if (gamepad1.y) {
-                elevator_moveto = HIGH_POLE;
-                if (current_elevator_position < HIGH_POLE) {
-                    elevatorPower = HIGH_POLE_SPEED;
-                    move_up = true;
-                } else if (current_elevator_position > HIGH_POLE) {
-                    move_up = false;
-                    elevatorPower = DOWN_SPEED; //-HIGH_POLE_SPEED;
-                    move_down_offset = 0;
-                } else {
-                    elevatorPower = 0;
-                }
-            }
-            if (gamepad1.x) {
-                elevator_moveto = Math.max(elevatorposition_start,0);
-                if (current_elevator_position < elevatorposition_start) {
-                    elevatorPower = 0.5;
-                    move_up = true;
-                } else if (current_elevator_position > elevatorposition_start) {
-                    move_up = false;
-                    elevatorPower = DOWN_SPEED;
-                    move_down_offset = 0;
-                } else {
-                    elevatorPower = 0;
-                }
-            }
 
-            if (gamepad1.dpad_up && !dpad_pressed){
-                elevator_moveto = current_elevator_position + 400;
-                move_up = true;
-                elevatorPower = 0.5;
-                dpad_pressed = true;
-            }
-            else if ( !gamepad1.dpad_up && dpad_pressed) {
-                dpad_pressed = false;
-            }
-
-            if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0) {
-                elevatorPower = Math.min(gamepad1.right_trigger, 0.8);
-                elevator_moveto = -1000;
-
-            } else if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0) {
-                elevatorPower = Math.max(-0.5, -gamepad1.left_trigger);
-                elevator_moveto = -1000;
-            } else {
-                if (elevator_moveto < 0) {
-                    elevatorPower = 0;
-                }
-            }
-            if (elevator_moveto >= elevatorposition_start) {
-                if (move_up) {
-                    if (current_elevator_position >= elevator_moveto) {
-                        elevatorPower = 0;
-                        elevator_moveto = -1000;
-                    }
-                } else {
-                    if (current_elevator_position <= (elevator_moveto + move_down_offset)) {
-                        elevatorPower = 0;
-                        elevator_moveto = -1000;
-                    }
-                }
-            }
-            if (elevatorPower < 0 && current_elevator_position <= 0) {
-                elevatorPower = 0;
-            }
-
-            elevator.setPower(elevatorPower);
-            telemetry.addData("elevator position", "%d", current_elevator_position);
-            if ((gamepad1.right_bumper || gamepad1.left_bumper) && !pushed) {
-                pushed = true;
-                if (open) {
-                    grabber.setPosition(CLOSE_POS);
-                    grabber_position = CLOSE_POS;
-                    open = false;
-                } else {
-                    grabber.setPosition(OPEN_POS);
-                    grabber_position = OPEN_POS;
-                    open = true;
-                }
-            } else if (!gamepad1.right_bumper && !gamepad1.left_bumper) {
-                pushed = false;
             }
             //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("axial (ly), lateral (lx), yaw (ry) ", "%4.2f, %4.2f. %4.2f", axial, lateral, yaw);
-            telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
-            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-            telemetry.addData("Grabber Position", "%4.2f", grabber_position);
-            telemetry.addData("Move to, up", "%d, %b",elevator_moveto, move_up);
             telemetry.update();
         }
     }
-}
+
+
