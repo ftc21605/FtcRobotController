@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode.sensortest;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -47,16 +47,16 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "Sensor: REV touch sensor", group = "Sensor")
-@Disabled
-public class SensorTouch extends LinearOpMode {
+@TeleOp(name = "Sensor: REV Magnetic Limit Switch", group = "Sensor")
+//@Disabled
+public class MagnetLimit extends LinearOpMode {
     TouchSensor touchSensor;  // Touch sensor Object
 
     @Override
     public void runOpMode() {
 
         // get a reference to our touchSensor object.
-        touchSensor = hardwareMap.get(TouchSensor.class, "sensor_touch");
+        touchSensor = hardwareMap.get(TouchSensor.class, "magnet");
 
         // wait for the start button to be pressed.
         waitForStart();
