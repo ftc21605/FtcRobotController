@@ -28,8 +28,11 @@ public class RedBlueProcessor implements VisionProcessor {
     public Object processFrame(Mat frame, long captureTimeNanos) {
 
         Imgproc.cvtColor(frame, hsvMat, Imgproc.COLOR_RGB2HSV);
-        Scalar lowHSV = new Scalar(20, 70, 80); // lenient lower bound HSV for yellow
-        Scalar highHSV = new Scalar(32, 255, 255); // lenient higher bound HSV for yellow
+
+     //   Scalar lowHSV = new Scalar(20, 70, 80); // lenient lower bound HSV for yellow
+     //   Scalar highHSV = new Scalar(32, 255, 255); // lenient higher bound HSV for yellow
+        Scalar lowHSV = new Scalar(75, 50, 50); // lenient lower bound HSV for yellow
+        Scalar highHSV = new Scalar(130, 255, 255); // lenient higher bound HSV for yellow
         Mat thresh = new Mat();
         // Get a black and white image of yellow objects
         Core.inRange(hsvMat, lowHSV, highHSV, thresh);
