@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode.test;
 
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -50,9 +52,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Test: Drive Motors", group="ZTest")
+@TeleOp(name="Test: Encoder Drive", group="ZTest")
 //@Disabled
-public class MotorTest extends OpMode
+public class EncoderDriveTest extends LinearOpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -60,121 +62,104 @@ public class MotorTest extends OpMode
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 20.0 ;     // No External Gearing.
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
 
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
-    public void init() {
+    public void runOpMode() {
+
         telemetry.addData("Status", "Initialized");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontleft");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "backleft");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
         rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftBackDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        telemetry.addData("Status", "Initialized");
+        waitForStart();
+        runtime.reset();
 
         // Tell the driver that initialization is complete.
-        telemetry.addData("Status", "Initialized");
+
+        while (opModeIsActive()) {
+            if (gamepad1.a) {
+                encoderDrive(0.2, 10, 10, 5);
+                //telemetry.addData("LF Motor", "(%.2f)", Power);
+                sleep(5000);
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+
+            }
+        }
     }
 
-    /*
-     * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
-     */
-    @Override
-    public void init_loop() {
-    }
 
-    /*
-     * Code to run ONCE when the driver hits PLAY
-     */
-    @Override
-    public void start() {
-        runtime.reset();
-    }
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS) {
+        int newLeftTarget;
+        int newRightTarget;
+        telemetry.addData("lfin", "%.0f %.0f / %.0f", speed, leftInches, rightInches);
+        telemetry.update();
+        //   sleep(10000);  // pause to display final telemetry message.
 
-    /*
-     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-     */
-    @Override
-    public void loop() {
-        // Setup a variable for each drive wheel to save power level for telemetry
-        double Power = gamepad1.left_stick_y;
+        // Ensure that the opmode is still active
+        if (opModeIsActive())
+        {
 
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = leftFrontDrive.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
+            newRightTarget = rightFrontDrive.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
+            leftFrontDrive.setTargetPosition(newLeftTarget);
+            rightFrontDrive.setTargetPosition(newRightTarget);
 
-        // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight.
-       // double leftdrive =  gamepad1.left_stick_y;
-       // double rightdrive  =  gamepad1.right_stick_y;
-       // leftPower    = Range.clip(leftdrive, -1.0, 1.0) ;
-       // rightPower   = Range.clip(rightdrive, -1.0, 1.0) ;
+            // Turn On RUN_TO_POSITION
+            leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        if (gamepad1.x)
-        {
-            leftFrontDrive.setPower(Power);
-            telemetry.addData("LF Motor", "(%.2f), position %d", Power, leftFrontDrive.getCurrentPosition());
-        }
-        else
-        {
-            leftFrontDrive.setPower(0.);
-        }
-        if (gamepad1.y)
-        {
-            rightFrontDrive.setPower(Power);
-            telemetry.addData("RF Motor", "(%.2f), position %d", Power, rightFrontDrive.getCurrentPosition());
-        }
-        else
-        {
-            rightFrontDrive.setPower(0.);
-        }
-        if (gamepad1.a)
-        {
-            leftBackDrive.setPower(Power);
-            telemetry.addData("LB Motor", "(%.2f), position %d", Power, leftBackDrive.getCurrentPosition());
-        }
-        else
-        {
-            leftBackDrive.setPower(0.);
-        }
-        if (gamepad1.b)
-        {
-            rightBackDrive.setPower(Power);
-            telemetry.addData("RB Motor", "(%.2f), position %d", Power, rightBackDrive.getCurrentPosition());
-        }
-        else
-        {
-            rightBackDrive.setPower(0.);
-        }
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftFrontDrive.setPower(Math.abs(speed));
+            rightFrontDrive.setPower(Math.abs(speed));
+            leftBackDrive.setPower(Math.abs(speed));
+            rightBackDrive.setPower(Math.abs(speed));
 
-        // Show the elapsed game time and wheel power.
-        telemetry.addData("Help", "front left press x");
-        telemetry.addData("Help", "front right press y");
-        telemetry.addData("Help", "back left press a");
-        telemetry.addData("Help", "back right press b");
-        telemetry.addData("Help", "left stick y: motor power");
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motor Power", " (%.2f)", Power);
-        //telemetry.addData("Motors", "left (%.2f)", leftPower);
-    }
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
 
-    /*
-     * Code to run ONCE after the driver hits STOP
-     */
-    @Override
-    public void stop() {
+                // Display it for the driver.
+                telemetry.addData("Running to", " %7d :%7d", newLeftTarget, newRightTarget);
+                telemetry.addData("Currently at", " at %7d :%7d",
+                        leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition());
+                telemetry.update();
+            }
+        }
     }
 
 }
