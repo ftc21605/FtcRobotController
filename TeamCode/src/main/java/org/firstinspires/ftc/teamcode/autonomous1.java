@@ -38,12 +38,15 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
 import java.util.List;
@@ -52,43 +55,43 @@ import java.util.Objects;
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
  * The code is structured as a LinearOpMode
- *
+ * <p>
  * The code REQUIRES that you DO have encoders on the wheels,
- *   otherwise you would use: RobotAutoDriveByTime;
- *
- *  This code ALSO requires that the drive Motors have been configured such that a positive
- *  power command moves them forward, and causes the encoders to count UP.
- *
- *   The desired path in this example is:
- *   - Drive forward for 48 inches
- *   - Spin right for 12 Inches
- *   - Drive Backward for 24 inches
- *   - Stop and close the claw.
- *
- *  The code is written using a method called: encoderDrive(speed, leftInches, rightInches, timeoutS)
- *  that performs the actual movement.
- *  This method assumes that each movement is relative to the last stopping place.
- *  There are other ways to perform encoder based moves, but this method is probably the simplest.
- *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
- *
+ * otherwise you would use: RobotAutoDriveByTime;
+ * <p>
+ * This code ALSO requires that the drive Motors have been configured such that a positive
+ * power command moves them forward, and causes the encoders to count UP.
+ * <p>
+ * The desired path in this example is:
+ * - Drive forward for 48 inches
+ * - Spin right for 12 Inches
+ * - Drive Backward for 24 inches
+ * - Stop and close the claw.
+ * <p>
+ * The code is written using a method called: encoderDrive(speed, leftInches, rightInches, timeoutS)
+ * that performs the actual movement.
+ * This method assumes that each movement is relative to the last stopping place.
+ * There are other ways to perform encoder based moves, but this method is probably the simplest.
+ * This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
+ * <p>
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Wallace autonomous", group="Wallace")
+@Autonomous(name = "Wallace autonomous1", group = "Wallace")
 //@Disabled
-public class autonomous extends LinearOpMode {
+public class autonomous1 extends LinearOpMode {
 
     /* Declare OpMode members. */
-    private DcMotor         leftFrontDrive   = null;
-    private DcMotor         rightFrontDrive  = null;
-    private DcMotor         leftBackDrive   = null;
-    private DcMotor         rightBackDrive  = null;
+    private DcMotor leftFrontDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightBackDrive = null;
     IMU imu;
     double turnpower = -0.2;
     private WebcamName webcam1, webcam2;
     private static final String TFOD_MODEL_ASSET = "cylinder.tflite";
-    private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime runtime = new ElapsedTime();
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
     // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
@@ -96,16 +99,15 @@ public class autonomous extends LinearOpMode {
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 20.0 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    static final double COUNTS_PER_MOTOR_REV = 28;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 20.0;     // No External Gearing.
+    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.2;
-    static final double     TURN_SPEED              = 0.5;
+    static final double DRIVE_SPEED = 0.2;
+    static final double TURN_SPEED = 0.5;
 
 //    private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
-
 
 
     private static final String[] LABELS = {
@@ -117,7 +119,11 @@ public class autonomous extends LinearOpMode {
     private TfodProcessor tfod;
 
     private VisionPortal visionPortal;
+    private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
+    private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
+    int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
 
+    boolean targetFound     = false;
 
     /**
      * {@link #tfod} is the variable we will use to store our instance of the TensorFlow Object
@@ -126,8 +132,9 @@ public class autonomous extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
+        initAprilTag();
         initTfod();
+
 
         /*
          * Activate TensorFlow Object Detection before we wait for the start command.
@@ -191,52 +198,45 @@ public class autonomous extends LinearOpMode {
         double col = 0;
         double row = 0;
         while (!isStarted() && !isStopRequested()) {
-        //String object_id = "0";
-        int icnt = 0;
+            //String object_id = "0";
+            int icnt = 0;
 
-        while (Objects.equals(object_id, "0") && !isStopRequested()) {
-            if (tfod != null) {
-                // getUpdatedRecognitions() will return null if no new information is available since
-                // the last time that call was made.
-                List<Recognition> currentRecognitions = tfod.getRecognitions();
-                if (currentRecognitions != null) {
-                    telemetry.addData("# Objects Detected", currentRecognitions.size());
+            while (Objects.equals(object_id, "0") && !isStopRequested()) {
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> currentRecognitions = tfod.getRecognitions();
+                    if (currentRecognitions != null) {
+                        telemetry.addData("# Objects Detected", currentRecognitions.size());
 
-                    // step through the list of recognitions and display image position/size information for each one
-                    // Note: "Image number" refers to the randomized image orientation/number
-                    for (Recognition recognition : currentRecognitions) {
-                         col = (recognition.getLeft() + recognition.getRight()) / 2;
-                         row = (recognition.getTop() + recognition.getBottom()) / 2;
-                        double width = Math.abs(recognition.getRight() - recognition.getLeft());
-                        double height = Math.abs(recognition.getTop() - recognition.getBottom());
+                        // step through the list of recognitions and display image position/size information for each one
+                        // Note: "Image number" refers to the randomized image orientation/number
+                        for (Recognition recognition : currentRecognitions) {
+                            col = (recognition.getLeft() + recognition.getRight()) / 2;
+                            row = (recognition.getTop() + recognition.getBottom()) / 2;
+                            double width = Math.abs(recognition.getRight() - recognition.getLeft());
+                            double height = Math.abs(recognition.getTop() - recognition.getBottom());
 
-                        telemetry.addData("", " ");
-                        telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                        object_id = recognition.getLabel();
-                        telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
-                        telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
+                            telemetry.addData("", " ");
+                            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                            object_id = recognition.getLabel();
+                            telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
+                            telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
+                        }
+                        telemetry.update();
+                    } else {
+                        sleep(10);
+                        icnt++;
+                        telemetry.addData("tried ", "%d", icnt);
+                        telemetry.update();
+
                     }
-                    telemetry.update();
-                } else {
-                    sleep(10);
-                    icnt++;
-                    telemetry.addData("tried ", "%d", icnt);
-                    telemetry.update();
-
                 }
             }
-        }
-        if (isStopRequested()) return;
-        telemetry.addData("found ", "%s", object_id);
-        telemetry.update();
-        sleep(1000);
-    }
-        telemetry.addData("waiting for b pressed", gamepad1.b);
-        telemetry.update();
-       // sleep(30000);
-        while (! gamepad1.b)
-        {
-            sleep(100);
+            if (isStopRequested()) return;
+            telemetry.addData("found ", "%s", object_id);
+            telemetry.update();
+            sleep(1000);
         }
         imu.resetYaw();
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
@@ -253,18 +253,56 @@ public class autonomous extends LinearOpMode {
             double y = row;
             double phi = Math.atan2(x, y);
             double deg = phi * 180. / Math.PI;
-            telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x,y,phi,deg);
+            telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
             telemetry.update();
-           if (50 < deg && deg < 70)
-           {
-               encoderDrive(DRIVE_SPEED, 25, 25, 5.0);  // S1: Forward 47
-               return;
-           }
+            if (50 < deg && deg < 75) {
+                encoderDrive(DRIVE_SPEED, 25, 25, 5.0);  // S1: Forward 47
+
+                orientation = imu.getRobotYawPitchRollAngles();
+                leftFrontDrive.setPower(-turnpower);
+                rightFrontDrive.setPower(turnpower);
+                leftBackDrive.setPower(-turnpower);
+                rightBackDrive.setPower(turnpower);
+
+                while (orientation.getYaw(AngleUnit.DEGREES) > -85) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                encoderDrive(DRIVE_SPEED, 50, 50, 5.0);  // S1: Forward 47
+                doCameraSwitching();
+                List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+                for (AprilTagDetection detection : currentDetections) {
+                        // Look to see if we have size info on this tag.
+                        if (detection.metadata != null) {
+                            //  Check to see if we want to track towards this tag.
+                            if ((DESIRED_TAG_ID < 0) || (detection.id == 2)) {
+                                // Yes, we want to use this tag.
+                                targetFound = true;
+                                desiredTag = detection;
+                                break;  // don't look any further.
+                            } else {
+                                // This tag is in the library, but we do not want to track it right now.
+                                telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
+                            }
+                        } else {
+                            // This tag is NOT in the library, so we don't have enough information to track to it.
+                            telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
+                        }
+                    // Look to see if we have size info on this tag.
+
+                }
+
+                return;
+            }
             sleep(10000);
         }
-            //encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-            //encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-         else if (Objects.equals(object_id, "b")) {
+        //encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        //encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        else if (Objects.equals(object_id, "b")) {
 //            encoderDrive(DRIVE_SPEED, 2, 2, 5.0);  // S1: Forward 47
             telemetry.addData("Yaw (Z)", "%.2f Deg. (Heading)", orientation.getYaw(AngleUnit.DEGREES));
 
@@ -273,18 +311,74 @@ public class autonomous extends LinearOpMode {
             double y = row;
             double phi = Math.atan2(x, y);
             double deg = phi * 180. / Math.PI;
-            telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x,y,phi,deg);
+            telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
             telemetry.update();
-            if (50 < deg && deg < 70)
-            {
+
+             if (45 < deg && deg < 75) {
                 encoderDrive(DRIVE_SPEED, 25, 25, 5.0);  // S1: Forward 47
+
+                orientation = imu.getRobotYawPitchRollAngles();
+                leftFrontDrive.setPower(turnpower);
+                rightFrontDrive.setPower(-turnpower);
+                leftBackDrive.setPower(turnpower);
+                rightBackDrive.setPower(-turnpower);
+
+                while (orientation.getYaw(AngleUnit.DEGREES) < 85) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+           //         telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+          //          telemetry.update();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                sleep(2000);
+                encoderDrive(DRIVE_SPEED, 50, 50, 5.0);  // S1: Forward 47
+                doCameraSwitching();
+                List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+               telemetry.addData("april", x);
+                for (AprilTagDetection detection : currentDetections) {
+                 telemetry.addData("found dets", x);
+                    // Look to see if we have size info on this tag.
+                    if (detection.metadata != null) {
+                        telemetry.addData("found ", detection.id);
+                    }
+                }
+                telemetry.update();
+                sleep(3000);
+                for (AprilTagDetection detection : currentDetections) {
+                    // Look to see if we have size info on this tag.
+                    if (detection.metadata != null) {
+                        //  Check to see if we want to track towards this tag.
+                        if ((DESIRED_TAG_ID < 0) || (detection.id == 2)) {
+                            // Yes, we want to use this tag.
+                            telemetry.addData("Skipping", "Tag ID %d is desired", detection.id);
+
+                            targetFound = true;
+                            desiredTag = detection;
+                            break;  // don't look any further.
+                        } else {
+                            // This tag is in the library, but we do not want to track it right now.
+                            telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
+                        }
+                    } else {
+                        // This tag is NOT in the library, so we don't have enough information to track to it.
+                        telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
+                    }
+
+                }
                 return;
+
             }
             sleep(10000);
+            }
         }
+
         // now for the april tags
 
-    }
+
+
     /*
      *  Method to perform a relative move, based on encoder counts.
      *  Encoders are not reset as the move is based on the current position.
@@ -306,8 +400,8 @@ public class autonomous extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newLeftTarget = leftFrontDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRightTarget = rightFrontDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftTarget = leftFrontDrive.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
+            newRightTarget = rightFrontDrive.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
             leftFrontDrive.setTargetPosition(newLeftTarget);
             rightFrontDrive.setTargetPosition(newRightTarget);
 
@@ -333,8 +427,8 @@ public class autonomous extends LinearOpMode {
                     (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
 
                 // Display it for the driver.
-                telemetry.addData("Running to",  " %7d :%7d", newLeftTarget,  newRightTarget);
-                telemetry.addData("Currently at",  " at %7d :%7d",
+                telemetry.addData("Running to", " %7d :%7d", newLeftTarget, newRightTarget);
+                telemetry.addData("Currently at", " at %7d :%7d",
                         leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition());
                 telemetry.update();
             }
@@ -358,7 +452,7 @@ public class autonomous extends LinearOpMode {
      * Initialize the TensorFlow Object Detection engine.
      */
     private void initTfod() {
-float conf = (float) 0.1;
+        float conf = (float) 0.6;
         tfod = new TfodProcessor.Builder()
 
                 // With the following lines commented out, the default TfodProcessor Builder
@@ -387,10 +481,12 @@ float conf = (float) 0.1;
         visionPortal = new VisionPortal.Builder()
                 .setCamera(switchableCamera)
                 .addProcessor(tfod)
+                .addProcessor(aprilTag)
                 .build();
 
 
-          }
+    }
+
     private void doCameraSwitching() {
         if (visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
             if (visionPortal.getActiveCamera().equals(webcam1)) {
@@ -401,4 +497,38 @@ float conf = (float) 0.1;
             }
         }
     }   // end method doCameraSwitching()
+
+    private void initAprilTag() {
+        // Create the AprilTag processor by using a builder.
+        aprilTag = new AprilTagProcessor.Builder().build();
+
+        // Adjust Image Decimation to trade-off detection-range for detection-rate.
+        // eg: Some typical detection data using a Logitech C920 WebCam
+        // Decimation = 1 ..  Detect 2" Tag from 10 feet away at 10 Frames per second
+        // Decimation = 2 ..  Detect 2" Tag from 6  feet away at 22 Frames per second
+        // Decimation = 3 ..  Detect 2" Tag from 4  feet away at 30 Frames Per Second
+        // Decimation = 3 ..  Detect 5" Tag from 10 feet away at 30 Frames Per Second
+        // Note: Decimation can be changed on-the-fly to adapt during a match.
+        aprilTag.setDecimation(2);
+    }
+
+    public void moveRobot(double x, double yaw) {
+        // Calculate left and right wheel powers.
+        double leftPower = x - yaw;
+        double rightPower = x + yaw;
+
+        // Normalize wheel powers to be less than 1.0
+        double max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+        if (max > 1.0) {
+            leftPower /= max;
+            rightPower /= max;
+        }
+
+        // Send powers to the wheels.
+        leftFrontDrive.setPower(leftPower);
+        leftBackDrive.setPower(leftPower);
+        rightFrontDrive.setPower(rightPower);
+        rightBackDrive.setPower(rightPower);
+    }
 }
+

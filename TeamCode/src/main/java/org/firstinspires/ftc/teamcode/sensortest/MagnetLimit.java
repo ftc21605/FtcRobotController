@@ -56,7 +56,7 @@ public class MagnetLimit extends LinearOpMode {
     public void runOpMode() {
 
         // get a reference to our touchSensor object.
-        touchSensor = hardwareMap.get(TouchSensor.class, "magnet");
+        touchSensor = hardwareMap.get(TouchSensor.class, "elevatorlimit");
 
         // wait for the start button to be pressed.
         waitForStart();
