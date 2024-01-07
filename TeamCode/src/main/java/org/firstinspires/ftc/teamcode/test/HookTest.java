@@ -27,12 +27,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
  * This OpMode scans a single servo back and forward until Stop is pressed.
@@ -48,28 +50,27 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Test: Continuous Servo", group = "ZTest")
+@TeleOp(name = "Test: Hook Test", group = "ZTest")
 //@Disabled
-public class ServoTest extends LinearOpMode {
+public class HookTest extends LinearOpMode {
 
-    static final double INCREMENT   = 0.1;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   2000;     // period of each cycle
-    static final double MAX_POS     =  1.0;     // Maximum rotational position
-    static final double MIN_POS     =  0.0;     // Minimum rotational position
-
+    static final double MOVE_UP     =  0.8;     // move up (cont servo posistion = 1)
+    static final double MOVE_DOWN     =  0.0;     // move down (cont servo position = 0)
+    static final double MOVE_STOP     =  0.5;     // stop moving (cont servo position 0.5)
     // Define class members
     Servo   CRservo;
-    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
-    boolean rampUp = true;
+    TouchSensor ElevatorLimit;  // Touch sensor Object
 
-
+boolean moving_up = false;
+boolean moving_down = false;
     @Override
     public void runOpMode() {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        CRservo = hardwareMap.get(Servo.class, "servo5");
-
+        CRservo = hardwareMap.get(Servo.class, "hook");
+        ElevatorLimit = hardwareMap.get(TouchSensor.class, "elevatorlimit");
+        ElapsedTime timer = new ElapsedTime();
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
         telemetry.update();
@@ -80,36 +81,50 @@ public class ServoTest extends LinearOpMode {
         while(opModeIsActive()){
 
             // slew the servo, according to the rampUp (direction) variable.
-            if (rampUp) {
-                // Keep stepping up until we hit the max value.
-                position += INCREMENT ;
-                if (position >= MAX_POS ) {
-                    position = MAX_POS;
-                    rampUp = !rampUp;   // Switch ramp direction
-                }
-            }
-            else {
-                // Keep stepping down until we hit the min value.
-                position -= INCREMENT ;
-                if (position <= MIN_POS ) {
-                    position = MIN_POS;
-                    rampUp = !rampUp;  // Switch ramp direction
-                }
+
+
+            telemetry.addData(">", "Press X for moving up");
+            telemetry.addData(">", "Press Y for moving down");
+            telemetry.addData(">", "Press A for stop");
+            if (gamepad1.x) {
+                CRservo.setPosition(MOVE_UP);
+                moving_up = true;
+moving_down = false;
             }
 
+            if (gamepad1.y) {
+                CRservo.setPosition(MOVE_DOWN);
+                timer.reset();
+                moving_up = false;
+                moving_down = true;
+            }
+            if (gamepad1.a) {
+                CRservo.setPosition(MOVE_STOP);
+                moving_up = false;
+                moving_down = false;
+            }
+            if (ElevatorLimit.isPressed() && moving_up) {
+                telemetry.addData("Touch Sensor", "Is Pressed");
+                moving_up = false;
+                CRservo.setPosition(MOVE_STOP);
+            }
+
+if (moving_down && timer.seconds() > 1)
+{
+    CRservo.setPosition(MOVE_STOP);
+    moving_up = false;
+    moving_down = false;
+}
             // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
-            telemetry.addData(">", "Press Stop to end test." );
+            telemetry.addData("Servo Power", "%5.2f", CRservo.getPosition());
+            telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
 
-            // Set the servo to the new position and pause;
-            CRservo.setPosition(position);
-            sleep(CYCLE_MS);
-            idle();
+
+            // Display the current value
+
         }
 
-        // Signal done;
-        telemetry.addData(">", "Done");
-        telemetry.update();
+
     }
 }

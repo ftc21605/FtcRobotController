@@ -33,70 +33,51 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-/*
- * This OpMode scans a single servo back and forward until Stop is pressed.
- * The code is structured as a LinearOpMode
- * INCREMENT sets how much to increase/decrease the servo position each cycle
- * CYCLE_MS sets the update period.
- *
- * This code assumes a Servo configured with the name "left_hand" as is found on a Robot.
- *
- * NOTE: When any servo position is set, ALL attached servos are activated, so ensure that any other
- * connected servos are able to move freely before running this test.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
-@TeleOp(name = "Test: Plane", group = "Test")
+
+@TeleOp(name = "Test: Plane Launch", group = "ZTest")
 //@Disabled
 public class PlaneTest extends LinearOpMode {
 
-    static final double INCREMENT   = 0.1;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   2000;     // period of each cycle
-    static final double MAX_POS     =  1.0;     // Maximum rotational position
-    static final double MIN_POS     =  0.0;     // Minimum rotational position
+    static final double MAX_POS = 1.0;     // Maximum rotational position
+    static final double MIN_POS = 0.0;     // Minimum rotational position
 
     // Define class members
-    Servo   CRservo;
-    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    Servo PlaneServo;
+    double position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
     boolean rampUp = true;
 
 
     @Override
     public void runOpMode() {
 
-        // Connect to servo (Assume Robot Left Hand)
-        // Change the text in quotes to match any servo name on your robot.
-        CRservo = hardwareMap.get(Servo.class, "servo0");
+        // Connect to PlaneServo (Assume Robot Left Hand)
+
+        PlaneServo = hardwareMap.get(Servo.class, "plane");
 
         // Wait for the start button
-        telemetry.addData(">", "Press Start." );
+        telemetry.addData(">", "Press Start.");
         telemetry.update();
         waitForStart();
 
 
-        // Scan servo till stop pressed.
-        while(opModeIsActive()){
-            telemetry.addData(">", "Press X for max position");
-            telemetry.addData(">", "Press Y for min position" );
-            telemetry.update();
-if (gamepad1.x) {
-    CRservo.setPosition(MAX_POS);
-}
+        // Scan PlaneServo till stop pressed.
+        while (opModeIsActive()) {
+            telemetry.addData(">", "Press X for launch");
+            telemetry.addData(">", "Press Y for load plane");
+            if (gamepad1.x) {
+                PlaneServo.setPosition(MAX_POS);
+            }
             if (gamepad1.y) {
-                CRservo.setPosition(MIN_POS);
+                PlaneServo.setPosition(MIN_POS);
             }
 
             // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
-            telemetry.addData(">", "Press Stop to end test." );
+            telemetry.addData("PlaneServo Position", "%5.2f", PlaneServo.getPosition());
+            telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
 
-            // Set the servo to the new position and pause;
-         }
+            // Set the PlaneServo to the new position and pause;
+        }
 
-        // Signal done;
-        telemetry.addData(">", "Done");
-        telemetry.update();
     }
 }
