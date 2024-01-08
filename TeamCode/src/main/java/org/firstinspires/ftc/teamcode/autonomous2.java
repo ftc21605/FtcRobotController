@@ -82,6 +82,7 @@ import java.util.Objects;
 //@Disabled
 public class autonomous2 extends LinearOpMode {
 
+    boolean override_tfod = false;
     /* Declare OpMode members. */
     private DcMotor leftFrontDrive = null;
     private DcMotor rightFrontDrive = null;
@@ -169,47 +170,52 @@ public class autonomous2 extends LinearOpMode {
         while (!isStarted() && !isStopRequested()) {
 
             int icnt = 0;
+            if (!override_tfod) {
+                while (Objects.equals(object_id, "0") && !isStopRequested()) {
+                    if (tfod != null) {
+                        // getUpdatedRecognitions() will return null if no new information is available since
+                        // the last time that call was made.
+                        List<Recognition> currentRecognitions = tfod.getRecognitions();
+                        if (currentRecognitions != null) {
+                            telemetry.addData("# Objects Detected", currentRecognitions.size());
 
-            while (Objects.equals(object_id, "0") && !isStopRequested()) {
-                if (tfod != null) {
-                    // getUpdatedRecognitions() will return null if no new information is available since
-                    // the last time that call was made.
-                    List<Recognition> currentRecognitions = tfod.getRecognitions();
-                    if (currentRecognitions != null) {
-                        telemetry.addData("# Objects Detected", currentRecognitions.size());
+                            // step through the list of recognitions and display image position/size information for each one
+                            // Note: "Image number" refers to the randomized image orientation/number
+                            for (Recognition recognition : currentRecognitions) {
+                                col = (recognition.getLeft() + recognition.getRight()) / 2;
+                                row = (recognition.getTop() + recognition.getBottom()) / 2;
+                                double width = Math.abs(recognition.getRight() - recognition.getLeft());
+                                double height = Math.abs(recognition.getTop() - recognition.getBottom());
 
-                        // step through the list of recognitions and display image position/size information for each one
-                        // Note: "Image number" refers to the randomized image orientation/number
-                        for (Recognition recognition : currentRecognitions) {
-                            col = (recognition.getLeft() + recognition.getRight()) / 2;
-                            row = (recognition.getTop() + recognition.getBottom()) / 2;
-                            double width = Math.abs(recognition.getRight() - recognition.getLeft());
-                            double height = Math.abs(recognition.getTop() - recognition.getBottom());
+                                telemetry.addData("", " ");
+                                telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                                object_id = recognition.getLabel();
+                                telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
+                                telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
+                            }
+                            telemetry.update();
+                        } else {
+                            sleep(10);
+                            icnt++;
+                            telemetry.addData("tried ", "%d", icnt);
+                            telemetry.update();
 
-                            telemetry.addData("", " ");
-                            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                            object_id = recognition.getLabel();
-                            telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
-                            telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
                         }
-                        telemetry.update();
-                    } else {
-                        sleep(10);
-                        icnt++;
-                        telemetry.addData("tried ", "%d", icnt);
-                        telemetry.update();
-
                     }
                 }
+                if (isStopRequested())
+                    return; // if we do not find anything and get a stop after 30secs, quit here
+                telemetry.addData("found ", "%s", object_id);
+                telemetry.update();
+                sleep(1000);
+            } else {
+                object_id = "b";
+                col = 10.;
+                row = 10.;
             }
-            if (isStopRequested())
-                return; // if we do not find anything and get a stop after 30secs, quit here
-            telemetry.addData("found ", "%s", object_id);
-            telemetry.update();
-            sleep(1000);
         }
         imu.resetYaw();
-        //YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+
 
 
         sleep(1000);
@@ -283,7 +289,7 @@ public class autonomous2 extends LinearOpMode {
             double deg = phi * 180. / Math.PI;
             telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
             telemetry.update();
-
+sleep(2000);
             if (45 < deg && deg < 75) {
                 encoderDrive(DRIVE_SPEED, 25, 25, 5.0);  // S1: Forward 47
 
@@ -295,8 +301,8 @@ public class autonomous2 extends LinearOpMode {
 
                 while (orientation.getYaw(AngleUnit.DEGREES) < 85) {
                     orientation = imu.getRobotYawPitchRollAngles();
-                    //         telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    //          telemetry.update();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
                     sleep(5);
                 }
                 leftFrontDrive.setPower(0);
