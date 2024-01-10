@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class PixelLiftTest extends OpMode
 {
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime runtime = new ElapsedTime();
     private DcMotor PixelLift = null;
 
 
@@ -86,7 +86,7 @@ public class PixelLiftTest extends OpMode
     @Override
     public void loop() {
         // Setup a variable for each drive wheel to save power level for telemetry
-        double Power = 0;
+        double Power;
         if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0)
         {
             Power = gamepad1.right_trigger;

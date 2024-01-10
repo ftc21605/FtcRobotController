@@ -31,7 +31,6 @@ package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -54,31 +53,32 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //@Disabled
 public class HookTest extends LinearOpMode {
 
-    static final double MOVE_UP     =  0.8;     // move up (cont servo posistion = 1)
-    static final double MOVE_DOWN     =  0.0;     // move down (cont servo position = 0)
-    static final double MOVE_STOP     =  0.5;     // stop moving (cont servo position 0.5)
+    static final double MOVE_UP = 0.8;     // move up (cont servo posistion = 1)
+    static final double MOVE_DOWN = 0.0;     // move down (cont servo position = 0)
+    static final double MOVE_STOP = 0.5;     // stop moving (cont servo position 0.5)
     // Define class members
-    Servo   CRservo;
+    Servo ElevatorServo;
     TouchSensor ElevatorLimit;  // Touch sensor Object
 
-boolean moving_up = false;
-boolean moving_down = false;
+    boolean moving_up = false;
+    boolean moving_down = false;
+
     @Override
     public void runOpMode() {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        CRservo = hardwareMap.get(Servo.class, "hook");
+        ElevatorServo = hardwareMap.get(Servo.class, "hook");
         ElevatorLimit = hardwareMap.get(TouchSensor.class, "elevatorlimit");
         ElapsedTime timer = new ElapsedTime();
         // Wait for the start button
-        telemetry.addData(">", "Press Start to scan Servo." );
+        telemetry.addData(">", "Press Start to scan Servo.");
         telemetry.update();
         waitForStart();
 
 
         // Scan servo till stop pressed.
-        while(opModeIsActive()){
+        while (opModeIsActive()) {
 
             // slew the servo, according to the rampUp (direction) variable.
 
@@ -87,36 +87,35 @@ boolean moving_down = false;
             telemetry.addData(">", "Press Y for moving down");
             telemetry.addData(">", "Press A for stop");
             if (gamepad1.x) {
-                CRservo.setPosition(MOVE_UP);
+                ElevatorServo.setPosition(MOVE_UP);
                 moving_up = true;
-moving_down = false;
+                moving_down = false;
             }
 
             if (gamepad1.y) {
-                CRservo.setPosition(MOVE_DOWN);
+                ElevatorServo.setPosition(MOVE_DOWN);
                 timer.reset();
                 moving_up = false;
                 moving_down = true;
             }
-            if (gamepad1.a) {
-                CRservo.setPosition(MOVE_STOP);
-                moving_up = false;
-                moving_down = false;
-            }
             if (ElevatorLimit.isPressed() && moving_up) {
                 telemetry.addData("Touch Sensor", "Is Pressed");
                 moving_up = false;
-                CRservo.setPosition(MOVE_STOP);
+                ElevatorServo.setPosition(MOVE_STOP);
             }
 
-if (moving_down && timer.seconds() > 1)
-{
-    CRservo.setPosition(MOVE_STOP);
-    moving_up = false;
-    moving_down = false;
-}
+            if (moving_down && timer.seconds() > 1) {
+                ElevatorServo.setPosition(MOVE_STOP);
+                moving_up = false;
+                moving_down = false;
+            }
+            if (gamepad1.a) {
+                ElevatorServo.setPosition(MOVE_STOP);
+                moving_up = false;
+                moving_down = false;
+            }
             // Display the current value
-            telemetry.addData("Servo Power", "%5.2f", CRservo.getPosition());
+            telemetry.addData("Servo Power", "%5.2f", ElevatorServo.getPosition());
             telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
 

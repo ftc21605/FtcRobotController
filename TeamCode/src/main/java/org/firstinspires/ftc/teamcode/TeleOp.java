@@ -31,6 +31,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -72,19 +75,23 @@ public class TeleOp extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
 
-    static final double CLOSE_POS = 0.57;     // Maximum rotational position
-    static final double OPEN_POS = 0.37;     // Minimum rotational position
-    int countopen = 0;
-    int countclose = 0;
-    // elevator variables
-    //int elevatorposition_start = 0;
-    static final int LOW_POLE = 870;
-    static final int MEDIUM_POLE = 1300;
-    static final int HIGH_POLE = 1830;
-    static final double LOW_POLE_SPEED = 0.7;
-    static final double MEDIUM_POLE_SPEED = 0.7;
-    static final double HIGH_POLE_SPEED = 0.8;
-    static final double DOWN_SPEED = -0.5;
+    Servo PlaneServo;
+    static final double PLANE_LAUNCH = 1.;
+    static final double PLANE_LOAD = 0.;
+    boolean plane_launched = false;
+    boolean x_pushed = false;
+
+    Servo ElevatorServo;
+    TouchSensor ElevatorLimit; // magnet limit switch
+    static final double MOVE_UP = 1.0;     // move up (cont servo posistion = 1)
+    static final double MOVE_DOWN = 0.0;     // move down (cont servo position = 0)
+    static final double MOVE_STOP = 0.5;     // stop moving (cont servo position 0.5)
+    boolean moving_up = false;
+    boolean moving_down = false;
+    boolean y_pushed = false;
+
+    // Intake
+    private DcMotor Intake = null;
 
     @Override
     public void runOpMode() {
@@ -96,24 +103,20 @@ public class TeleOp extends LinearOpMode {
         leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
         rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
-    //    grabber = hardwareMap.get(Servo.class, "grabber");
-        // ########################################################################################
-        // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
-        // ########################################################################################
-        // Most robots need the motors on one side to be reversed to drive forward.
-        // The motor reversals shown here are for a "direct drive" robot (the wheels turn the same direction as the motor shaft)
-        // If your robot has additional gear reductions or uses a right-angled drive, it's important to ensure
-        // that your motors are turning in the correct direction.  So, start out with the reversals here, BUT
-        // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
-        // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
-        // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        PlaneServo = hardwareMap.get(Servo.class, "plane");
 
-        //elevatorposition_start = elevator.getCurrentPosition();
+        ElevatorServo = hardwareMap.get(Servo.class, "hook");
+        ElevatorLimit = hardwareMap.get(TouchSensor.class, "elevatorlimit");
+        ElapsedTime ElevatorTimer = new ElapsedTime();
+
+        Intake  = hardwareMap.get(DcMotor.class, "intake");
+        Intake.setDirection(DcMotor.Direction.FORWARD);
+
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -124,11 +127,18 @@ public class TeleOp extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double max;
-
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData(">", "left trigger intake in");
+            telemetry.addData(">", "right trigger intake out");
+            telemetry.addData(">", "Press X for plane launch");
+            telemetry.addData(">", "Press X again for load plane");
+            telemetry.addData(">", "Press Y for hook deploy");
+            telemetry.addData(">", "Press Y again for hook retract");
+            telemetry.addData(">", "Press A again for emergency hook stop");
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double axial = -gamepad1.left_stick_y / 2.;  // Note: pushing stick forward gives negative value
             double lateral = 0.;
-            if (Math.abs(gamepad1.left_stick_x)>0.8) {
+            if (Math.abs(gamepad1.left_stick_x) > 0.8) {
                 lateral = gamepad1.left_stick_x / 2.;
             }
             double yaw = gamepad1.right_stick_x / 2.;
@@ -159,13 +169,74 @@ public class TeleOp extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
+            double intake_power = 0;
+            if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0)
+            {
+                intake_power = gamepad1.right_trigger;
+            }
+            if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0)
+            {
+                intake_power = -gamepad1.left_trigger;
+            }
+            Intake.setPower(intake_power);
+
+            if (gamepad1.x && !x_pushed) {
+                x_pushed = true;
+                if (!plane_launched) {
+                    PlaneServo.setPosition(PLANE_LAUNCH);
+                    plane_launched = true;
+                } else {
+                    PlaneServo.setPosition(PLANE_LOAD);
+                    plane_launched = false;
+                }
+            }
+            if (!gamepad1.x) {
+                x_pushed = false;
+            }
+
+//            telemetry.addData(">", "Y Button" + String.valueOf(gamepad1.y));
+ //           telemetry.addData(">", "y_pushed " + String.valueOf(y_pushed));
+   //         telemetry.addData(">", "moving_up " + String.valueOf(moving_up));
+     //       telemetry.addData(">", "moving_down "+ String.valueOf(moving_down));
+       //     telemetry.addData(">", "elevator time " + ElevatorTimer.toString());
+            if (gamepad1.y && !y_pushed) {
+
+                y_pushed = true;
+                if (!moving_up) {
+                    ElevatorServo.setPosition(MOVE_UP);
+                    moving_up = true;
+                    moving_down = false;
+                } else {
+                    moving_down = true;
+                    ElevatorServo.setPosition(MOVE_DOWN);
+                    ElevatorTimer.reset();
+                }
+
 
             }
+            if (!gamepad1.y) {
+                y_pushed = false;
+            }
+
+            if (ElevatorLimit.isPressed() && !moving_down) {
+                telemetry.addData("Touch Sensor", "Is Pressed");
+                ElevatorServo.setPosition(MOVE_STOP);
+            }
+            if (moving_down && ElevatorTimer.seconds() > 1) {
+                ElevatorServo.setPosition(MOVE_STOP);
+            }
+            if (gamepad1.a) {
+                ElevatorServo.setPosition(MOVE_STOP);
+                moving_up = false;
+                moving_down = false;
+            }
+
             //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
         }
     }
+}
 
 

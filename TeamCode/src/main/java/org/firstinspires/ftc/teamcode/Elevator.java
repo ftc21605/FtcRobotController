@@ -52,7 +52,6 @@ import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "Test: Old Elevator", group = "ZTest")
 @Disabled
-//@Disabled
 public class Elevator extends LinearOpMode {
 
     // Declare OpMode members.
