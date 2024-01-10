@@ -41,18 +41,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The names of OpModes appear on the menu of the FTC Driver Station.
  * When a selection is made from the menu, the corresponding OpMode
  * class is instantiated on the Robot Controller and executed.
- *
+ * <p>
  * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
  * It includes all the skeletal structure that all iterative OpModes contain.
- *
+ * <p>
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Test: Intake Test", group="ZTest")
+@TeleOp(name = "Test: Intake Test", group = "ZTest")
 //@Disabled
-public class IntakeTest extends OpMode
-{
+public class IntakeTest extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor Intake = null;
@@ -68,13 +67,14 @@ public class IntakeTest extends OpMode
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        Intake  = hardwareMap.get(DcMotor.class, "intake");
+        Intake = hardwareMap.get(DcMotor.class, "intake");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         Intake.setDirection(DcMotor.Direction.FORWARD);
-
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
@@ -102,21 +102,33 @@ public class IntakeTest extends OpMode
         // Setup a variable for each drive wheel to save power level for telemetry
         double Power = gamepad1.left_stick_y;
 
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
 
-        // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight.
-       // double leftdrive =  gamepad1.left_stick_y;
-       // double rightdrive  =  gamepad1.right_stick_y;
-       // leftPower    = Range.clip(leftdrive, -1.0, 1.0) ;
-       // rightPower   = Range.clip(rightdrive, -1.0, 1.0) ;
-            Intake.setPower(Power);
-
+        Intake.setPower(Power);
+        int rot_tics = Intake.getCurrentPosition();
+        int tics_to_go = rot_tics % (28 * 3);
+        telemetry.addData(">", "Rotations Tics %7d", rot_tics);
+        telemetry.addData(">", "Rotations Tics to go %7d", tics_to_go);
         // Show the elapsed game time and wheel power.
+        if (gamepad1.b) {
+            Intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            int target;
+            if (rot_tics < 0) {
+                target = rot_tics - tics_to_go;
+            } else {
+                target = rot_tics + tics_to_go;
+            }
+            Intake.setTargetPosition(target);
+            Intake.setPower(0.1);
+            while (Intake.isBusy()) {
+
+            }
+            Intake.setPower(0);
+            Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f)", Power);
-        //telemetry.addData("Motors", "left (%.2f)", leftPower);
+        //telemetry.addData("Motors", "left (%.2f)", leftPower)
+        telemetry.update();
     }
 
     /*
