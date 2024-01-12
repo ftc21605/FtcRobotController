@@ -93,6 +93,8 @@ public class TeleOp extends LinearOpMode {
     // Intake
     private DcMotor Intake = null;
 
+    private DcMotor Hanger = null;
+
     @Override
     public void runOpMode() {
 
@@ -103,10 +105,10 @@ public class TeleOp extends LinearOpMode {
         leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
         rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
 
         PlaneServo = hardwareMap.get(Servo.class, "plane");
 
@@ -116,6 +118,8 @@ public class TeleOp extends LinearOpMode {
 
         Intake  = hardwareMap.get(DcMotor.class, "intake");
         Intake.setDirection(DcMotor.Direction.FORWARD);
+Hanger = hardwareMap.get(DcMotor.class, "hanger");
+Hanger.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -130,6 +134,7 @@ public class TeleOp extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData(">", "left trigger intake in");
             telemetry.addData(">", "right trigger intake out");
+            telemetry.addData(">", "left bumper + right stick: hang");
             telemetry.addData(">", "Press X for plane launch");
             telemetry.addData(">", "Press X again for load plane");
             telemetry.addData(">", "Press Y for hook deploy");
@@ -230,7 +235,12 @@ public class TeleOp extends LinearOpMode {
                 moving_up = false;
                 moving_down = false;
             }
-
+if (gamepad1.left_bumper)
+{
+    // set hanger power
+    double hangerpower = gamepad1.left_stick_y;
+    Hanger.setPower(hangerpower);
+}
             //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
