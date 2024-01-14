@@ -34,7 +34,6 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -78,9 +77,9 @@ import java.util.Objects;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Wallace autonomous2", group = "Wallace")
+@Autonomous(name = "Wallace autonomous blue", group = "Wallace")
 //@Disabled
-public class autonomous2 extends LinearOpMode {
+public class autonomousblue extends LinearOpMode {
 
     boolean override_tfod = false;
     /* Declare OpMode members. */
@@ -95,6 +94,8 @@ public class autonomous2 extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * Math.PI);
     static final double DRIVE_SPEED = 0.2;
     static final double TURN_SPEED = 0.2;
+
+    private DcMotor Intake = null;
 
     IMU imu;
 
@@ -144,6 +145,11 @@ public class autonomous2 extends LinearOpMode {
 
         leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        Intake = hardwareMap.get(DcMotor.class, "intake");
+        Intake.setDirection(DcMotor.Direction.FORWARD);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 // set up the imu, our controller which contains the imu faces forward and up
         imu = hardwareMap.get(IMU.class, "imu");
@@ -231,9 +237,10 @@ public class autonomous2 extends LinearOpMode {
             double deg = phi * 180. / Math.PI;
             telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
             telemetry.update();
-            if (50 < deg && deg < 75) {
-                encoderDrive(DRIVE_SPEED, 25, 25, 5.0);  // S1: Forward 47
-
+            sleep(2000);
+            if (60 < deg && deg < 65) {
+                encoderDrive(DRIVE_SPEED, 26, 26, 5.0);  // S1: Forward 47
+                encoderDrive(-DRIVE_SPEED, -2,-2,5.0);
                 YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
                 leftFrontDrive.setPower(TURN_SPEED);
                 rightFrontDrive.setPower(-TURN_SPEED);
@@ -242,15 +249,140 @@ public class autonomous2 extends LinearOpMode {
 
                 while (orientation.getYaw(AngleUnit.DEGREES) > -85) {
                     orientation = imu.getRobotYawPitchRollAngles();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
                     sleep(5);
                 }
                 leftFrontDrive.setPower(0);
                 rightFrontDrive.setPower(0);
                 leftBackDrive.setPower(0);
                 rightBackDrive.setPower(0);
-                encoderDrive(DRIVE_SPEED, 75, 75, 5.0);  // S1: Forward 47
+                sleep(1000);
+                encoderDrive(DRIVE_SPEED, 75, 75, 25.0);  // S1: Forward 47
+                imu.resetYaw();
+                orientation = imu.getRobotYawPitchRollAngles();
+                leftFrontDrive.setPower(-TURN_SPEED);
+                rightFrontDrive.setPower(TURN_SPEED);
+                leftBackDrive.setPower(-TURN_SPEED);
+                rightBackDrive.setPower(TURN_SPEED);
+
+                while (orientation.getYaw(AngleUnit.DEGREES) < 85) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                sleep(2000);
+                encoderDrive(DRIVE_SPEED, 15, 15, 25.0);  // S1: Forward 47
+                imu.resetYaw();
+                orientation = imu.getRobotYawPitchRollAngles();
+                leftFrontDrive.setPower(TURN_SPEED);
+                rightFrontDrive.setPower(-TURN_SPEED);
+                leftBackDrive.setPower(TURN_SPEED);
+                rightBackDrive.setPower(-TURN_SPEED);
+                while (orientation.getYaw(AngleUnit.DEGREES) > -85) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                sleep(2000);
+                encoderDrive(DRIVE_SPEED, 23, 23, 5.0);  // S1: Forward 47
+                sleep(10000);
+                return;
+
+            } else if (65 < deg){
+                encoderDrive(DRIVE_SPEED, 5, 5, 5.0);  // S1: Forward 47
+                imu.resetYaw();
+                YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+                leftFrontDrive.setPower(TURN_SPEED - 0.1);
+                rightFrontDrive.setPower(-(TURN_SPEED -0.1));
+                leftBackDrive.setPower(TURN_SPEED - 0.1);
+                rightBackDrive.setPower(-(TURN_SPEED - 0.1));
+                while (orientation.getYaw(AngleUnit.DEGREES) > -25) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                sleep(2000);
+                encoderDrive(DRIVE_SPEED, 13, 13, 5.0);  // S1: Forward 47
+                encoderDrive(-DRIVE_SPEED, -13,-13,5.0);
+
+                imu.resetYaw();
+                leftFrontDrive.setPower(-TURN_SPEED);
+                rightFrontDrive.setPower(TURN_SPEED);
+                leftBackDrive.setPower(-TURN_SPEED);
+                rightBackDrive.setPower(TURN_SPEED);
+
+                while (orientation.getYaw(AngleUnit.DEGREES) < 110) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                sleep(1000);
+                encoderDrive(DRIVE_SPEED, 90, 90, 25.0);  // S1: Forward 47
             }
-            sleep(10000);
+            else if(deg < 60){
+                encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
+                sleep(1000);
+                imu.resetYaw();
+                YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+                leftFrontDrive.setPower(-(TURN_SPEED - 0.1));
+                rightFrontDrive.setPower((TURN_SPEED -0.1));
+                leftBackDrive.setPower(-(TURN_SPEED - 0.1));
+                rightBackDrive.setPower((TURN_SPEED - 0.1));
+                while (orientation.getYaw(AngleUnit.DEGREES) < 25) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
+                sleep(1500);
+                encoderDrive(-DRIVE_SPEED, -20,-20,5.0);
+
+                imu.resetYaw();
+                leftFrontDrive.setPower(-TURN_SPEED);
+                rightFrontDrive.setPower(TURN_SPEED);
+                leftBackDrive.setPower(-TURN_SPEED);
+                rightBackDrive.setPower(TURN_SPEED);
+
+                while (orientation.getYaw(AngleUnit.DEGREES) < 56) {
+                    orientation = imu.getRobotYawPitchRollAngles();
+                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+                    telemetry.update();
+                    sleep(5);
+                }
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                sleep(1000);
+                encoderDrive(DRIVE_SPEED, 90, 90, 25.0);  // S1: Forward 47
+            }
+            return;
         }
         //encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         //encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
@@ -581,5 +713,31 @@ sleep(2000);
         rightFrontDrive.setPower(rightPower);
         rightBackDrive.setPower(rightPower);
     }
+    public void pixel_release() {
+        double Power = 0.2;
+        int tics = 8;
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        while (Intake.getCurrentPosition() < tics) {
+            sleep(1);
+        }
+        Intake.setPower(0);
+
+
+    }
+
+    public void pixel_lock() {
+        double Power = -0.2;
+        int tics = 8;
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        while (Intake.getCurrentPosition() < tics) {
+            sleep(1);
+        }
+        Intake.setPower(0);
+
+
+    }
+
 }
 

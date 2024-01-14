@@ -49,7 +49,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name="Test: Spark Controler", group="ZTest")
-//@Disabled
+@Disabled
 public class ConceptRevSPARKMini extends LinearOpMode {
 
     // Declare OpMode members.

@@ -64,7 +64,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "Wallace")
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "AWallace")
 //@Disabled
 public class TeleOp extends LinearOpMode {
 
@@ -89,6 +89,7 @@ public class TeleOp extends LinearOpMode {
     boolean moving_up = false;
     boolean moving_down = false;
     boolean y_pushed = false;
+    boolean b_pushed = false;
 
     // Intake
     private DcMotor Intake = null;
@@ -116,10 +117,10 @@ public class TeleOp extends LinearOpMode {
         ElevatorLimit = hardwareMap.get(TouchSensor.class, "elevatorlimit");
         ElapsedTime ElevatorTimer = new ElapsedTime();
 
-        Intake  = hardwareMap.get(DcMotor.class, "intake");
+        Intake = hardwareMap.get(DcMotor.class, "intake");
         Intake.setDirection(DcMotor.Direction.FORWARD);
-Hanger = hardwareMap.get(DcMotor.class, "hanger");
-Hanger.setDirection(DcMotor.Direction.FORWARD);
+        Hanger = hardwareMap.get(DcMotor.class, "hanger");
+        Hanger.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -138,8 +139,9 @@ Hanger.setDirection(DcMotor.Direction.FORWARD);
             telemetry.addData(">", "Press X for plane launch");
             telemetry.addData(">", "Press X again for load plane");
             telemetry.addData(">", "Press Y for hook deploy");
-            telemetry.addData(">", "Press Y again for hook retract");
+            telemetry.addData(">", "Press B for hook retract");
             telemetry.addData(">", "Press A again for emergency hook stop");
+            telemetry.addData(">", "Press DPad Up again for hanging");
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double axial = -gamepad1.left_stick_y / 2.;  // Note: pushing stick forward gives negative value
             double lateral = 0.;
@@ -175,12 +177,10 @@ Hanger.setDirection(DcMotor.Direction.FORWARD);
             rightBackDrive.setPower(rightBackPower);
 
             double intake_power = 0;
-            if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0)
-            {
+            if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0) {
                 intake_power = gamepad1.right_trigger;
             }
-            if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0)
-            {
+            if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0) {
                 intake_power = -gamepad1.left_trigger;
             }
             Intake.setPower(intake_power);
@@ -200,34 +200,43 @@ Hanger.setDirection(DcMotor.Direction.FORWARD);
             }
 
 //            telemetry.addData(">", "Y Button" + String.valueOf(gamepad1.y));
- //           telemetry.addData(">", "y_pushed " + String.valueOf(y_pushed));
-   //         telemetry.addData(">", "moving_up " + String.valueOf(moving_up));
-     //       telemetry.addData(">", "moving_down "+ String.valueOf(moving_down));
-       //     telemetry.addData(">", "elevator time " + ElevatorTimer.toString());
+            //           telemetry.addData(">", "y_pushed " + String.valueOf(y_pushed));
+            //         telemetry.addData(">", "moving_up " + String.valueOf(moving_up));
+            //       telemetry.addData(">", "moving_down "+ String.valueOf(moving_down));
+            //     telemetry.addData(">", "elevator time " + ElevatorTimer.toString());
             if (gamepad1.y && !y_pushed) {
 
                 y_pushed = true;
-                if (!moving_up) {
+
                     ElevatorServo.setPosition(MOVE_UP);
                     moving_up = true;
                     moving_down = false;
-                } else {
-                    moving_down = true;
-                    ElevatorServo.setPosition(MOVE_DOWN);
-                    ElevatorTimer.reset();
-                }
-
-
             }
             if (!gamepad1.y) {
                 y_pushed = false;
+            }
+
+            if (gamepad1.b && !b_pushed) {
+
+                b_pushed = true;
+
+                    moving_down = true;
+                moving_up = false;
+                    ElevatorServo.setPosition(MOVE_DOWN);
+                    ElevatorTimer.reset();
+
+
+
+            }
+            if (!gamepad1.b) {
+                b_pushed = false;
             }
 
             if (ElevatorLimit.isPressed() && !moving_down) {
                 telemetry.addData("Touch Sensor", "Is Pressed");
                 ElevatorServo.setPosition(MOVE_STOP);
             }
-            if (moving_down && ElevatorTimer.seconds() > 1) {
+            if (moving_down && ElevatorTimer.milliseconds() > 1500) {
                 ElevatorServo.setPosition(MOVE_STOP);
             }
             if (gamepad1.a) {
@@ -235,12 +244,13 @@ Hanger.setDirection(DcMotor.Direction.FORWARD);
                 moving_up = false;
                 moving_down = false;
             }
-if (gamepad1.left_bumper)
-{
-    // set hanger power
-    double hangerpower = gamepad1.left_stick_y;
-    Hanger.setPower(hangerpower);
-}
+            if (gamepad1.dpad_up) {
+                // set hanger power
+                double hangerpower = 0.5;
+                Hanger.setPower(hangerpower);
+            } else {
+                Hanger.setPower(0);
+            }
             //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
