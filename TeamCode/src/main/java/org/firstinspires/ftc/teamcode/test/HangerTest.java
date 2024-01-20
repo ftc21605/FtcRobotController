@@ -98,7 +98,14 @@ public class HangerTest extends OpMode
        // leftPower    = Range.clip(leftdrive, -1.0, 1.0) ;
        // rightPower   = Range.clip(rightdrive, -1.0, 1.0) ;
             Hanger.setPower(Power);
-
+            if (gamepad1.a){
+                Hanger.setTargetPosition(Hanger.getCurrentPosition());
+                Hanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                Hanger.setPower(0.5);
+            }
+            if (gamepad1.b){
+                Hanger.setPower(0);
+            }
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f)", Power);

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.processors.RedBlueProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 @Autonomous(name="RedBlue")
-@Disabled
+//@Disabled
 public class FindRedBlue extends OpMode {
     private RedBlueProcessor visionProcessor;
     private VisionPortal visionPortal;

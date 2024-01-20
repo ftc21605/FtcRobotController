@@ -397,9 +397,11 @@ public class autonomousblue extends LinearOpMode {
             double deg = phi * 180. / Math.PI;
             telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
             telemetry.update();
-sleep(2000);
-            if (60 < deg && deg < 65) {
-                encoderDrive(DRIVE_SPEED, 26, 26, 5.0);  // S1: Forward 47
+            sleep(2000);
+            if (55 < deg && deg < 67) {
+                encoderDrive(DRIVE_SPEED, 26, 26, 5.0);
+                pixel_release();
+                //pixel_lock();// S1: Forward 47
                 encoderDrive(-DRIVE_SPEED, -2,-2,5.0);
                 YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
                 leftFrontDrive.setPower(-TURN_SPEED);
@@ -436,7 +438,7 @@ sleep(2000);
                 rightFrontDrive.setPower(0);
                 leftBackDrive.setPower(0);
                 rightBackDrive.setPower(0);
-                sleep(2000);
+                sleep(1000);
                 encoderDrive(DRIVE_SPEED, 15, 15, 25.0);  // S1: Forward 47
                 imu.resetYaw();
                 orientation = imu.getRobotYawPitchRollAngles();
@@ -454,12 +456,11 @@ sleep(2000);
                 rightFrontDrive.setPower(0);
                 leftBackDrive.setPower(0);
                 rightBackDrive.setPower(0);
-                sleep(2000);
                 encoderDrive(DRIVE_SPEED, 23, 23, 5.0);  // S1: Forward 47
                 sleep(10000);
                 return;
 
-            } else if (65 < deg){
+            } else if (55 > deg){
                 encoderDrive(DRIVE_SPEED, 5, 5, 5.0);  // S1: Forward 47
                 imu.resetYaw();
                 YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
@@ -477,9 +478,12 @@ sleep(2000);
                 rightFrontDrive.setPower(0);
                 leftBackDrive.setPower(0);
                 rightBackDrive.setPower(0);
-                sleep(2000);
-                encoderDrive(DRIVE_SPEED, 13, 13, 5.0);  // S1: Forward 47
+                sleep(1000);
+                encoderDrive(DRIVE_SPEED, 13, 13, 5.0);
+                pixel_release();// S1: Forward 47
+               // pixel_lock();
                 encoderDrive(-DRIVE_SPEED, -13,-13,5.0);
+
 
                 imu.resetYaw();
                 leftFrontDrive.setPower(-TURN_SPEED);
@@ -500,7 +504,7 @@ sleep(2000);
                 sleep(1000);
                 encoderDrive(DRIVE_SPEED, 90, 90, 25.0);  // S1: Forward 47
             }
-            else if(deg < 60){
+            else if(deg > 67){
                 encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
                 sleep(1000);
                 imu.resetYaw();
@@ -520,8 +524,10 @@ sleep(2000);
                 leftBackDrive.setPower(0);
                 rightBackDrive.setPower(0);
                 encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
-                sleep(1500);
-                encoderDrive(-DRIVE_SPEED, -20,-20,5.0);
+                pixel_release();
+                encoderDrive(-DRIVE_SPEED, -2,-2,5.0);
+                //pixel_lock();
+                encoderDrive(-DRIVE_SPEED, -18,-18,5.0);
 
                 imu.resetYaw();
                 leftFrontDrive.setPower(-TURN_SPEED);
@@ -716,8 +722,10 @@ sleep(2000);
     public void pixel_release() {
         double Power = 0.2;
         int tics = 8;
+     //   tics = Intake.getCurrentPosition() + tics;
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setPower(Power);
         while (Intake.getCurrentPosition() < tics) {
             sleep(1);
         }
@@ -729,8 +737,10 @@ sleep(2000);
     public void pixel_lock() {
         double Power = -0.2;
         int tics = 8;
+      //  tics = Intake.getCurrentPosition() - tics;
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setPower(Power);
         while (Intake.getCurrentPosition() < tics) {
             sleep(1);
         }

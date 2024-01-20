@@ -246,17 +246,52 @@ public class TeleOp extends LinearOpMode {
             }
             if (gamepad1.dpad_up) {
                 // set hanger power
-                double hangerpower = 0.5;
+                double hangerpower = 0.8;
                 Hanger.setPower(hangerpower);
             } else {
                 Hanger.setPower(0);
             }
+           if (gamepad1.right_bumper)
+           {
+            Intake.setPower(0.4);
+            }
+           if (gamepad1.left_bumper)
+            {
+                Intake.setPower(-0.4);
+           }
             //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
         }
     }
+    public void pixel_release() {
+        double Power = 0.2;
+        int tics = 8;
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setPower(Power);
+        while (Intake.getCurrentPosition() < tics) {
+            sleep(1);
+        }
+        Intake.setPower(0);
+
+
+    }
+    public void pixel_lock() {
+        double Power = -0.2;
+        int tics = 8;
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setPower(Power);
+        while (Intake.getCurrentPosition() < tics) {
+            sleep(1);
+        }
+        Intake.setPower(0);
+
+
+    }
+
 }
 
 
