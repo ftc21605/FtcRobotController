@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.processors;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Bitmap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -15,23 +15,20 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class RedFinder implements VisionProcessor {
-    public Rect rectLeft = new Rect(10, 100, 200, 200);
+public class BlueFinder implements VisionProcessor {
+    public Rect rectLeft = new Rect(10,100,200,200);
     public Rect rectMiddle = new Rect(220, 100, 200, 200);
     public Rect rectRight = new Rect(430, 100, 200, 200);
     Selected selection = Selected.NONE;
     Mat submat = new Mat();
     Mat hsvMat = new Mat();
     Mat thresh = new Mat();
-    Mat thresh1 = new Mat();
-    Mat thresh2 = new Mat();
     int pixelLeft;
 
     int pixelMiddle;
     int pixelRight;
 
     Telemetry mytelemetry;
-
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
     }
@@ -41,17 +38,13 @@ public class RedFinder implements VisionProcessor {
 
         Imgproc.cvtColor(frame, hsvMat, Imgproc.COLOR_RGB2HSV);
 
-        //   Scalar lowHSV = new Scalar(20, 70, 80); // lenient lower bound HSV for yellow
-        //   Scalar highHSV = new Scalar(32, 255, 255); // lenient higher bound HSV for yellow
-        Scalar lowHSV1 = new Scalar(0, 50, 20); // lenient lower bound HSV for yellow
-        Scalar highHSV1 = new Scalar(5, 255, 255); // lenient higher bound HSV for yellow
-        Scalar lowHSV2 = new Scalar(175, 50, 20); // lenient lower bound HSV for yellow
-        Scalar highHSV2 = new Scalar(180, 255, 255); // lenient higher bound HSV for yellow
+        Scalar lowHSV1 = new Scalar(75, 50, 50); // lenient lower bound HSV for yellow
+        Scalar highHSV1 = new Scalar(130, 255, 255); // lenient higher bound HSV for yellow
+        //Mat thresh = new Mat();
 
-        // Get a black and white image of yellow objects
-        Core.inRange(hsvMat, lowHSV1, highHSV1, thresh1);
-        Core.inRange(hsvMat, lowHSV2, highHSV2, thresh2);
-        Core.bitwise_or(thresh1, thresh2, thresh);
+
+        // Get a black and white image of blue objects
+        Core.inRange(hsvMat, lowHSV1, highHSV1, thresh);
         //double satRectLeft = getAvgSaturation(thresh, rectLeft);
         //double satRectMiddle = getAvgSaturation(thresh, rectMiddle);
         //double satRectRight = getAvgSaturation(thresh, rectRight);
@@ -77,7 +70,6 @@ public class RedFinder implements VisionProcessor {
         Scalar color = Core.mean(submat);
         return color.val[1];
     }
-
     protected int getnWhitePixel(Mat input, Rect rect) {
         submat = input.submat(rect);
         return Core.countNonZero(submat);
@@ -102,13 +94,13 @@ public class RedFinder implements VisionProcessor {
         Paint nonSelectedPaint = new Paint(selectedPaint);
         nonSelectedPaint.setColor(Color.RED);
 
-        android.graphics.Rect drawRectLeft = makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx);
-        android.graphics.Rect drawRectMiddle = makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx);
-        android.graphics.Rect drawRectRight = makeGraphicsRect(rectRight, scaleBmpPxToCanvasPx);
+        //android.graphics.Rect drawRectLeft = makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx);
+        //android.graphics.Rect drawRectMiddle = makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx);
+        //android.graphics.Rect drawRectRight = makeGraphicsRect(rectRight, scaleBmpPxToCanvasPx);
         canvas.drawRect(makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx), selectedPaint);
         Bitmap bmp = convertMatToBitMap(thresh);
         canvas.drawBitmap(bmp,null,makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx), selectedPaint);
-/*
+      /*
         selection = (Selected) userContext;
         switch (selection) {
             case LEFT:
@@ -133,44 +125,43 @@ public class RedFinder implements VisionProcessor {
                 break;
         }
         */
+
     }
 
     public Selected getSelection() {
         return selection;
     }
 
-    public enum Selected {NONE, LEFT, MIDDLE, RIGHT}
+    public enum Selected { NONE, LEFT, MIDDLE, RIGHT }
+public void print_selection(){
+    mytelemetry.addData(">", "LEFT pixels %d", pixelLeft);
+    mytelemetry.addData(">", "MIDDLE pixels %d", pixelMiddle);
+    mytelemetry.addData(">", "RIGHT pixels %d", pixelRight);
+if (selection == Selected.NONE) {
+    mytelemetry.addData(">", "NONE");
+} else if (selection == Selected.LEFT) {
+    mytelemetry.addData(">", "LEFT");
 
-    public void print_selection() {
-        mytelemetry.addData(">", "LEFT pixels %d", pixelLeft);
-        mytelemetry.addData(">", "MIDDLE pixels %d", pixelMiddle);
-        mytelemetry.addData(">", "RIGHT pixels %d", pixelRight);
-        if (selection == Selected.NONE) {
-            mytelemetry.addData(">", "NONE");
-        } else if (selection == Selected.LEFT) {
-            mytelemetry.addData(">", "LEFT");
+}
+else if (selection == Selected.MIDDLE) {
+    mytelemetry.addData(">", "MIDDLE");
 
-        } else if (selection == Selected.MIDDLE) {
-            mytelemetry.addData(">", "MIDDLE");
+}
+else if (selection == Selected.RIGHT) {
+    mytelemetry.addData(">", "RIGHT");
 
-        } else if (selection == Selected.RIGHT) {
-            mytelemetry.addData(">", "RIGHT");
-
-        }
-    }
-
-    public void setTelemetry(Telemetry telemetry) {
+}
+}
+public void setTelemetry(Telemetry telemetry){
         mytelemetry = telemetry;
-    }
-
-    private static Bitmap convertMatToBitMap(Mat input) {
+}
+    private static Bitmap convertMatToBitMap(Mat input){
         Bitmap bmp = null;
         Mat rgb = input;//new Mat();
-        //Imgproc.cvtColor(input, rgb, Imgproc.COLOR_BGR2RGB);
+       // Imgproc.cvtColor(input, rgb, Imgproc.COLOR_BGR2RGB);
 
-        bmp = Bitmap.createBitmap(rgb.cols(), rgb.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(rgb, bmp);
+            bmp = Bitmap.createBitmap(rgb.cols(), rgb.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(rgb, bmp);
         return bmp;
     }
-
 }

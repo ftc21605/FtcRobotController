@@ -27,12 +27,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.processors.BlueFinder;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 /*
  * This OpMode scans a single servo back and forward until Stop is pressed.
@@ -48,68 +51,52 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Test: Pixel Release", group = "ZTest")
+@TeleOp(name = "Test: Opencv Blue Test", group = "ZTest")
 //@Disabled
-public class PixelRelease extends LinearOpMode {
+public class OpencvBlueTest extends LinearOpMode {
+
+    private BlueFinder visionProcessor = new BlueFinder();
+    private VisionPortal visionPortal;
 
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor Intake = null;
 
     @Override
     public void runOpMode() {
 
-
-        Intake = hardwareMap.get(DcMotor.class, "intake");
-
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        Intake.setDirection(DcMotor.Direction.FORWARD);
-        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        // Tell the driver that initialization is complete.
-        telemetry.addData("Status", "Initialized");
+        initBlueFinding();
+        // Wait for the start button
+        telemetry.addData(">", "Press Start to start opencv test.");
+        telemetry.update();
+        BlueFinder.Selected selected;
         waitForStart();
 
 
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
-            double Power = 0.25;
-            int tics = 12;
-            telemetry.addData(">", "Rotations Tics %7d", Intake.getCurrentPosition());
+
+            // slew the servo, according to the rampUp (direction) variable.
+            // BlueFinder.print_selection(telemetry);
+            visionProcessor.print_selection();
+            telemetry.addData(">", "Press X for moving up");
+            telemetry.addData(">", "Press Y for moving down");
+            telemetry.addData(">", "Press A for stop");
+           if (gamepad1.a) {
+           }
+            // Display the current value
+            telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
-            if (gamepad1.x) {
-                Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-            }
-            if (gamepad1.a && Intake.getCurrentPosition() < tics) {
-                Intake.setPower(Power);
-                while (Intake.getCurrentPosition() < tics) {
-                sleep(1);}
-                telemetry.addData(">", "Rotations Tics in loop %7d", Intake.getCurrentPosition());
-                telemetry.update();
-                Intake.setPower(0);
-            }
-            //Intake.setPower(0);
-            //Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-            if (gamepad1.b && Intake.getCurrentPosition() > -tics) {
-                Intake.setPower(-Power);
-                while (Intake.getCurrentPosition() > -tics) {
-                    sleep(1);
-                }
-
-                telemetry.addData(">", "Rotations Tics in loop %7d", Intake.getCurrentPosition());
-                telemetry.update();
-                Intake.setPower(0);
-             }
+            // Display the current value
 
         }
 
-        // Signal done;
-        // telemetry.addData(">", "Done");
-        // telemetry.update();
-    }
-    }
 
+    }
+    void initBlueFinding() {
+        //visionProcessor = new BlueFinder();
+        visionProcessor.setTelemetry(telemetry);
+        visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 2"), visionProcessor);
+
+    }
+}
