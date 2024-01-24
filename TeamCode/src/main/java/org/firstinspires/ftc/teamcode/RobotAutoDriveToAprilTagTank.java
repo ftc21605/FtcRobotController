@@ -88,7 +88,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @TeleOp(name="Tank Drive To AprilTag", group = "Concept")
-@Disabled
+//@Disabled
 public class RobotAutoDriveToAprilTagTank extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
@@ -109,7 +109,7 @@ public class RobotAutoDriveToAprilTagTank extends LinearOpMode
     private DcMotor rightDrive2 = null;
 
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static final int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final int DESIRED_TAG_ID = 1;    // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
@@ -143,15 +143,15 @@ public class RobotAutoDriveToAprilTagTank extends LinearOpMode
         rightDrive2.setDirection(DcMotor.Direction.REVERSE);
 
 
-        if (USE_WEBCAM)
-         //   setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
-        setManualExposure(6, 100);  // Use low exposure time to reduce motion blur
-        // Wait for the driver to press Start
-        telemetry.addData("Camera preview on/off", "3 dots, Camera Stream");
-        telemetry.addData(">", "Touch Play to start OpMode");
-        telemetry.update();
-        waitForStart();
-
+        if (USE_WEBCAM) {
+            //   setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
+            //setManualExposure(6, 100);  // Use low exposure time to reduce motion blur
+            // Wait for the driver to press Start
+            telemetry.addData("Camera preview on/off", "3 dots, Camera Stream");
+            telemetry.addData(">", "Touch Play to start OpMode");
+            telemetry.update();
+            waitForStart();
+        }
         while (opModeIsActive())
         {
             targetFound = false;
@@ -260,7 +260,7 @@ public class RobotAutoDriveToAprilTagTank extends LinearOpMode
         // Create the vision portal by using a builder.
         if (USE_WEBCAM) {
             visionPortal = new VisionPortal.Builder()
-                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 2"))
                     .addProcessor(aprilTag)
                     .build();
         } else {
@@ -294,20 +294,6 @@ public class RobotAutoDriveToAprilTagTank extends LinearOpMode
         }
 
         // Set camera controls unless we are stopping.
-        if (!isStopRequested())
-        {
-            ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
-            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
-                exposureControl.setMode(ExposureControl.Mode.Manual);
-                sleep(50);
-            }
-            exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
-            sleep(20);
-            GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
-            gainControl.setGain(gain);
-            sleep(20);
-            telemetry.addData("Camera", "Ready");
-            telemetry.update();
-        }
+        
     }
 }

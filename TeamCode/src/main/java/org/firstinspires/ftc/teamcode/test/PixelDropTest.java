@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode.test;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -48,19 +47,15 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Test: Servo Test", group = "ZTest")
+@TeleOp(name = "Test: Pixel Drop Test", group = "ZTest")
 //@Disabled
-public class ServoTest extends LinearOpMode {
+public class PixelDropTest extends LinearOpMode {
 
-    static final double INCREMENT   = 0.1;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   2000;     // period of each cycle
-    static final double MAX_POS     =  1.0;     // Maximum rotational position
-    static final double MIN_POS     =  0.0;     // Minimum rotational position
+    static final double MAX_POS = 0.1;     // Maximum rotational position
+    static final double MIN_POS = 0.3;     // Minimum rotational position
 
     // Define class members
-    Servo   CRservo;
-    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
-    boolean rampUp = true;
+    Servo CRservo;
 
 
     @Override
@@ -68,48 +63,36 @@ public class ServoTest extends LinearOpMode {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        CRservo = hardwareMap.get(Servo.class, "servo5");
+        CRservo = hardwareMap.get(Servo.class, "pixelbucket");
 
         // Wait for the start button
-        telemetry.addData(">", "Press Start to scan Servo." );
+        telemetry.addData(">", "Press X for max pos.");
+        telemetry.addData(">", "Press Y for min pos.");
         telemetry.update();
         waitForStart();
 
 
         // Scan servo till stop pressed.
-        while(opModeIsActive()){
+        while (opModeIsActive()) {
 
             // slew the servo, according to the rampUp (direction) variable.
-            if (rampUp) {
-                // Keep stepping up until we hit the max value.
-                position += INCREMENT ;
-                if (position >= MAX_POS ) {
-                    position = MAX_POS;
-                    rampUp = !rampUp;   // Switch ramp direction
-                }
+            if (gamepad1.x) {
+                CRservo.setPosition(MAX_POS);
             }
-            else {
-                // Keep stepping down until we hit the min value.
-                position -= INCREMENT ;
-                if (position <= MIN_POS ) {
-                    position = MIN_POS;
-                    rampUp = !rampUp;  // Switch ramp direction
-                }
+            if (gamepad1.y) {
+                CRservo.setPosition(MIN_POS);
             }
 
-            // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
-            telemetry.addData(">", "Press Stop to end test." );
+            telemetry.addData(">", "Press X for max pos.");
+            telemetry.addData(">", "Press Y for min pos.");
             telemetry.update();
 
-            // Set the servo to the new position and pause;
-            CRservo.setPosition(position);
-            sleep(CYCLE_MS);
-            idle();
-        }
+             // Set the servo to the new position and pause;
+         }
 
         // Signal done;
         telemetry.addData(">", "Done");
         telemetry.update();
     }
 }
+

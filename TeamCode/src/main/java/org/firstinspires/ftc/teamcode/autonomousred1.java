@@ -77,7 +77,7 @@ import java.util.Objects;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "new autonomous red", group = "Wallace")
+@Autonomous(name = "autonomous red front", group = "Wallace")
 //@Disabled
 public class autonomousred1 extends LinearOpMode {
 
@@ -217,10 +217,10 @@ public class autonomousred1 extends LinearOpMode {
                 double deg = phi * 180. / Math.PI;
                 telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
                 telemetry.update();
-                sleep(2000);
+                //sleep(2000);
                 telemetry.addData("Angle", "%.1f", deg);
                 telemetry.update();
-                sleep(1000);
+                sleep(10);
             } else {
                 object_id = "b";
                 col = 10.;
@@ -284,14 +284,14 @@ public class autonomousred1 extends LinearOpMode {
 
             } else if (deg > 65) {
                 encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
-                sleep(1000);
+                sleep(10);
                 right_turn(25);
-                encoderDrive(DRIVE_SPEED, 13, 13, 5.0);  // S1: Forward 47
+                encoderDrive(DRIVE_SPEED, 10, 10, 5.0);  // S1: Forward 47
                 pixel_release();
-                encoderDrive(-DRIVE_SPEED, -18, -18, 5.0);
+                encoderDrive(-DRIVE_SPEED, -14, -14, 5.0);
 
                 left_turn(25);
-                sleep(1000);
+                sleep(10);
                 encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
                 right_turn(80);
                 encoderDrive(DRIVE_SPEED, 90, 90, 25.0);  // S1: Forward 47
@@ -484,8 +484,8 @@ public class autonomousred1 extends LinearOpMode {
     }
 
     public void pixel_release() {
-        double Power = 0.2;
-        int tics = 8;
+        double Power = 0.28;
+        int tics = 12;
         //   tics = Intake.getCurrentPosition() + tics;
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

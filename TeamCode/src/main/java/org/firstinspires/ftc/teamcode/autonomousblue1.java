@@ -77,7 +77,7 @@ import java.util.Objects;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "new autonomous blue", group = "Wallace")
+@Autonomous(name = "autonomous blue front", group = "Wallace")
 //@Disabled
 public class autonomousblue1 extends LinearOpMode {
 
@@ -262,148 +262,42 @@ public class autonomousblue1 extends LinearOpMode {
                 //pixel_lock();// S1: Forward 47
                 encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
                 YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-                leftFrontDrive.setPower(-TURN_SPEED);
-                rightFrontDrive.setPower(TURN_SPEED);
-                leftBackDrive.setPower(-TURN_SPEED);
-                rightBackDrive.setPower(TURN_SPEED);
-
-                while (orientation.getYaw(AngleUnit.DEGREES) < 85) {
-                    orientation = imu.getRobotYawPitchRollAngles();
-                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    telemetry.update();
-                    sleep(5);
-                }
-                leftFrontDrive.setPower(0);
-                rightFrontDrive.setPower(0);
-                leftBackDrive.setPower(0);
-                rightBackDrive.setPower(0);
-                sleep(1000);
-                encoderDrive(DRIVE_SPEED, 75, 75, 25.0);  // S1: Forward 47
-                imu.resetYaw();
-                orientation = imu.getRobotYawPitchRollAngles();
-                leftFrontDrive.setPower(-TURN_SPEED);
-                rightFrontDrive.setPower(TURN_SPEED);
-                leftBackDrive.setPower(-TURN_SPEED);
-                rightBackDrive.setPower(TURN_SPEED);
-
-                while (orientation.getYaw(AngleUnit.DEGREES) < 85) {
-                    orientation = imu.getRobotYawPitchRollAngles();
-                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    telemetry.update();
-                    sleep(5);
-                }
-                leftFrontDrive.setPower(0);
-                rightFrontDrive.setPower(0);
-                leftBackDrive.setPower(0);
-                rightBackDrive.setPower(0);
-                sleep(1000);
+                left_turn(85);
                 encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
-                imu.resetYaw();
-                orientation = imu.getRobotYawPitchRollAngles();
-                leftFrontDrive.setPower(TURN_SPEED);
-                rightFrontDrive.setPower(-TURN_SPEED);
-                leftBackDrive.setPower(TURN_SPEED);
-                rightBackDrive.setPower(-TURN_SPEED);
-                while (orientation.getYaw(AngleUnit.DEGREES) > -85) {
-                    orientation = imu.getRobotYawPitchRollAngles();
-                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    telemetry.update();
-                    sleep(5);
-                }
-                leftFrontDrive.setPower(0);
-                rightFrontDrive.setPower(0);
-                leftBackDrive.setPower(0);
-                rightBackDrive.setPower(0);
-                encoderDrive(DRIVE_SPEED, 23, 23, 5.0);  // S1: Forward 47
-                sleep(10000);
+
                 return;
 
             } else if (65 < deg) {
                 encoderDrive(DRIVE_SPEED, 5, 5, 5.0);  // S1: Forward 47
-                imu.resetYaw();
-                YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-                leftFrontDrive.setPower(TURN_SPEED - 0.1);
-                rightFrontDrive.setPower(-(TURN_SPEED - 0.1));
-                leftBackDrive.setPower(TURN_SPEED - 0.1);
-                rightBackDrive.setPower(-(TURN_SPEED - 0.1));
-                while (orientation.getYaw(AngleUnit.DEGREES) > -25) {
-                    orientation = imu.getRobotYawPitchRollAngles();
-                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    telemetry.update();
-                    sleep(5);
-                }
-                leftFrontDrive.setPower(0);
-                rightFrontDrive.setPower(0);
-                leftBackDrive.setPower(0);
-                rightBackDrive.setPower(0);
+                right_turn(25);
                 sleep(1000);
                 encoderDrive(DRIVE_SPEED, 13, 13, 5.0);
                 pixel_release();// S1: Forward 47
                 // pixel_lock();
                 encoderDrive(-DRIVE_SPEED, -13, -13, 5.0);
+                left_turn(25);
 
-
-                imu.resetYaw();
-                leftFrontDrive.setPower(-TURN_SPEED);
-                rightFrontDrive.setPower(TURN_SPEED);
-                leftBackDrive.setPower(-TURN_SPEED);
-                rightBackDrive.setPower(TURN_SPEED);
-
-                while (orientation.getYaw(AngleUnit.DEGREES) < 110) {
-                    orientation = imu.getRobotYawPitchRollAngles();
-                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    telemetry.update();
-                    sleep(5);
-                }
-                leftFrontDrive.setPower(0);
-                rightFrontDrive.setPower(0);
-                leftBackDrive.setPower(0);
-                rightBackDrive.setPower(0);
                 sleep(1000);
+                encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
+                left_turn(85);
                 encoderDrive(DRIVE_SPEED, 90, 90, 25.0);  // S1: Forward 47
+
             } else if (deg < 60) {
                 encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
                 sleep(1000);
-                imu.resetYaw();
-                YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-                leftFrontDrive.setPower(-(TURN_SPEED - 0.1));
-                rightFrontDrive.setPower((TURN_SPEED - 0.1));
-                leftBackDrive.setPower(-(TURN_SPEED - 0.1));
-                rightBackDrive.setPower((TURN_SPEED - 0.1));
-                while (orientation.getYaw(AngleUnit.DEGREES) < 25) {
-                    orientation = imu.getRobotYawPitchRollAngles();
-                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    telemetry.update();
-                    sleep(5);
-                }
-                leftFrontDrive.setPower(0);
-                rightFrontDrive.setPower(0);
-                leftBackDrive.setPower(0);
-                rightBackDrive.setPower(0);
+                left_turn(25);
                 encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
                 pixel_release();
                 encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
                 //pixel_lock();
                 encoderDrive(-DRIVE_SPEED, -18, -18, 5.0);
 
-                imu.resetYaw();
-                leftFrontDrive.setPower(-TURN_SPEED);
-                rightFrontDrive.setPower(TURN_SPEED);
-                leftBackDrive.setPower(-TURN_SPEED);
-                rightBackDrive.setPower(TURN_SPEED);
-
-                while (orientation.getYaw(AngleUnit.DEGREES) < 56) {
-                    orientation = imu.getRobotYawPitchRollAngles();
-                    telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                    telemetry.update();
-                    sleep(5);
-                }
-                leftFrontDrive.setPower(0);
-                rightFrontDrive.setPower(0);
-                leftBackDrive.setPower(0);
-                rightBackDrive.setPower(0);
+                right_turn(25);
                 sleep(1000);
+                encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
+                left_turn(85);
                 encoderDrive(DRIVE_SPEED, 90, 90, 25.0);  // S1: Forward 47
+
             }
             return;
         }
@@ -603,42 +497,42 @@ public class autonomousblue1 extends LinearOpMode {
         }
         Intake.setPower(0);
     }
-        void left_turn(double ANGLE){
-            imu.resetYaw();
-            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-            leftFrontDrive.setPower(-TURN_SPEED);
-            rightFrontDrive.setPower(TURN_SPEED);
-            leftBackDrive.setPower(-TURN_SPEED);
-            rightBackDrive.setPower(TURN_SPEED);
-            while (orientation.getYaw(AngleUnit.DEGREES) < ANGLE) {
-                orientation = imu.getRobotYawPitchRollAngles();
-                telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                telemetry.update();
-                sleep(5);
-            }
-            leftFrontDrive.setPower(0);
-            rightFrontDrive.setPower(0);
-            leftBackDrive.setPower(0);
-            rightBackDrive.setPower(0);
+    void left_turn(double ANGLE){
+        imu.resetYaw();
+        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        leftFrontDrive.setPower(-TURN_SPEED);
+        rightFrontDrive.setPower(TURN_SPEED);
+        leftBackDrive.setPower(-TURN_SPEED);
+        rightBackDrive.setPower(TURN_SPEED);
+        while (orientation.getYaw(AngleUnit.DEGREES) < ANGLE) {
+            orientation = imu.getRobotYawPitchRollAngles();
+            telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+            telemetry.update();
+            sleep(5);
         }
-        void right_turn ( double ANGLE){
-            imu.resetYaw();
-            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-            leftFrontDrive.setPower(TURN_SPEED);
-            rightFrontDrive.setPower(-TURN_SPEED);
-            leftBackDrive.setPower(TURN_SPEED);
-            rightBackDrive.setPower(-TURN_SPEED);
-            while (orientation.getYaw(AngleUnit.DEGREES) > -ANGLE) {
-                orientation = imu.getRobotYawPitchRollAngles();
-                telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
-                telemetry.update();
-                sleep(5);
-            }
-            leftFrontDrive.setPower(0);
-            rightFrontDrive.setPower(0);
-            leftBackDrive.setPower(0);
-            rightBackDrive.setPower(0);
-        }
+        leftFrontDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightBackDrive.setPower(0);
     }
+    void right_turn ( double ANGLE){
+        imu.resetYaw();
+        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        leftFrontDrive.setPower(TURN_SPEED);
+        rightFrontDrive.setPower(-TURN_SPEED);
+        leftBackDrive.setPower(TURN_SPEED);
+        rightBackDrive.setPower(-TURN_SPEED);
+        while (orientation.getYaw(AngleUnit.DEGREES) > -ANGLE) {
+            orientation = imu.getRobotYawPitchRollAngles();
+            telemetry.addData("angle ", orientation.getYaw(AngleUnit.DEGREES));
+            telemetry.update();
+            sleep(5);
+        }
+        leftFrontDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightBackDrive.setPower(0);
+    }
+}
 
 
