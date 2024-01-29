@@ -29,14 +29,11 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import static java.lang.Math.atan;
-
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -59,9 +56,9 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "auto", group = "Concept")
+@TeleOp(name = "auto orig", group = "Concept")
 @Disabled
-public class auto extends LinearOpMode {
+public class auto_orig extends LinearOpMode {
 
     /**
      * Variables used for switching cameras.

@@ -101,7 +101,7 @@ public class OpencvBlueTest extends LinearOpMode {
     void initBlueFinding() {
         //visionProcessor = new BlueFinder();
         visionProcessor.setTelemetry(telemetry);
-        visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), visionProcessor, aprilTag);
+        visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 2"), visionProcessor, aprilTag);
 
     }
     private void initAprilTag() {
