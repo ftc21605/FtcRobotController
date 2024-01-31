@@ -16,9 +16,9 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class BlueFinder implements VisionProcessor {
-    public Rect rectLeft = new Rect(10,170,180,200);
-    public Rect rectMiddle = new Rect(220, 100, 200, 200);
-    public Rect rectRight = new Rect(450, 150, 180, 200);
+    public Rect rectLeft = new Rect(0,170,160,200);
+    public Rect rectMiddle = new Rect(220, 130, 200, 160);
+    public Rect rectRight = new Rect(460, 160, 180, 200);
     public Rect rectThresh = new Rect(10, 10, 200, 200);
     Selected selection = Selected.NONE;
     Mat submat = new Mat();
