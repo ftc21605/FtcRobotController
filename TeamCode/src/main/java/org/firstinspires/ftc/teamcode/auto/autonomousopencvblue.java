@@ -79,6 +79,8 @@ public class autonomousopencvblue extends LinearOpMode {
     private WebcamName webcam1, webcam2;
 
     private BlueFinder visionProcessor = new BlueFinder();
+    //visionProcessor.drawthr();
+    BlueFinder.Selected myselect = BlueFinder.Selected.NONE;
     private TfodProcessor tfod;
     private static final String TFOD_MODEL_ASSET = "cylinder.tflite";
     private static final String[] LABELS = {
@@ -115,7 +117,7 @@ public class autonomousopencvblue extends LinearOpMode {
         initBlueFinding();
         //initTfod();
         startVisionPortal();
-
+        //visionProcessor.drawthr();
         // Initialize the drive system variables.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
         leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
@@ -166,19 +168,34 @@ public class autonomousopencvblue extends LinearOpMode {
         telemetry.addData(">", "angle %.1f", (imu.getRobotYawPitchRollAngles()).getYaw(AngleUnit.DEGREES));
         telemetry.addData("angle", "deg %.1f", (deg));
         telemetry.update();
-
         //BlueFinder.Selected selected;
         // here is what happens after we hit start
         while (!isStarted() && !isStopRequested()) {
             visionProcessor.print_selection();
-            while (visionProcessor.getSelection()  == BlueFinder.Selected.NONE)
-            {
-                if (isStopRequested())
-                {
+            //BlueFinder.Selected myselect = BlueFinder.Selected.NONE;
+            while ((myselect = visionProcessor.getSelection()) == BlueFinder.Selected.NONE) {
+                if (isStopRequested()) {
                     return;
                 }
                 sleep(10);
             }
+            visionProcessor.print_selection();
+            /*
+            if (myselect == BlueFinder.Selected.LEFT) {
+                telemetry.addData(":", "Found blue on left");
+            }
+            else if (myselect == BlueFinder.Selected.MIDDLE) {
+                telemetry.addData(":", "Found blue in middle");
+            }
+            else if (myselect == BlueFinder.Selected.RIGHT) {
+                telemetry.addData(":", "Found blue on right");
+            }
+            else {
+                telemetry.addData(":", "bad selection code, should not happen");
+            }
+            */
+
+            telemetry.update();
             int icnt = 0;
             if (!override_tfod) {
                 while (Objects.equals(object_id, "0") && !isStopRequested()) {
@@ -227,89 +244,42 @@ public class autonomousopencvblue extends LinearOpMode {
         }
         imu.resetYaw();
 
-
-        sleep(1000);
-        if (Objects.equals(object_id, "r")) {
-            // Step through each leg of the path,
-            // Note: Reverse movement is obtained by setting a negative distance (not speed)
-            //telemetry.addData("Yaw (Z)", "%.2f Deg. (Heading)", orientation.getYaw(AngleUnit.DEGREES));
-
-            //sleep(10000);
-            //double x = col;
-            //double y = row;
-            //double phi = Math.atan2(x, y);
-            //double deg = phi * 180. / Math.PI;
-            telemetry.addData("wrong one. this is for BLUE team guys. deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
-            telemetry.update();
-            sleep(2000);
-
+        if (myselect == BlueFinder.Selected.MIDDLE) {
+            encoderDrive(DRIVE_SPEED, 26, 26, 5.0);
+            pixel_release();
+            //pixel_lock();// S1: Forward 47
+            encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
+            while (!gamepad1.a) {
+                sleep(1);
+            }
+            right_turn(85);
+            while (!gamepad1.a) {
+                sleep(1);
+            }
+            encoderDrive(-DRIVE_SPEED, -75, -75, 25.0);  // S1: Forward 47
+            while (!gamepad1.a) {
+                sleep(1);
+            }
+            right_turn(85);
+            while (!gamepad1.a) {
+                sleep(1);
+            }
+            sleep(1000);
+            encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
+            left_turn(85);
+            while (!gamepad1.a) {
+                sleep(1);
+            }
+            encoderDrive(DRIVE_SPEED, 23, 23, 5.0);  // S1: Forward 47
+            sleep(10000);
+            return;
         }
+        sleep(1000);
+
         //encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         //encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-        else if (Objects.equals(object_id, "b")) {
-//            encoderDrive(DRIVE_SPEED, 2, 2, 5.0);  // S1: Forward 47
-            //telemetry.addData("Yaw (Z)", "%.2f Deg. (Heading)", orientation.getYaw(AngleUnit.DEGREES));
 
 
-            telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
-            telemetry.update();
-            sleep(2000);
-            if (60 < deg && deg < 65) {
-                encoderDrive(DRIVE_SPEED, 26, 26, 5.0);
-                pixel_release();
-                //pixel_lock();// S1: Forward 47
-                encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
-                YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-                left_turn(85);
-                encoderDrive(DRIVE_SPEED, 75, 75, 25.0);  // S1: Forward 47
-                right_turn(85);
-                sleep(1000);
-                encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
-                imu.resetYaw();
-                orientation = imu.getRobotYawPitchRollAngles();
-                left_turn(85);
-                encoderDrive(DRIVE_SPEED, 23, 23, 5.0);  // S1: Forward 47
-                sleep(10000);
-                return;
-
-            } else if (65 < deg) {
-                encoderDrive(DRIVE_SPEED, 5, 5, 5.0);  // S1: Forward 47
-                right_turn(25);
-                sleep(1000);
-                encoderDrive(DRIVE_SPEED, 13, 13, 5.0);
-                pixel_release();// S1: Forward 47
-                // pixel_lock();
-                encoderDrive(-DRIVE_SPEED, -13, -13, 5.0);
-                left_turn(25);
-                sleep(1000);
-                encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
-                left_turn(85);
-                encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
-                left_turn(85);
-                encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
-                right_turn(85);
-
-
-            } else if (deg < 60) {
-                encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
-                sleep(1000);
-                left_turn(25);
-                encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
-                pixel_release();
-                encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
-                //pixel_lock();
-                encoderDrive(-DRIVE_SPEED, -18, -18, 5.0);
-
-                right_turn(25);
-                sleep(1000);
-                encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
-                left_turn(85);
-                encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
-                left_turn(85);
-                encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
-                right_turn(85);
-
-            }
             targetFound = false;
             desiredTag = null;
 
@@ -361,7 +331,7 @@ public class autonomousopencvblue extends LinearOpMode {
                 return;
             }
         }
-    }
+
 
 
     // now for the april tags
@@ -559,7 +529,6 @@ public class autonomousopencvblue extends LinearOpMode {
         Intake.setPower(0);
     }
     void left_turn(double ANGLE){
-        imu.resetYaw();
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         leftFrontDrive.setPower(-TURN_SPEED);
         rightFrontDrive.setPower(TURN_SPEED);
@@ -577,7 +546,6 @@ public class autonomousopencvblue extends LinearOpMode {
         rightBackDrive.setPower(0);
     }
     void right_turn ( double ANGLE){
-        imu.resetYaw();
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         leftFrontDrive.setPower(TURN_SPEED);
         rightFrontDrive.setPower(-TURN_SPEED);

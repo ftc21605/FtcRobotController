@@ -16,9 +16,10 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class BlueFinder implements VisionProcessor {
-    public Rect rectLeft = new Rect(10,100,200,200);
+    public Rect rectLeft = new Rect(10,170,180,200);
     public Rect rectMiddle = new Rect(220, 100, 200, 200);
-    public Rect rectRight = new Rect(430, 100, 200, 200);
+    public Rect rectRight = new Rect(450, 150, 180, 200);
+    public Rect rectThresh = new Rect(10, 10, 200, 200);
     Selected selection = Selected.NONE;
     Mat submat = new Mat();
     Mat hsvMat = new Mat();
@@ -27,12 +28,15 @@ public class BlueFinder implements VisionProcessor {
 
     int pixelMiddle;
     int pixelRight;
-
+    boolean drawthresh = true;
     Telemetry mytelemetry;
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
     }
-
+public void drawthr()
+{
+    drawthresh = false;
+}
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
 
@@ -94,13 +98,17 @@ public class BlueFinder implements VisionProcessor {
         Paint nonSelectedPaint = new Paint(selectedPaint);
         nonSelectedPaint.setColor(Color.RED);
 
-        //android.graphics.Rect drawRectLeft = makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx);
-        //android.graphics.Rect drawRectMiddle = makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx);
-        //android.graphics.Rect drawRectRight = makeGraphicsRect(rectRight, scaleBmpPxToCanvasPx);
-        canvas.drawRect(makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx), selectedPaint);
-        Bitmap bmp = convertMatToBitMap(thresh);
-        canvas.drawBitmap(bmp,null,makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx), selectedPaint);
-      /*
+        android.graphics.Rect drawRectLeft = makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx);
+        android.graphics.Rect drawRectMiddle = makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx);
+        android.graphics.Rect drawRectRight = makeGraphicsRect(rectRight, scaleBmpPxToCanvasPx);
+        //canvas.drawRect(makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx), selectedPaint);
+        //canvas.drawRect(makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx), selectedPaint);
+        //canvas.drawRect(makeGraphicsRect(rectRight, scaleBmpPxToCanvasPx), selectedPaint);
+        if (drawthresh) {
+            Bitmap bmp = convertMatToBitMap(thresh);
+            canvas.drawBitmap(bmp, null, makeGraphicsRect(rectThresh, scaleBmpPxToCanvasPx), selectedPaint);
+        }
+
         selection = (Selected) userContext;
         switch (selection) {
             case LEFT:
@@ -124,7 +132,6 @@ public class BlueFinder implements VisionProcessor {
                 canvas.drawRect(drawRectRight, nonSelectedPaint);
                 break;
         }
-        */
 
     }
 

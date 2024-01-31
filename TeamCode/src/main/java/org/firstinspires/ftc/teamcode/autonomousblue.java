@@ -176,21 +176,17 @@ public class autonomousblue extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
         imu.resetYaw(); // just reset to zero to have a defined starting value
         // Send telemetry message to indicate successful Encoder reset
-        String object_id = "0";
-        double col = 0;
-        double row = 0;
-        double x = col;
-        double y = row;
-        double phi = Math.atan2(x, y);
-        double deg = phi * 180. / Math.PI;
+
         telemetry.addData("Starting at", "%7d :%7d",
                 leftFrontDrive.getCurrentPosition(),
                 rightFrontDrive.getCurrentPosition());
         telemetry.addData(">", "angle %.1f", (imu.getRobotYawPitchRollAngles()).getYaw(AngleUnit.DEGREES));
-        telemetry.addData("angle", "deg %.1f", (deg));
+        telemetry.addData("angle", "deg %.1f");
         telemetry.update();
 
-
+        String object_id = "0";
+        double col = 0;
+        double row = 0;
         // here is what happens after we hit start
         while (!isStarted() && !isStopRequested()) {
 
@@ -231,6 +227,10 @@ public class autonomousblue extends LinearOpMode {
                 if (isStopRequested())
                     return; // if we do not find anything and get a stop after 30secs, quit here
                 telemetry.addData("found ", "%s", object_id);
+                double x = col;
+                double y = row;
+                double phi = Math.atan2(x, y);
+                double deg = phi * 180. / Math.PI;
                 telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
                 telemetry.update();
                 sleep(1000);
@@ -254,7 +254,7 @@ public class autonomousblue extends LinearOpMode {
             //double y = row;
             //double phi = Math.atan2(x, y);
             //double deg = phi * 180. / Math.PI;
-            telemetry.addData("wrong one. this is for BLUE team guys. deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
+            telemetry.addData("wrong one. this is for BLUE team guys. deg", "deg.0%");
             telemetry.update();
             sleep(2000);
 
@@ -265,24 +265,39 @@ public class autonomousblue extends LinearOpMode {
 //            encoderDrive(DRIVE_SPEED, 2, 2, 5.0);  // S1: Forward 47
             //telemetry.addData("Yaw (Z)", "%.2f Deg. (Heading)", orientation.getYaw(AngleUnit.DEGREES));
 
-
+            double x = col;
+            double y = row;
+            double phi = Math.atan2(x, y);
+            double deg = phi * 180. / Math.PI;
             telemetry.addData("deg", "x %.2f y %.2f phi %.1f deg %.1f", x, y, phi, deg);
             telemetry.update();
             sleep(2000);
-            if (60 < deg && deg < 65) {
+            if (75 < deg && deg < 80) {
                 encoderDrive(DRIVE_SPEED, 26, 26, 5.0);
                 pixel_release();
                 //pixel_lock();// S1: Forward 47
                 encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
-                YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+                while (!gamepad1.a){
+                    sleep(1);
+                }
                 left_turn(85);
-                encoderDrive(DRIVE_SPEED, 75, 75, 25.0);  // S1: Forward 47
+                while (!gamepad1.a){
+                    sleep(1);
+                }
+                encoderDrive(-DRIVE_SPEED, -5, -5, 25.0);  // S1: Forward 47
+                while (!gamepad1.a){
+                    sleep(1);
+                }
                 right_turn(85);
+                while (!gamepad1.a){
+                    sleep(1);
+                }
                 sleep(1000);
                 encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
-                imu.resetYaw();
-                orientation = imu.getRobotYawPitchRollAngles();
                 left_turn(85);
+                while (!gamepad1.a){
+                    sleep(1);
+                }
                 encoderDrive(DRIVE_SPEED, 23, 23, 5.0);  // S1: Forward 47
                 sleep(10000);
                 return;
