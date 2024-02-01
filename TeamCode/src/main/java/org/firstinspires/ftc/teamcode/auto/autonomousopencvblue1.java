@@ -42,22 +42,18 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.processors.BlueFinder;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
 import java.util.List;
-import java.util.Objects;
 
-@Autonomous(name = "autonomous opencv blue back", group = "Wallace")
+@Autonomous(name = "autonomous opencv blue back1", group = "Wallace")
 //@Disabled
-public class autonomousopencvblue extends LinearOpMode {
+public class autonomousopencvblue1 extends LinearOpMode {
 
-    boolean skip_opencv = true;
+    boolean skip_opencv = false;
     /* Declare OpMode members. */
     private DcMotor leftFrontDrive = null;
     private DcMotor rightFrontDrive = null;
@@ -184,7 +180,7 @@ public class autonomousopencvblue extends LinearOpMode {
                 while (!gamepad1.a) {
                     sleep(1);
                 }
-                encoderDrive(-DRIVE_SPEED, -35, -35, 25.0);  // S1: Forward 47
+                encoderDrive(-DRIVE_SPEED, -75, -75, 25.0);  // S1: Forward 47
                 while (!gamepad1.a) {
                     sleep(1);
                 }
@@ -196,106 +192,47 @@ public class autonomousopencvblue extends LinearOpMode {
             telemetry.addData(">","switched camera, waiting for 1sec");
             telemetry.update();
             sleep(1000);
-            targetFound = false;
-            while(!targetFound) {
-                List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-                for (AprilTagDetection detection : currentDetections) {
-                    // Look to see if we have size info on this tag.
-                    if (detection.metadata != null) {
-                        //  Check to see if we want to track towards this tag.
-                        if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
-                            // Yes, we want to use this tag.
-                            targetFound = true;
-                            desiredTag = detection;
-                            telemetry.addData("Found", "desired Tag ID %d", detection.id);
-                            break;  // don't look any further.
-                        } else {
-                            // This tag is in the library, but we do not want to track it right now.
-                            telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
-                        }
-                    } else {
-                        // This tag is NOT in the library, so we don't have enough information to track to it.
-                        telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
-                    }
-                    //telemetry.update();
 
-                }
-                sleep(100);
-            }
-            telemetry.update();
-            while (!gamepad1.a) {
-                sleep(1);
-            }
-            double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-            double headingError = desiredTag.ftcPose.bearing;
-
-            // Use the speed and turn "gains" to calculate how we want the robot to move.  Clip it to the maximum
-            double drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            double turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
-
-            telemetry.addData("Auto", "Drive %5.2f, Turn %5.2f", drive, turn);
-            telemetry.update();
-            moveRobot(drive, turn, rangeError);
-
-            return;
-        }
-        sleep(1000);
-
-        //encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        //encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-
-
-            targetFound = false;
-            desiredTag = null;
-
-            // Step through the list of detected tags and look for a matching tag
-            List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-            for (AprilTagDetection detection : currentDetections) {
-                // Look to see if we have size info on this tag.
-                if (detection.metadata != null) {
-                    //  Check to see if we want to track towards this tag.
-                    if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
-                        // Yes, we want to use this tag.
-                        targetFound = true;
-                        desiredTag = detection;
-                        break;  // don't look any further.
-                    } else {
-                        // This tag is in the library, but we do not want to track it right now.
-                        telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
-                    }
-                } else {
-                    // This tag is NOT in the library, so we don't have enough information to track to it.
-                    telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
-                }
-            }
-
-            // Tell the driver what we see, and what to do.
-            if (targetFound) {
-                telemetry.addData("\n>", "HOLD Left-Bumper to Drive to Target\n");
-                telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
-                telemetry.addData("Range", "%5.1f inches", desiredTag.ftcPose.range);
-                telemetry.addData("Bearing", "%3.0f degrees", desiredTag.ftcPose.bearing);
-            } else {
-                telemetry.addData("\n>", "Drive using joysticks to find valid target\n");
-            }
-
-            // If Left Bumper is being pressed, AND we have found the desired target, Drive to target Automatically .
-            if (gamepad1.left_bumper && targetFound) {
-
-                // Determine heading and range error so we can use them to control the robot automatically.
-                double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-                double headingError = desiredTag.ftcPose.bearing;
-
-                // Use the speed and turn "gains" to calculate how we want the robot to move.  Clip it to the maximum
-                double drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-                double turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
-
-                telemetry.addData("Auto", "Drive %5.2f, Turn %5.2f", drive, turn);
-                telemetry.update();
-                sleep(10000);
                 return;
             }
+        else if (myselect == BlueFinder.Selected.LEFT){
+            encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
+            sleep(1000);
+            left_turn(25);
+            encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
+            pixel_release();
+            encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
+            //pixel_lock();
+            encoderDrive(-DRIVE_SPEED, -18, -18, 5.0);
+
+            right_turn(25);
+            sleep(1000);
+            encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
+            left_turn(85);
+            encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
+            left_turn(85);
+            encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
+            right_turn(85);
         }
+        else if (myselect == BlueFinder.Selected.RIGHT){
+            encoderDrive(DRIVE_SPEED, 5, 5, 5.0);  // S1: Forward 47
+            right_turn(25);
+            sleep(1000);
+            encoderDrive(DRIVE_SPEED, 13, 13, 5.0);
+            pixel_release();// S1: Forward 47
+            // pixel_lock();
+            encoderDrive(-DRIVE_SPEED, -13, -13, 5.0);
+            left_turn(25);
+            sleep(1000);
+            encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
+            left_turn(85);
+            encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
+            left_turn(85);
+            encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
+            right_turn(85);
+
+        }
+    }
 
 
 
@@ -456,15 +393,15 @@ int currpos = leftFrontDrive.getCurrentPosition();
     }
 
     public void pixel_release() {
-        double Power = 0.2;
+        double Power = 0.4;
         int tics = 8;
         //   tics = Intake.getCurrentPosition() + tics;
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Intake.setPower(Power);
-        while (Intake.getCurrentPosition() < tics) {
-            sleep(1);
-        }
+        //while (Intake.getCurrentPosition() < tics) {
+         //   sleep(1);
+        //}
         Intake.setPower(0);
 
 

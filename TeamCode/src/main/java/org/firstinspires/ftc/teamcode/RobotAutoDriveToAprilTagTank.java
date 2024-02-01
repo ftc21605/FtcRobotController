@@ -109,7 +109,7 @@ public class RobotAutoDriveToAprilTagTank extends LinearOpMode
     private DcMotor rightDrive2 = null;
 
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static final int DESIRED_TAG_ID = 1;    // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final int DESIRED_TAG_ID = 2;    // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
@@ -224,8 +224,8 @@ public class RobotAutoDriveToAprilTagTank extends LinearOpMode
      */
     public void moveRobot(double x, double yaw) {
         // Calculate left and right wheel powers.
-        double leftPower    = x - yaw;
-        double rightPower   = x + yaw;
+        double rightPower    = -(x - yaw);
+        double leftPower   = -(x + yaw);
 
         // Normalize wheel powers to be less than 1.0
         double max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
@@ -235,10 +235,13 @@ public class RobotAutoDriveToAprilTagTank extends LinearOpMode
         }
 
         // Send powers to the wheels.
+
         leftDrive1.setPower(leftPower);
         leftDrive2.setPower(leftPower);
         rightDrive1.setPower(rightPower);
         rightDrive2.setPower(rightPower);
+
+
     }
 
     /**

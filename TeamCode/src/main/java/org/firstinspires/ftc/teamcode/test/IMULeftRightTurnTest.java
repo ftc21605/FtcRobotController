@@ -41,7 +41,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 
-@TeleOp(name="Test: IMU Left Right Turn Test", group="ZTest")
+@TeleOp(name = "Test: IMU Left Right Turn Test", group = "ZTest")
 //@Disabled
 public class IMULeftRightTurnTest extends LinearOpMode {
 
@@ -55,6 +55,7 @@ public class IMULeftRightTurnTest extends LinearOpMode {
     IMU imu;
     static final double TURN_SPEED = 0.2;
     double drive_angle = 0;
+
     @Override
     public void runOpMode() {
         double turn_speed_local = TURN_SPEED;
@@ -65,9 +66,9 @@ public class IMULeftRightTurnTest extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontleft");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
-        leftBackDrive  = hardwareMap.get(DcMotorSimple.class, "backleft");
+        leftBackDrive = hardwareMap.get(DcMotorSimple.class, "backleft");
         rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
@@ -77,64 +78,62 @@ public class IMULeftRightTurnTest extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        
+
         // This sample expects the IMU to be in a REV Hub and named "imu".
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
         // Note: if you choose two conflicting directions, this initialization will cause a code exception.
         imu.initialize(new IMU.Parameters(orientationOnRobot));
-
+        imu.resetYaw();
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        imu.resetYaw();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-if (gamepad1.b){
-    drive_angle = left_turn(45);
-}
-            if (gamepad1.a){
-                drive_angle = right_turn(45);
+            if (gamepad1.b) {
+                drive_angle = left_turn(25);
+            }
+            if (gamepad1.a) {
+                drive_angle = right_turn(25);
             }
 
-            if (gamepad1.x){
+            if (gamepad1.x) {
                 imu.resetYaw();
             }
-            telemetry.addData(">","Press A for 45deg right turn");
-            telemetry.addData(">","Press B for 45deg left turn");
+            telemetry.addData(">", "Press A for 45deg right turn");
+            telemetry.addData(">", "Press B for 45deg left turn");
 
-            telemetry.addData(">","current angle %.1f, drive to angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES), drive_angle);
+            telemetry.addData(">", "current angle %.1f, drive to angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES), drive_angle);
 
             telemetry.update();
         }
     }
-    double left_turn(double ANGLE){
+
+    double left_turn(double ANGLE) {
         double current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         double driveto_angle = current_angle + ANGLE;
-        telemetry.addData(">","input: %.1f, current angle %.1f, driveto: %.1f", ANGLE, current_angle, driveto_angle );
+        telemetry.addData(">", "input: %.1f, current angle %.1f, driveto: %.1f", ANGLE, current_angle, driveto_angle);
         telemetry.update();
 
         leftFrontDrive.setPower(-TURN_SPEED);
         rightFrontDrive.setPower(TURN_SPEED);
         leftBackDrive.setPower(-TURN_SPEED);
         rightBackDrive.setPower(TURN_SPEED);
-        if (driveto_angle > 180)
-        {
-            while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES))> 0 || current_angle > (driveto_angle - 360)) {
-                telemetry.addData(">","angle %.1f", current_angle);
+        if (driveto_angle > 180) {
+            while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) > 0 || current_angle > (driveto_angle - 360)) {
+                telemetry.addData(">", "angle %.1f", current_angle);
                 telemetry.update();
                 sleep(1);
             }
 
-        }
-        else {
+        } else {
             while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) < driveto_angle) {
 //            orientation = imu.getRobotYawPitchRollAngles();
                 telemetry.addData(">", "angle %.1f", current_angle);
@@ -146,29 +145,28 @@ if (gamepad1.b){
         rightFrontDrive.setPower(0);
         leftBackDrive.setPower(0);
         rightBackDrive.setPower(0);
-        telemetry.addData(">","final angle %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.addData(">", "final angle %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
         return driveto_angle;
     }
-    double right_turn ( double ANGLE){
+
+    double right_turn(double ANGLE) {
         double current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         double driveto_angle = current_angle - ANGLE;
-        telemetry.addData("right turn: ","input: %.1f, current angle %.1f, driveto: %.1f", ANGLE, current_angle, driveto_angle );
+        telemetry.addData("right turn: ", "input: %.1f, current angle %.1f, driveto: %.1f", ANGLE, current_angle, driveto_angle);
         telemetry.update();
-         leftFrontDrive.setPower(TURN_SPEED);
+        leftFrontDrive.setPower(TURN_SPEED);
         rightFrontDrive.setPower(-TURN_SPEED);
         leftBackDrive.setPower(TURN_SPEED);
         rightBackDrive.setPower(-TURN_SPEED);
-        if (driveto_angle < -180)
-        {
+        if (driveto_angle < -180) {
             //current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) < 0 || current_angle > (driveto_angle + 360)) {
-                telemetry.addData(">","angle %.1f", current_angle);
+                telemetry.addData(">", "angle %.1f", current_angle);
                 telemetry.update();
                 sleep(1);
             }
-        }
-        else {
+        } else {
             while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) > driveto_angle) {
                 telemetry.addData(">", "angle %.1f", current_angle);
                 telemetry.update();
