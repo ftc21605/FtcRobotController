@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -79,7 +80,7 @@ import java.util.Objects;
  */
 
 @Autonomous(name = "autonomous blue back", group = "Wallace")
-//@Disabled
+@Disabled
 public class autonomousblue extends LinearOpMode {
 
     boolean override_tfod = false;

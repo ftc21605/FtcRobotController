@@ -143,12 +143,12 @@ public class TeleOp extends LinearOpMode {
             telemetry.addData(">", "Press A again for emergency hook stop");
             telemetry.addData(">", "Press DPad Up again for hanging");
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            double axial = -gamepad1.left_stick_y*0.6;  // Note: pushing stick forward gives negative value
             double lateral = 0.;
             if (Math.abs(gamepad1.left_stick_x) > 0.8) {
                 lateral = gamepad1.left_stick_x;
             }
-            double yaw = gamepad1.right_stick_x;
+            double yaw = gamepad1.right_stick_x*0.6;
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -169,7 +169,18 @@ public class TeleOp extends LinearOpMode {
                 rightBackPower /= max;
             }
 
-
+            if (gamepad1.dpad_right){
+                 leftFrontPower =  0.3;
+                 rightFrontPower = - 0.3;
+                 leftBackPower = - 0.3;
+                 rightBackPower =   0.3;
+            }
+            if (gamepad1.dpad_left){
+                leftFrontPower = - 0.3;
+                rightFrontPower =  0.3;
+                leftBackPower =  0.3;
+                rightBackPower = - 0.3;
+            }
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
@@ -251,6 +262,7 @@ public class TeleOp extends LinearOpMode {
             } else {
                 Hanger.setPower(0);
             }
+
            if (gamepad1.right_bumper)
            {
             Intake.setPower(0.4);
