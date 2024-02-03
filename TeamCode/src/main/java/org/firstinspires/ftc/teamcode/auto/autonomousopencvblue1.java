@@ -231,27 +231,82 @@ public class autonomousopencvblue1 extends LinearOpMode {
                 return;
             }
         else if (myselect == BlueFinder.Selected.LEFT){
-            encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
-            sleep(1000);
+            encoderDrive(DRIVE_SPEED, 12, 12, 5.0);        while (!gamepad1.a){
+                      sleep(1);
+                  }
+
+            sleep(100);
             left_turn(25);
             telemetry.addData("> l25","angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             telemetry.update();
+            while (!gamepad1.a){
+                sleep(1);
+            }
             encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
             pixel_release();
+            while (!gamepad1.a){
+                sleep(1);
+            }
             encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
             //pixel_lock();
+            while (!gamepad1.a){
+                sleep(1);
+            }
             encoderDrive(-DRIVE_SPEED, -18, -18, 5.0);
+            while (!gamepad1.a){
+                sleep(1);
+            }
             right_turn(25);
 telemetry.addData("> r25","angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             telemetry.update();
-            sleep(1000);
-            encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
-            left_turn(85);
-            encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
-            left_turn(85);
-            encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
-            right_turn(85);
+            while (!gamepad1.a){
+                sleep(1);
+            }
+            sleep(100);
+            encoderDrive(DRIVE_SPEED, 40, 40, 25.0);            while (!gamepad1.a){
+            sleep(1);
+        }
 
+            left_turn(85);
+            telemetry.addData("> l85","angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.update();
+            while (!gamepad1.a){
+                sleep(1);
+            }
+            encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
+            while (!gamepad1.a){
+                sleep(1);
+            }
+
+            left_turn(85);
+            telemetry.addData("> l85","angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.update();
+            while (!gamepad1.a){
+                sleep(1);
+            }
+            encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
+            while (!gamepad1.a){
+                sleep(1);
+            }
+
+            right_turn(85);
+            telemetry.addData("> r25","angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.update();
+            while (!gamepad1.a){
+                sleep(1);
+            }
+
+            double to_go = -(sensorDistance.getDistance(DistanceUnit.INCH)-10); // seems to result in 1.5 inch
+            if(to_go < -200)
+            {
+                to_go = -15;
+            }
+            if (to_go < 0) {
+                encoderDrive(-0.2, to_go, to_go, 5);
+            }
+            while (!gamepad1.a){
+                sleep(1);
+            }
 
             PixelLift.setTargetPosition(1100);
             PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -331,9 +386,9 @@ telemetry.addData("> r25","angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw
             telemetry.addData("> d","distance: %.1f", sensorDistance.getDistance(DistanceUnit.INCH));
 
 
-            while (!gamepad1.a){
-                sleep(1);
-            }
+      //      while (!gamepad1.a){
+       //         sleep(1);
+      //      }
             double to_go = -(sensorDistance.getDistance(DistanceUnit.INCH)-10); // seems to result in 1.5 inch
             if(to_go < -200)
             {
@@ -346,9 +401,9 @@ telemetry.addData("> r25","angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw
             telemetry.addData("> r85","distance now: %.1f", sensorDistance.getDistance(DistanceUnit.INCH));
             telemetry.update();
 
-            while (!gamepad1.a){
-                sleep(1);
-            }
+       //     while (!gamepad1.a){
+        //        sleep(1);
+       //     }
 
             PixelLift.setTargetPosition(1100);
             PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
