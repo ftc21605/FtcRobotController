@@ -47,9 +47,9 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-@Autonomous(name = "autonomous opencv red front", group = "Wallace")
+@Autonomous(name = "autonomous opencv blue front", group = "Wallace")
 //@Disabled
-public class autonomousopencvred2 extends LinearOpMode {
+public class autonomousopencvbluefront extends LinearOpMode {
 
     boolean skip_opencv = false;
     /* Declare OpMode members. */
@@ -116,8 +116,6 @@ public class autonomousopencvred2 extends LinearOpMode {
 
         PixelLift  = hardwareMap.get(DcMotor.class, "pixellift");
         CRservo = hardwareMap.get(Servo.class, "pixelbucket");
-
-
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -186,14 +184,18 @@ public class autonomousopencvred2 extends LinearOpMode {
                 pixel_release();
                 //pixel_lock();// S1: Forward 47
                 encoderDrive(-DRIVE_SPEED, -2, -2, 5.0);
-                left_turn(85);
+                right_turn(85);
                 encoderDrive(-DRIVE_SPEED, -40, -40, 25.0);  // S1: Forward 47
+
 
             }
             else {
                 sleep(1000);
             }
-
+            doCameraSwitching();
+            telemetry.addData(">","switched camera, waiting for 1sec");
+            telemetry.update();
+            sleep(1000);
 
                 return;
             }
@@ -210,7 +212,7 @@ public class autonomousopencvred2 extends LinearOpMode {
 
             sleep(1000);
             encoderDrive(DRIVE_SPEED, 18, 18, 25.0);  // S1: Forward 47
-            left_turn(85);
+            right_turn(85);
             encoderDrive(-DRIVE_SPEED, -38, -38, 25.0);  // S1: Forward 47
 
         }
@@ -226,7 +228,7 @@ public class autonomousopencvred2 extends LinearOpMode {
 
             sleep(1000);
             encoderDrive(DRIVE_SPEED, 18, 18, 25.0);  // S1: Forward 47
-           left_turn(85);
+            right_turn(85);
             encoderDrive(-DRIVE_SPEED, -37, -37, 25.0);  // S1: Forward 47
 
         }

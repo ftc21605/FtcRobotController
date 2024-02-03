@@ -16,9 +16,10 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class RedFinder implements VisionProcessor {
-    public Rect rectLeft = new Rect(10, 100, 200, 200);
-    public Rect rectMiddle = new Rect(220, 100, 200, 200);
-    public Rect rectRight = new Rect(430, 100, 200, 200);
+    public Rect rectLeft = new Rect(0,170,160,200);
+    public Rect rectMiddle = new Rect(220, 130, 200, 160);
+    public Rect rectRight = new Rect(460, 160, 180, 200);
+    public Rect rectThresh = new Rect(10, 10, 200, 200);
     Selected selection = Selected.NONE;
     Mat submat = new Mat();
     Mat hsvMat = new Mat();
@@ -30,6 +31,7 @@ public class RedFinder implements VisionProcessor {
     int pixelMiddle;
     int pixelRight;
 
+    boolean drawthresh = true;
     Telemetry mytelemetry;
 
     @Override
@@ -106,9 +108,12 @@ public class RedFinder implements VisionProcessor {
         android.graphics.Rect drawRectMiddle = makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx);
         android.graphics.Rect drawRectRight = makeGraphicsRect(rectRight, scaleBmpPxToCanvasPx);
         canvas.drawRect(makeGraphicsRect(rectLeft, scaleBmpPxToCanvasPx), selectedPaint);
-        Bitmap bmp = convertMatToBitMap(thresh);
-        canvas.drawBitmap(bmp,null,makeGraphicsRect(rectMiddle, scaleBmpPxToCanvasPx), selectedPaint);
-/*
+
+        if (drawthresh) {
+            Bitmap bmp = convertMatToBitMap(thresh);
+            canvas.drawBitmap(bmp, null, makeGraphicsRect(rectThresh, scaleBmpPxToCanvasPx), selectedPaint);
+        }
+
         selection = (Selected) userContext;
         switch (selection) {
             case LEFT:
@@ -132,7 +137,7 @@ public class RedFinder implements VisionProcessor {
                 canvas.drawRect(drawRectRight, nonSelectedPaint);
                 break;
         }
-        */
+
     }
 
     public Selected getSelection() {
