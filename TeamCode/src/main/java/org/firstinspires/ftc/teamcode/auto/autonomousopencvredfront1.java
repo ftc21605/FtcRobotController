@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.auto;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -49,9 +50,9 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-@Autonomous(name = "autonomous opencv red front", group = "Wallace")
-//@Disabled
-public class autonomousopencvredfront extends LinearOpMode {
+@Autonomous(name = "autonomous opencv red front1", group = "Wallace")
+@Disabled
+public class autonomousopencvredfront1 extends LinearOpMode {
 
     boolean skip_opencv = false;
     /* Declare OpMode members. */
@@ -106,7 +107,6 @@ public class autonomousopencvredfront extends LinearOpMode {
     @Override
     public void runOpMode() {
         //initAprilTag();
-        initBlueFinding();
         //initTfod();
         startVisionPortal();
         sensorDistance = hardwareMap.get(DistanceSensor.class, "distance");
@@ -183,27 +183,22 @@ public class autonomousopencvredfront extends LinearOpMode {
         if (myselect == RedFinder.Selected.MIDDLE) {
             DESIRED_TAG_ID = 2;
             if (!skip_opencv) {
-                encoderDrive(DRIVE_SPEED, 27, 27, 5.0);  // S1: Forward 47
+                encoderDrive(DRIVE_SPEED, 26, 26, 5.0);  // S1: Forward 47
                 pixel_release();
-          //      while (!gamepad1.a){
-          //         sleep(1);
-          //      }
-                encoderDrive(-DRIVE_SPEED, -3, -3, 5.0);
-             //   while (!gamepad1.a){
-             //       sleep(1);
-             //   }
-                left_turn(85);
+                while (!gamepad1.a){
+                   sleep(1);
+                }
+                encoderDrive(-DRIVE_SPEED, -4, -4, 5.0);
+                while (!gamepad1.a){
+                    sleep(1);
+                }
+                right_turn(85);
                 telemetry.addData("> r85", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
                 telemetry.update();
-          //      while (!gamepad1.a){
-          //          sleep(1);
-          //      }
-                //encoderDrive(-(DRIVE_SPEED+0.2), -40, -40, 25.0);  // S1: Forward 47
-                //right_turn(3);
-                encoderDrive(-(DRIVE_SPEED+0.2), -34, -35, 25.0);  // S1: Forward 47
-
-                sleep(100);
-                right_turn(1);
+                while (!gamepad1.a){
+                    sleep(1);
+                }
+                encoderDrive(-DRIVE_SPEED, -10, -10, 25.0);  // S1: Forward 47
                 double to_go = -(sensorDistance.getDistance(DistanceUnit.INCH) - 4); // seems to result in 1.5 inch
                 if (to_go < 0) {
                     encoderDrive(-0.2, to_go, to_go, 5);
@@ -242,62 +237,59 @@ public class autonomousopencvredfront extends LinearOpMode {
 
     {
         encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
-      //  while (!gamepad1.a) {
-      //      sleep(1);
-     //   }
+        while (!gamepad1.a) {
+            sleep(1);
+        }
         sleep(100);
-        left_turn(35);
+        left_turn(25);
         telemetry.addData("> l25", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
-      //  while (!gamepad1.a) {
-      //      sleep(1);
-      //  }
-        encoderDrive(DRIVE_SPEED, 11, 11, 5.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        encoderDrive(DRIVE_SPEED, 12, 12, 5.0);  // S1: Forward 47
         pixel_release();
-    //    while (!gamepad1.a) {
-    //        sleep(1);
-    //    }
+        while (!gamepad1.a) {
+            sleep(1);
+        }
         encoderDrive(-DRIVE_SPEED, -10, -10, 5.0);
-   //     while (!gamepad1.a) {
-    //        sleep(1);
-     //   }
-        right_turn(35);
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        right_turn(25);
         telemetry.addData("> r25", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
-    //    while (!gamepad1.a) {
-     //       sleep(1);
-     //   }
+        while (!gamepad1.a) {
+            sleep(1);
+        }
 
-        encoderDrive((DRIVE_SPEED+0.2), 32, 32, 25.0);  // S1: Forward 47
-    //    while (!gamepad1.a) {
-     //       sleep(1);
-     //   }
-        right_turn(80);
+        sleep(1000);
+        encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        right_turn(85);
         telemetry.addData("> r85", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
-    //    while (!gamepad1.a) {
-     //       sleep(1);
-     //   }
-        encoderDrive((DRIVE_SPEED+0.2), 25, 25, 25.0);  // S1: Forward 47
-     //   while (!gamepad1.a) {
-     //       sleep(1);
-     //   }
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
         left_turn(85);
         telemetry.addData("> l85", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
-        encoderDrive(-DRIVE_SPEED, -7, -7, 25.0);  // S1: Forward 47
-    //    while (!gamepad1.a) {
-     //       sleep(1);
-    //    }
-        left_turn(88);
+        encoderDrive(-DRIVE_SPEED, -20, -20, 25.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        right_turn(85);
         telemetry.addData("> r85", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
-    //    while (!gamepad1.a) {
-    //        sleep(1);
-     //   }
-        double to_go = -(sensorDistance.getDistance(DistanceUnit.INCH) - 3); // seems to result in 1.5 inch
-        if (to_go < 0) {
-            encoderDrive(-0.2, to_go, to_go, 5);
+        while (!gamepad1.a) {
+            sleep(1);
         }
         PixelLift.setTargetPosition(1100);
         PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -321,60 +313,52 @@ public class autonomousopencvredfront extends LinearOpMode {
     } else if(myselect ==RedFinder.Selected.RIGHT)
 
     {
-        encoderDrive(DRIVE_SPEED, 14, 14, 5.0);  // S1: Forward 47
-     //   while (!gamepad1.a) {
-     //       sleep(1);
-      //  }
-        right_turn(35);
-    //    while (!gamepad1.a) {
-    //        sleep(1);
-     //   }
+        encoderDrive(DRIVE_SPEED, 5, 5, 5.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        right_turn(25);
+        while (!gamepad1.a) {
+            sleep(1);
+        }
         sleep(100);
-        encoderDrive(DRIVE_SPEED, 8, 8, 5.0);
+        encoderDrive(DRIVE_SPEED, 13, 13, 5.0);
         pixel_release();// S1: Forward 47
         // pixel_lock();
-    //    while (!gamepad1.a) {
-    //        sleep(1);
-    //    }
-        encoderDrive(-DRIVE_SPEED, -5, -5, 5.0);
-    //    while (!gamepad1.a) {
-    //        sleep(1);
-     //   }
-        left_turn(35);
-      //  while (!gamepad1.a) {
-     //       sleep(1);
-      //  }
-
-        sleep(100);
-        encoderDrive((DRIVE_SPEED+0.2), 28, 28, 25.0);  // S1: Forward 47
-   //     while (!gamepad1.a) {
-    //        sleep(1);
-   //     }
-        right_turn(80);
-      //  while (!gamepad1.a) {
-      //      sleep(1);
-      //  }
-        encoderDrive((DRIVE_SPEED+0.2), 25, 25, 25.0);  // S1: Forward 47
-     //   while (!gamepad1.a) {
-      //      sleep(1);
-      //  }
-        left_turn(85);
-        encoderDrive(-DRIVE_SPEED, -20, -20, 25.0);  // S1: Forward 47
-     //   while (!gamepad1.a) {
-      //      sleep(1);
-      //  }
-        left_turn(85);
-     //   while (!gamepad1.a) {
-     //       sleep(1);
-     //   }
-        double to_go = -(sensorDistance.getDistance(DistanceUnit.INCH) - 3); // seems to result in 1.5 inch
-        if (to_go < -200) {
-            to_go = -10;
+        while (!gamepad1.a) {
+            sleep(1);
         }
-        if (to_go < 0) {
-            encoderDrive(-0.2, to_go, to_go, 5);
+        encoderDrive(-DRIVE_SPEED, -13, -13, 5.0);
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        left_turn(25);
+        while (!gamepad1.a) {
+            sleep(1);
         }
 
+        sleep(1000);
+        encoderDrive(DRIVE_SPEED, 40, 40, 25.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        left_turn(85);
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        encoderDrive(DRIVE_SPEED, 65, 65, 25.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        left_turn(85);
+        encoderDrive(DRIVE_SPEED, 20, 20, 25.0);  // S1: Forward 47
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+        right_turn(85);
+        while (!gamepad1.a) {
+            sleep(1);
+        }
         PixelLift.setTargetPosition(1100);
         PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         PixelLift.setPower(0.5);
@@ -486,12 +470,6 @@ public class autonomousopencvredfront extends LinearOpMode {
         }
     }   // end method doCameraSwitching()
 
-    void initBlueFinding() {
-        //visionProcessor = new BlueFinder();
-        // visionProcessor.setTelemetry(telemetry);
-        //  visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 2"), visionProcessor, aprilTag);
-
-    }
 
     private void initAprilTag() {
         // Create the AprilTag processor by using a builder.

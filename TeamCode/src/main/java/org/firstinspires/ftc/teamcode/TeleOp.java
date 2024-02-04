@@ -95,6 +95,7 @@ public class TeleOp extends LinearOpMode {
     private DcMotor Intake = null;
 
     private DcMotor Hanger = null;
+    private DcMotor PixelLift = null;
 
     @Override
     public void runOpMode() {
@@ -121,7 +122,10 @@ public class TeleOp extends LinearOpMode {
         Intake.setDirection(DcMotor.Direction.FORWARD);
         Hanger = hardwareMap.get(DcMotor.class, "hanger");
         Hanger.setDirection(DcMotor.Direction.FORWARD);
-
+        PixelLift = hardwareMap.get(DcMotor.class, "pixellift");
+        PixelLift.setDirection(DcMotor.Direction.REVERSE);
+        PixelLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        PixelLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -181,6 +185,13 @@ public class TeleOp extends LinearOpMode {
                 leftBackPower =  0.3;
                 rightBackPower = - 0.3;
             }
+            if (gamepad1.dpad_down){
+                PixelLift.setPower(-0.2);
+            }
+            else {
+                PixelLift.setPower(0);
+            }
+
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
