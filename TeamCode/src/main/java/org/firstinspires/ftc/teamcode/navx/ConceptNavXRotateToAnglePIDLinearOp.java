@@ -41,6 +41,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.text.DecimalFormat;
@@ -57,10 +58,12 @@ import java.text.DecimalFormat;
  * for the navX-Model sensor should be used.
  */
 @TeleOp(name = "Concept: navX Rotate to Angle PID - Linear", group = "Concept")
-@Disabled // Comment this in to remove this from the Driver Station OpMode List
+//@Disabled // Comment this in to remove this from the Driver Station OpMode List
 public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
-    DcMotor leftMotor;
-    DcMotor rightMotor;
+    private DcMotor leftFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor rightBackDrive = null;
 
     private AHRS navx_device;
     private navXPIDController yawPIDController;
@@ -80,15 +83,19 @@ public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        leftMotor = hardwareMap.dcMotor.get("left motor");
-        rightMotor = hardwareMap.dcMotor.get("right motor");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontleft");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "backleft");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
         navx_device = AHRS.getInstance(hardwareMap.get(NavxMicroNavigationSensor.class, "navx"),
                 AHRS.DeviceDataType.kProcessedData,
                 NAVX_DEVICE_UPDATE_RATE_HZ);
 
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);
-
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
         /* If possible, use encoders when driving, as it results in more */
         /* predictable drive system response.                           */
         //leftMotor.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -137,13 +144,17 @@ public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
                     !Thread.currentThread().isInterrupted()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
                     if (yawPIDResult.isOnTarget()) {
-                        leftMotor.setPowerFloat();
-                        rightMotor.setPowerFloat();
+                        leftFrontDrive.setPowerFloat();
+                        leftBackDrive.setPowerFloat();
+                        rightFrontDrive.setPowerFloat();
+                        rightBackDrive.setPowerFloat();
                         telemetry.addData("PIDOutput", df.format(0.00));
                     } else {
                         double output = yawPIDResult.getOutput();
-                        leftMotor.setPower(output);
-                        rightMotor.setPower(-output);
+                        leftFrontDrive.setPower(output);
+                        leftBackDrive.setPower(output);
+                        rightFrontDrive.setPower(-output);
+                        rightBackDrive.setPower(-output);
                         telemetry.addData("PIDOutput", df.format(output) + ", " +
                                 df.format(-output));
                     }

@@ -30,6 +30,7 @@
 
 package org.firstinspires.ftc.teamcode.auto;
 
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -37,6 +38,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -44,7 +46,10 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.processors.BlueFinder;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -60,6 +65,8 @@ public class autonomousopencvbluefront extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor leftBackDrive = null;
     private DcMotor rightBackDrive = null;
+    IntegratingGyroscope gyro;
+    NavxMicroNavigationSensor navxMicro;
     static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
     static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
@@ -123,6 +130,8 @@ public class autonomousopencvbluefront extends LinearOpMode {
         PixelLift = hardwareMap.get(DcMotor.class, "pixellift");
         CRservo = hardwareMap.get(Servo.class, "pixelbucket");
 
+        navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
+        gyro = (IntegratingGyroscope)navxMicro;
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -216,6 +225,9 @@ public class autonomousopencvbluefront extends LinearOpMode {
                     sleep(10);
                 }
                 PixelLift.setPower(0);
+                //right_turn(85);
+                //encoderDrive(DRIVE_SPEED, 5,5,25);
+
             } else {
                 sleep(1000);
             }
@@ -365,7 +377,7 @@ public class autonomousopencvbluefront extends LinearOpMode {
             //         while (!gamepad1.a){
             //          sleep(1);
             //        }
-            encoderDrive(-DRIVE_SPEED, -18, -18, 25.0);  // S1: Forward 47
+            encoderDrive(-DRIVE_SPEED, -17, -17, 25.0);  // S1: Forward 47
             //      while (!gamepad1.a){
             //           sleep(1);
             //      }
@@ -380,7 +392,7 @@ public class autonomousopencvbluefront extends LinearOpMode {
             //      while (!gamepad1.a){
             //         sleep(1);
             //      }
-            double to_go = -(sensorDistance.getDistance(DistanceUnit.INCH) - 7); // seems to result in 1.5 inch
+            double to_go = -(sensorDistance.getDistance(DistanceUnit.INCH) - 5); // seems to result in 1.5 inch
             telemetry.addData("> ", "to_go: %.1f", to_go);
             telemetry.addData("> r85", "distance now: %.1f", sensorDistance.getDistance(DistanceUnit.INCH));
             telemetry.update();
@@ -607,7 +619,8 @@ public class autonomousopencvbluefront extends LinearOpMode {
     }
 
     double left_turn(double ANGLE) {
-        double current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double current_angle = angles.firstAngle;
         double driveto_angle = current_angle + ANGLE;
         telemetry.addData(">", "input: %.1f, current angle %.1f, driveto: %.1f", ANGLE, current_angle, driveto_angle);
         telemetry.update();
@@ -617,14 +630,14 @@ public class autonomousopencvbluefront extends LinearOpMode {
         leftBackDrive.setPower(-TURN_SPEED);
         rightBackDrive.setPower(TURN_SPEED);
         if (driveto_angle > 180) {
-            while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) > 0 || current_angle > (driveto_angle - 360)) {
+            while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) < 0 || current_angle > (driveto_angle - 360)) {
                 telemetry.addData(">", "angle %.1f", current_angle);
                 telemetry.update();
                 sleep(1);
             }
 
         } else {
-            while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) < driveto_angle) {
+            while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) < driveto_angle) {
 //            orientation = imu.getRobotYawPitchRollAngles();
                 telemetry.addData(">", "angle %.1f", current_angle);
                 telemetry.update();
@@ -641,7 +654,8 @@ public class autonomousopencvbluefront extends LinearOpMode {
     }
 
     double right_turn(double ANGLE) {
-        double current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double current_angle = angles.firstAngle;
         double driveto_angle = current_angle - ANGLE;
         telemetry.addData("right turn: ", "input: %.1f, current angle %.1f, driveto: %.1f", ANGLE, current_angle, driveto_angle);
         telemetry.update();
@@ -651,13 +665,13 @@ public class autonomousopencvbluefront extends LinearOpMode {
         rightBackDrive.setPower(-TURN_SPEED);
         if (driveto_angle < -180) {
             //current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) < 0 || current_angle > (driveto_angle + 360)) {
+            while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) < 0 || current_angle > (driveto_angle + 360)) {
                 telemetry.addData(">", "angle %.1f", current_angle);
                 telemetry.update();
                 sleep(1);
             }
         } else {
-            while ((current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)) > driveto_angle) {
+            while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) > driveto_angle) {
                 telemetry.addData(">", "angle %.1f", current_angle);
                 telemetry.update();
                 sleep(1);

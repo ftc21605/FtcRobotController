@@ -150,7 +150,9 @@ public class TeleOp extends LinearOpMode {
             double axial = -gamepad1.left_stick_y*0.6;  // Note: pushing stick forward gives negative value
             double lateral = 0.;
             if (Math.abs(gamepad1.left_stick_x) > 0.8) {
-                lateral = gamepad1.left_stick_x;
+                if (Math.abs(gamepad1.left_stick_y) < 0.3) {
+                    lateral = gamepad1.left_stick_x;
+                }
             }
             double yaw = gamepad1.right_stick_x*0.6;
 

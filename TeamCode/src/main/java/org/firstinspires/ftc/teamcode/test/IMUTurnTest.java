@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.test;
 
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -37,8 +38,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -49,12 +54,17 @@ public class IMUTurnTest extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
-    private DcMotorSimple leftBackDrive = null;
+    private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     // The IMU sensor object
     IMU imu;
     static final double TURN_SPEED = 0.2;
+
+    IntegratingGyroscope gyro;
+    NavxMicroNavigationSensor navxMicro;
+    ElapsedTime timer = new ElapsedTime();
+
     @Override
     public void runOpMode() {
         double turn_speed_local = TURN_SPEED;
@@ -66,7 +76,7 @@ public class IMUTurnTest extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontleft");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
-        leftBackDrive  = hardwareMap.get(DcMotorSimple.class, "backleft");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "backleft");
         rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
@@ -89,12 +99,32 @@ public class IMUTurnTest extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         // Wait for the game to start (driver presses PLAY)
+        navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
+        gyro = (IntegratingGyroscope)navxMicro;
+        // If you're only interested int the IntegratingGyroscope interface, the following will suffice.
+        // gyro = hardwareMap.get(IntegratingGyroscope.class, "navx");
+
+        // The gyro automatically starts calibrating. This takes a few seconds.
+        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+
+        // Wait until the gyro calibration is complete
+        timer.reset();
+        while (navxMicro.isCalibrating())  {
+            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+            telemetry.update();
+            sleep(50);
+        }
+        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear(); telemetry.update();
+
         waitForStart();
         runtime.reset();
 
         imu.resetYaw();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
 
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftFrontPower  =  turn_speed_local;
@@ -104,6 +134,7 @@ public class IMUTurnTest extends LinearOpMode {
 
 
             // Send calculated power to wheels
+
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
@@ -115,16 +146,27 @@ public class IMUTurnTest extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftFrontPower, rightFrontPower);
             telemetry.addData("Yaw (Z)", "%.2f Deg. (Heading)", orientation.getYaw(AngleUnit.DEGREES));
-            if (orientation.getYaw(AngleUnit.DEGREES) > 90) {
+            telemetry.addData("navx", formatAngle(angles.angleUnit, angles.firstAngle));
+            telemetry.addData("navx", "%.2f Deg. Heading", angles.firstAngle);
+
+
+
+            if (angles.firstAngle > 90) {
                 turn_speed_local = TURN_SPEED;
                 imu.resetYaw();
             }
-            if (orientation.getYaw(AngleUnit.DEGREES) < -90) {
+            if (angles.firstAngle < -90) {
                 turn_speed_local = -TURN_SPEED;
                 imu.resetYaw();
             }
 
             telemetry.update();
         }
+    }
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+    String formatDegrees(double degrees){
+        return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 }

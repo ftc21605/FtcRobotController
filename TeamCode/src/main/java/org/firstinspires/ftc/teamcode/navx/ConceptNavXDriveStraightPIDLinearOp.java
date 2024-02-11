@@ -60,10 +60,12 @@ import java.text.DecimalFormat;
  */
 
 @TeleOp(name = "Concept: navX Drive Straight PID - Linear", group = "Concept")
-@Disabled //Comment this in to remove this from the Driver Station OpMode List
+//@Disabled //Comment this in to remove this from the Driver Station OpMode List
 public class ConceptNavXDriveStraightPIDLinearOp extends LinearOpMode {
-    DcMotor leftMotor;
-    DcMotor rightMotor;
+    private DcMotor leftFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor rightBackDrive = null;
 
     private AHRS navx_device;
     private navXPIDController yawPIDController;
@@ -87,14 +89,19 @@ public class ConceptNavXDriveStraightPIDLinearOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        leftMotor = hardwareMap.dcMotor.get("left motor");
-        rightMotor = hardwareMap.dcMotor.get("right motor");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontleft");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "backleft");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
         navx_device = AHRS.getInstance(hardwareMap.get(NavxMicroNavigationSensor.class, "navx"),
                 AHRS.DeviceDataType.kProcessedData,
                 NAVX_DEVICE_UPDATE_RATE_HZ);
 
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
 
         /* If possible, use encoders when driving, as it results in more */
         /* predictable drive system response.                           */
@@ -146,14 +153,18 @@ public class ConceptNavXDriveStraightPIDLinearOp extends LinearOpMode {
                     !Thread.currentThread().isInterrupted()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
                     if (yawPIDResult.isOnTarget()) {
-                        leftMotor.setPower(drive_speed);
-                        rightMotor.setPower(drive_speed);
+                        leftBackDrive.setPower(drive_speed);
+                        leftFrontDrive.setPower(drive_speed);
+                        rightFrontDrive.setPower(drive_speed);
+                        rightBackDrive.setPower(drive_speed);
                         telemetry.addData("PIDOutput", df.format(drive_speed) + ", " +
                                 df.format(drive_speed));
                     } else {
                         double output = yawPIDResult.getOutput();
-                        leftMotor.setPower(drive_speed + output);
-                        rightMotor.setPower(drive_speed - output);
+                        leftFrontDrive.setPower(drive_speed + output);
+                        leftBackDrive.setPower(drive_speed + output);
+                        rightBackDrive.setPower(drive_speed - output);
+                        rightFrontDrive.setPower(drive_speed - output);
                         telemetry.addData("PIDOutput", df.format(limit(drive_speed + output)) + ", " +
                                 df.format(limit(drive_speed - output)));
                     }
