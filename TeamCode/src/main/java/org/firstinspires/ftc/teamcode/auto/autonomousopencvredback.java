@@ -227,24 +227,8 @@ public class autonomousopencvredback extends LinearOpMode {
                 //while (!gamepad1.a){
                 //   sleep(1);
                 //}
-                PixelLift.setTargetPosition(1100);
-                PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                PixelLift.setPower(0.5);
-                while (PixelLift.isBusy()) {
-                    sleep(10);
-                }
-                sleep(100);
-                CRservo.setPosition(MAX_POS);
-                sleep(3000);
-                CRservo.setPosition(MIN_POS);
-                sleep(100);
-                PixelLift.setTargetPosition(100);
-                PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                PixelLift.setPower(0.2);
-                while (PixelLift.isBusy()) {
-                    sleep(10);
-                }
-                PixelLift.setPower(0);
+                drop_pixel();
+
             } else {
                 sleep(1000);
             }
@@ -315,24 +299,7 @@ public class autonomousopencvredback extends LinearOpMode {
         if (to_go < 0) {
             encoderDrive(-0.2, to_go, to_go, 5);
         }
-        PixelLift.setTargetPosition(1100);
-        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        PixelLift.setPower(0.5);
-        while (PixelLift.isBusy()) {
-            sleep(10);
-        }
-        sleep(100);
-        CRservo.setPosition(MAX_POS);
-        sleep(2000);
-        CRservo.setPosition(MIN_POS);
-        sleep(100);
-        PixelLift.setTargetPosition(100);
-        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        PixelLift.setPower(0.2);
-        while (PixelLift.isBusy()) {
-            sleep(10);
-        }
-        PixelLift.setPower(0);
+        drop_pixel();
 
     } else if(myselect ==RedFinder.Selected.RIGHT)
 
@@ -390,25 +357,7 @@ public class autonomousopencvredback extends LinearOpMode {
         if (to_go < 0) {
             encoderDrive(-0.2, to_go, to_go, 5);
         }
-
-        PixelLift.setTargetPosition(1100);
-        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        PixelLift.setPower(0.5);
-        while (PixelLift.isBusy()) {
-            sleep(10);
-        }
-        sleep(100);
-        CRservo.setPosition(MAX_POS);
-        sleep(3000);
-        CRservo.setPosition(MIN_POS);
-        sleep(100);
-        PixelLift.setTargetPosition(100);
-        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        PixelLift.setPower(0.2);
-        while (PixelLift.isBusy()) {
-            sleep(10);
-        }
-        PixelLift.setPower(0);
+drop_pixel();
 
     }
 
@@ -663,6 +612,26 @@ public class autonomousopencvredback extends LinearOpMode {
         leftBackDrive.setPower(0);
         rightBackDrive.setPower(0);
         return driveto_angle;
+    }
+    void drop_pixel(){
+        PixelLift.setTargetPosition(1100);
+        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        PixelLift.setPower(0.5);
+        while (PixelLift.isBusy()) {
+            sleep(10);
+        }
+        sleep(100);
+        CRservo.setPosition(MAX_POS);
+        sleep(3000);
+        CRservo.setPosition(MIN_POS);
+        sleep(100);
+        PixelLift.setTargetPosition(100);
+        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        PixelLift.setPower(0.2);
+        while (PixelLift.isBusy()) {
+            sleep(10);
+        }
+        PixelLift.setPower(0);
     }
 
 }

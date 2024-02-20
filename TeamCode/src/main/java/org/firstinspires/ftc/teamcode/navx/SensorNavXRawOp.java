@@ -66,7 +66,7 @@ import java.text.DecimalFormat;
  * only the raw or only the processed data.
  */
 @TeleOp(name = "Sensor: navX Raw Data", group = "Sensor")
-@Disabled //Comment this in to remove this from the Driver Station OpMode List
+//@Disabled //Comment this in to remove this from the Driver Station OpMode List
 public class SensorNavXRawOp extends OpMode {
 
   private String startDate;

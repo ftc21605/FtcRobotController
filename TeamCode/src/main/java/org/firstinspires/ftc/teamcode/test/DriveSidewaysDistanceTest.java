@@ -28,18 +28,16 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
-package org.firstinspires.ftc.teamcode.navx;
+package org.firstinspires.ftc.teamcode.test;
 
 import android.util.Log;
 
-import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.navXPIDController;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.text.DecimalFormat;
@@ -59,9 +57,9 @@ import java.text.DecimalFormat;
  * to reduce the frequency of the updates to the drive system.
  */
 
-@TeleOp(name = "Concept: navX Drive Straight PID - Linear", group = "Concept")
+@TeleOp(name = "Test: Drive Sideways Distance Test", group = "ZTest")
 //@Disabled //Comment this in to remove this from the Driver Station OpMode List
-public class ConceptNavXDriveStraightPIDLinearOp extends LinearOpMode {
+public class DriveSidewaysDistanceTest extends LinearOpMode {
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
@@ -124,7 +122,7 @@ public class ConceptNavXDriveStraightPIDLinearOp extends LinearOpMode {
         yawPIDController.setTolerance(navXPIDController.ToleranceType.ABSOLUTE, TOLERANCE_DEGREES);
         yawPIDController.setPID(YAW_PID_P, YAW_PID_I, YAW_PID_D);
         yawPIDController.enable(true);
-
+telemetry.addData(">","push start");
         waitForStart();
 
         while ( !calibration_complete ) {
@@ -144,40 +142,70 @@ public class ConceptNavXDriveStraightPIDLinearOp extends LinearOpMode {
            with the new PID value with each new output value.
          */
 
-        final double TOTAL_RUN_TIME_SECONDS = 10.0;
+        final double TOTAL_RUN_TIME_SECONDS = 100.0;
         int DEVICE_TIMEOUT_MS = 500;
         navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
 
         /* Drive straight forward at 1/2 of full drive speed */
-        double drive_speed = 0.5;
+       //double drive_speed = gamepad1.left_stick_x;
 
         DecimalFormat df = new DecimalFormat("#.##");
 
         try {
             int current_left_position = leftFrontDrive.getCurrentPosition();
             int current_right_position = rightFrontDrive.getCurrentPosition();
-            while (20 >  ((leftFrontDrive.getCurrentPosition()-current_left_position + rightFrontDrive.getCurrentPosition() - current_right_position)/2./ COUNTS_PER_INCH) &&
-                    !Thread.currentThread().isInterrupted()) {
+            telemetry.addData(">","init left counter %d", leftFrontDrive.getCurrentPosition());
+            telemetry.addData(">","init right counter %d", rightFrontDrive.getCurrentPosition());
+            telemetry.update();
+
+//            while (Math::abs((leftFrontDrive.getCurrentPosition() - current_left_position - ((rightFrontDrive.getCurrentPosition() - current_right_position)) / 2.) < 560) &&
+  //                  !Thread.currentThread().isInterrupted()) {
+            while (opModeIsActive()) {
+                telemetry.addData(">","left counter %d", (leftFrontDrive.getCurrentPosition()- current_left_position));
+                telemetry.addData(">","right counter %d", (rightFrontDrive.getCurrentPosition()- current_right_position));
+                telemetry.addData(">","sum counter %.1f", Math.abs(leftFrontDrive.getCurrentPosition() - current_left_position - (rightFrontDrive.getCurrentPosition() - current_right_position)/ 2.));
+
+                telemetry.update();
+                double drive_speed = gamepad1.left_stick_x;
+                if (gamepad1.b)
+                {
+                    drive_speed = 0.5;
+                }
+                if (gamepad1.y)
+                {
+                    drive_speed = -0.5;
+                }
+
+                if (Math.abs(leftFrontDrive.getCurrentPosition() - current_left_position - (rightFrontDrive.getCurrentPosition() - current_right_position)/ 2.) > 560)
+                {
+                    //drive_speed = 0;
+                }
+                if (gamepad1.x)
+                {
+                    current_left_position = leftFrontDrive.getCurrentPosition();
+                    current_right_position = rightFrontDrive.getCurrentPosition();
+                }
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
                     if (yawPIDResult.isOnTarget()) {
-                        leftBackDrive.setPower(drive_speed);
                         leftFrontDrive.setPower(drive_speed);
-                        rightFrontDrive.setPower(drive_speed);
+                        leftBackDrive.setPower(-drive_speed);
+                        rightFrontDrive.setPower(-drive_speed);
                         rightBackDrive.setPower(drive_speed);
                         telemetry.addData("PIDOutput", df.format(drive_speed) + ", " +
                                 df.format(drive_speed));
                     } else {
                         double output = yawPIDResult.getOutput();
+                        output = 0;
                         leftFrontDrive.setPower(drive_speed + output);
-                        leftBackDrive.setPower(drive_speed + output);
+                        leftBackDrive.setPower(-drive_speed + output);
+                        rightFrontDrive.setPower(-drive_speed - output);
                         rightBackDrive.setPower(drive_speed - output);
-                        rightFrontDrive.setPower(drive_speed - output);
                         telemetry.addData("PIDOutput", df.format(limit(drive_speed + output)) + ", " +
                                 df.format(limit(drive_speed - output)));
                     }
                     telemetry.addData("Yaw", df.format(navx_device.getYaw()));
-                } else{
-			        /* A timeout occurred */
+                } else {
+                    /* A timeout occurred */
                     Log.w("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
                 }
             }
