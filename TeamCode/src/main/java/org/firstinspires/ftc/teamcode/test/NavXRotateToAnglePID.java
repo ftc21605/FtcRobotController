@@ -28,20 +28,16 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
-package org.firstinspires.ftc.teamcode.navx;
+package org.firstinspires.ftc.teamcode.test;
 
 import android.util.Log;
 
-import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.navXPIDController;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.text.DecimalFormat;
@@ -57,9 +53,9 @@ import java.text.DecimalFormat;
  * Note that for the best accuracy, a reasonably high update rate
  * for the navX-Model sensor should be used.
  */
-@TeleOp(name = "Concept: navX Rotate to Angle PID - Linear", group = "navx")
+@TeleOp(name = "Test: navX Rotate to Angle Test", group = "ZTest")
 //@Disabled // Comment this in to remove this from the Driver Station OpMode List
-public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
+public class NavXRotateToAnglePID extends LinearOpMode {
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
@@ -83,9 +79,9 @@ public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontleft");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "backleft");
         rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
         navx_device = AHRS.getInstance(hardwareMap.get(NavxMicroNavigationSensor.class, "navx"),
@@ -97,18 +93,18 @@ public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
 
-        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+	leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+	leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+	rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+	rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         /* If possible, use encoders when driving, as it results in more */
         /* predictable drive system response.                           */
         //leftMotor.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         //rightMotor.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
         /* Create a PID Controller which uses the Yaw Angle as input. */
-        yawPIDController = new navXPIDController(navx_device,
-                navXPIDController.navXTimestampedDataSource.YAW);
+        yawPIDController = new navXPIDController( navx_device,
+                                    navXPIDController.navXTimestampedDataSource.YAW);
 
         /* Configure the PID controller */
         yawPIDController.setSetpoint(TARGET_ANGLE_DEGREES);
@@ -117,14 +113,14 @@ public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
         yawPIDController.setTolerance(navXPIDController.ToleranceType.ABSOLUTE, TOLERANCE_DEGREES);
         yawPIDController.setPID(YAW_PID_P, YAW_PID_I, YAW_PID_D);
 
-        DcMotor.ZeroPowerBehavior save_left = leftFrontDrive.getZeroPowerBehavior();
-        DcMotor.ZeroPowerBehavior save_right = rightFrontDrive.getZeroPowerBehavior();
-        telemetry.addData(">", "left zero power behavior: %s", save_left);
-        telemetry.addData(">", "right zero power behavior: %s", save_right);
-        telemetry.update();
-        waitForStart();
+			DcMotor.ZeroPowerBehavior save_left = leftFrontDrive.getZeroPowerBehavior();
+			DcMotor.ZeroPowerBehavior save_right = rightFrontDrive.getZeroPowerBehavior();
+			telemetry.addData(">","left zero power behavior: %s", save_left); 
+			telemetry.addData(">","right zero power behavior: %s", save_right);
+			telemetry.update();
+			waitForStart();
 
-        while (!calibration_complete) {
+        while ( !calibration_complete ) {
             /* navX-Micro Calibration completes automatically ~15 seconds after it is
             powered on, as long as the device is still.  To handle the case where the
             navX-Micro has not been able to calibrate successfully, hold off using
@@ -150,7 +146,7 @@ public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
 
             DecimalFormat df = new DecimalFormat("#.##");
 
-            while ((runtime.time() < TOTAL_RUN_TIME_SECONDS) &&
+            while ( (runtime.time() < TOTAL_RUN_TIME_SECONDS) &&
                     !Thread.currentThread().isInterrupted()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
                     if (yawPIDResult.isOnTarget()) {
@@ -161,24 +157,26 @@ public class ConceptNavXRotateToAnglePIDLinearOp extends LinearOpMode {
                         telemetry.addData("PIDOutput", df.format(0.00));
                     } else {
                         double output = yawPIDResult.getOutput();
-                        output = Math.max(0.2, output);
-                        // leftFrontDrive.setPower(output);
-                        // leftBackDrive.setPower(output);
-                        // rightFrontDrive.setPower(-output);
-                        // rightBackDrive.setPower(-output);
+			output = Math.max(0.2,output);
+                        leftFrontDrive.setPower(output);
+                        leftBackDrive.setPower(output);
+                        rightFrontDrive.setPower(-output);
+                        rightBackDrive.setPower(-output);
                         telemetry.addData("PIDOutput", df.format(output) + ", " +
                                 df.format(-output));
                     }
                 } else {
-                    /* A timeout occurred */
+			    /* A timeout occurred */
                     Log.w("navXRotateOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
                 }
                 telemetry.addData("Yaw", df.format(navx_device.getYaw()));
-                telemetry.update();
+		telemetry.update();
             }
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        } finally {
+        }
+        catch(InterruptedException ex) {
+             Thread.currentThread().interrupt();
+        }
+        finally {
             navx_device.close();
             telemetry.addData("LinearOp", "Complete");
         }

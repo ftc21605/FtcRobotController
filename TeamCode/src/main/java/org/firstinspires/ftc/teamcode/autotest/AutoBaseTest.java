@@ -30,61 +30,96 @@
 
 package org.firstinspires.ftc.teamcode.autotest;
 
-
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.OurLinearOpBase;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.navXPIDController;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.processors.BlueFinder;
-import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-
 import java.util.List;
 
-@Autonomous(name = "Test: April tag drive Test", group = "ZTest")
+
+@Autonomous(name = "Test: Auto Base Test", group = "ZTest")
 //@Disabled
-public class ApriltagDriveTest extends OurLinearOpBase {
+public class AutoBaseTest extends OurLinearOpBase {
 
 
     @Override
     public void runOpMode() {
-         startVisionPortal();
-	 setup_drive_motors();
-	 setup_imu();
+        initAprilTag();
+        startVisionPortal();
+        // Initialize the drive system variables.
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
+
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+
+        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        // rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        navx_device = AHRS.getInstance(hardwareMap.get(NavxMicroNavigationSensor.class, "navx"),
+                AHRS.DeviceDataType.kProcessedData,
+                NAVX_DEVICE_UPDATE_RATE_HZ);
+
+        yawPIDController = new navXPIDController(navx_device,
+                navXPIDController.navXTimestampedDataSource.YAW);
+
+        /* Configure the PID controller */
+        yawPIDController.setSetpoint(TARGET_ANGLE_DEGREES);
+        yawPIDController.setContinuous(true);
+        yawPIDController.setOutputRange(MIN_MOTOR_OUTPUT_VALUE, MAX_MOTOR_OUTPUT_VALUE);
+        yawPIDController.setTolerance(navXPIDController.ToleranceType.ABSOLUTE, TOLERANCE_DEGREES);
+        yawPIDController.setPID(YAW_PID_P, YAW_PID_I, YAW_PID_D);
+        yawPIDController.enable(true);
+        //	navXPIDController.PIDResult yawPIDResult null;
+
+        while (!calibration_complete) {
+            /* navX-Micro Calibration completes automatically ~15 seconds after it is
+            powered on, as long as the device is still.  To handle the case where the
+            navX-Micro has not been able to calibrate successfully, hold off using
+            the navX-Micro Yaw value until calibration is complete.
+             */
+            calibration_complete = !navx_device.isCalibrating();
+            if (!calibration_complete) {
+                telemetry.addData("navX-Micro", "Startup Calibration in Progress");
+            }
+        }
+        navx_device.zeroYaw();
+        yawPIDResult = new navXPIDController.PIDResult();
         // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("Starting at", "%7d :%7d, press start",
+        telemetry.addData("Starting at", "%7d :%7d",
                 leftFrontDrive.getCurrentPosition(),
                 rightFrontDrive.getCurrentPosition());
         telemetry.update();
-	        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        runtime.reset();
-
         //BlueFinder.Selected selected;
         // here is what happens after we hit start
         doCameraSwitching(MicrosoftWebCam);
-	if (BlueColorFinder != null)
-	    {
-		visionPortal.setProcessorEnabled(BlueColorFinder, false);
-	    }
-	else if (RedColorFinder != null)
-	    {
-		visionPortal.setProcessorEnabled(RedColorFinder, false);
-	    }
-		int DESIRED_TAG_ID = 4;    // Choose the tag you want to approach or set to -1 for ANY tag.
+        //visionPortal.setProcessorEnabled(ColorFinder, false);
+        int DESIRED_TAG_ID = 4;    // Choose the tag you want to approach or set to -1 for ANY tag.
         boolean targetFound = false;
         double angle = 0;
         double distance = 0;
         while ((!isStarted() && !isStopRequested()) || !targetFound) {
+	    if (isStopRequested())
+		{
+		    return;
+		}
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData(">", "number of detections %d", currentDetections.size());
             for (AprilTagDetection detection : currentDetections) {
@@ -116,15 +151,10 @@ public class ApriltagDriveTest extends OurLinearOpBase {
             }
             telemetry.update();
         }
-	wait_for_button_pushed(0);
-	try{
-	navx_reverse_drive_to(angle,distance);
-	}
-	catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
+
         sleep(10000);
     }
+
 
 }
 
