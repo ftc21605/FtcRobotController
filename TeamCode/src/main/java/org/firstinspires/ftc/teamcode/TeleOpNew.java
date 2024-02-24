@@ -29,113 +29,34 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.teamcode.OurLinearOpBase;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-/**
- * This file contains an example of a Linear "OpMode".
- * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
- * The names of OpModes appear on the menu of the FTC Driver Station.
- * When a selection is made from the menu, the corresponding OpMode is executed.
- * <p>
- * This particular OpMode illustrates driving a 4-motor Omni-Directional (or Holonomic) robot.
- * This code will work with either a Mecanum-Drive or an X-Drive train.
- * Both of these drives are illustrated at https://gm0.org/en/latest/docs/robot-design/drivetrains/holonomic.html
- * Note that a Mecanum drive must display an X roller-pattern when viewed from above.
- * <p>
- * Also note that it is critical to set the correct rotation direction for each motor.  See details below.
- * <p>
- * Holonomic drives provide the ability for the robot to move in three axes (directions) simultaneously.
- * Each motion axis is controlled by one Joystick axis.
- * <p>
- * 1) Axial:    Driving forward and backward               Left-joystick Forward/Backward
- * 2) Lateral:  Strafing right and left                     Left-joystick Right and Left
- * 3) Yaw:      Rotating Clockwise and counter clockwise    Right-joystick Right and Left
- * <p>
- * This code is written assuming that the right-side motors need to be reversed for the robot to drive forward.
- * When you first test your robot, if it moves backward when you push the left stick forward, then you must flip
- * the direction of all 4 motors (see code below).
- * <p>
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "AWallace")
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "New TeleOp", group = "AWallace")
 //@Disabled
-public class TeleOp extends LinearOpMode {
+public class TeleOpNew extends OurLinearOpBase {
 
-    // Declare OpMode members for each of the 4 motors.
-    private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
-    private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
+     boolean x_pushed = false;
+     boolean a_pushed = false;
 
-    Servo PlaneServo;
-    static final double PLANE_LAUNCH = 1.;
-    static final double PLANE_LOAD = 0.;
-    boolean plane_launched = false;
-    boolean x_pushed = false;
-
-    Servo ElevatorServo;
-    TouchSensor ElevatorLimit; // magnet limit switch
-    static final double MOVE_UP = 1.0;     // move up (cont servo posistion = 1)
-    static final double MOVE_DOWN = 0.0;     // move down (cont servo position = 0)
-    static final double MOVE_STOP = 0.5;     // stop moving (cont servo position 0.5)
-    boolean moving_up = false;
-    boolean moving_down = false;
     boolean y_pushed = false;
     boolean b_pushed = false;
 
-    // Intake
-    private DcMotor Intake = null;
-
-    private DcMotor Hanger = null;
-    private DcMotor PixelLift = null;
-
-      public DcMotor PixelTransport = null;
-  @Override
+    @Override
     public void runOpMode() {
+	setup_drive_motors();
+	setup_planeservo();
+	setup_elevator();
+	setup_intake();
+	setup_hanger();
+	setup_pixel_lift();
 
-        // Initialize the hardware variables. Note that the strings used here must correspond
-        // to the names assigned during the robot configuration step on the DS or RC devices.
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
-
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
-
-        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        PlaneServo = hardwareMap.get(Servo.class, "plane");
-
-        ElevatorServo = hardwareMap.get(Servo.class, "hook");
-        ElevatorLimit = hardwareMap.get(TouchSensor.class, "elevatorlimit");
-        ElapsedTime ElevatorTimer = new ElapsedTime();
-
-        Intake = hardwareMap.get(DcMotor.class, "intake");
-        Intake.setDirection(DcMotor.Direction.FORWARD);
-        Hanger = hardwareMap.get(DcMotor.class, "hanger");
-        Hanger.setDirection(DcMotor.Direction.FORWARD);
-        PixelLift = hardwareMap.get(DcMotor.class, "pixellift");
-        PixelLift.setDirection(DcMotor.Direction.REVERSE);
-        PixelLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        PixelLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-                PixelTransport = hardwareMap.get(DcMotor.class, "pixeltransport");
-
-		// Wait for the game to start (driver presses PLAY)
+        // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -159,6 +80,7 @@ public class TeleOp extends LinearOpMode {
             telemetry.addData(">", "Press DPad Right for moving sideways to the right");
             telemetry.addData(">", "Press Right Bumper for Intake continuous in");
             telemetry.addData(">", "Press Left Bumper for Intake continuous out");
+	    
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
 	    if (Math.abs(axial) < 0.15)
@@ -219,26 +141,17 @@ public class TeleOp extends LinearOpMode {
             rightBackDrive.setPower(rightBackPower);
 
             double intake_power = 0;
-            // if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0) {
-            //     intake_power = gamepad1.right_trigger;
-	    // 	PixelTransport.setPower(gamepad1.right_trigger);
-            // }
-            // if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0) {
-            //     intake_power = -gamepad1.left_trigger;
-            // }
-            // Intake.setPower(intake_power);
-	    PixelTransport.setPower(gamepad1.right_trigger);
-            Intake.setPower(-gamepad1.left_trigger);
+            if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0) {
+                intake_power = gamepad1.right_trigger;
+            }
+            if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0) {
+                intake_power = -gamepad1.left_trigger;
+            }
+            Intake.setPower(intake_power);
 
             if (gamepad1.x && !x_pushed) {
                 x_pushed = true;
-                if (!plane_launched) {
-                    PlaneServo.setPosition(PLANE_LAUNCH);
-                    plane_launched = true;
-                } else {
-                    PlaneServo.setPosition(PLANE_LOAD);
-                    plane_launched = false;
-                }
+		launch_plane();
             }
             if (!gamepad1.x) {
                 x_pushed = false;
@@ -291,8 +204,7 @@ public class TeleOp extends LinearOpMode {
             }
             if (gamepad1.dpad_up) {
                 // set hanger power
-                double hangerpower = 0.8;
-                Hanger.setPower(hangerpower);
+		hang_the_bot();
             } else {
                 Hanger.setPower(0);
             }

@@ -42,10 +42,16 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 
@@ -60,12 +66,13 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 //@Disabled
 public class OurLinearOpBase extends LinearOpMode {
 
-    /* Declare OpMode members. */
+    /* Drive motors. */
     public DcMotor leftFrontDrive = null;
     public DcMotor rightFrontDrive = null;
     public DcMotor leftBackDrive = null;
     public DcMotor rightBackDrive = null;
 
+    // IMU 
     public AHRS navx_device;
     public navXPIDController yawPIDController;
     public navXPIDController.PIDResult yawPIDResult;
@@ -81,30 +88,57 @@ public class OurLinearOpBase extends LinearOpMode {
     public final double YAW_PID_P = 0.005;
     public final double YAW_PID_I = 0.0;
     public final double YAW_PID_D = 0.0;
-    static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
-    static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    public static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
+    public static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
+    public static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
+    public static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * Math.PI);
-    static final int DEVICE_TIMEOUT_MS = 500;
-    static final double NAVX_DRIVE_SPEED = 0.5;
-    static final double NAVX_MIN_TURN_POWER = 0.2;
+    public static final int DEVICE_TIMEOUT_MS = 500;
+    public static final double NAVX_DRIVE_SPEED = 0.4;
+    public static final double NAVX_MIN_TURN_POWER = 0.2;
 
     public boolean calibration_complete = false;
+    public double angle_we_should_have = 0.;
+    public double real_yaw = 0.;
 
-
+    // Vision
     public VisionPortal visionPortal;
     public WebcamName LogitechWebCam, MicrosoftWebCam;
 
     public BlueFinder BlueColorFinder = null;// = null;
     public RedFinder RedColorFinder = null;// = null;
-    //    ColorFinder = new BlueFinder();
-    //ColorFinder.drawthr();
-    //   BlueFinder.Selected myselect = BlueFinder.Selected.NONE;
 
+    // pixel lift
     public DcMotor PixelLift = null;
+
+    // intake
     public DcMotor Intake = null;
-    public Servo CRservo;
+
+    // pixel transport
+    public DcMotor PixelTransport = null;
+
+    public Servo BucketServo;
+
+    // Plane servo and its parameters
+    public Servo PlaneServo;
+
+    public static final double PLANE_LAUNCH = 1.;
+    public static final double PLANE_LOAD = 0.;
+    public boolean plane_launched = false;
+
+    // Hook Elevator
+    public Servo ElevatorServo;
+    public TouchSensor ElevatorLimit; // magnet limit switch
+    public static final double MOVE_UP = 1.0;     // move up (cont servo posistion = 1)
+    public static final double MOVE_DOWN = 0.0;     // move down (cont servo position = 0)
+    public static final double MOVE_STOP = 0.5;     // stop moving (cont servo position 0.5)
+    public boolean moving_up = false;
+    public boolean moving_down = false;
+    public ElapsedTime ElevatorTimer = new ElapsedTime();
+   
+    // Hanger winch
+    public DcMotor Hanger = null;
+   
     public DistanceSensor sensorDistance;
 
     public ElapsedTime runtime = new ElapsedTime();
@@ -230,18 +264,64 @@ public class OurLinearOpBase extends LinearOpMode {
         }
 
     }
-
+    public void navx_turn_left(double angle)
+    {
+	double adjusted_angle = angle_we_should_have - real_yaw;
+	if (adjusted_angle > 180)
+	    {
+		adjusted_angle -= 360;
+	    }
+	else if (adjusted_angle < -180)
+	    {
+		adjusted_angle += 360;
+	    }
+	angle = angle - adjusted_angle;
+	navx_turn(-angle);
+	angle_we_should_have -= angle;
+	double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+	telemetry.addData(">", "adjusted angle: %.1f",adjusted_angle);
+	telemetry.addData(">", "yaw: %.1f",yaw_buff);
+			  real_yaw -= yaw_buff;
+    }
+    
+    public void navx_turn_right(double angle)
+    {
+	double adjusted_angle = angle_we_should_have - real_yaw;
+	if (adjusted_angle > 180)
+	    {
+		adjusted_angle -= 360;
+	    }
+	else if (adjusted_angle < -180)
+	    {
+		adjusted_angle += 360;
+	    }
+	angle = angle - adjusted_angle;
+	navx_turn(angle);
+	angle_we_should_have += angle;
+	double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+	telemetry.addData(">", "adjusted angle: %.1f",adjusted_angle);
+	telemetry.addData(">", "yaw: %.1f",yaw_buff);
+	real_yaw += yaw_buff;
+    }
+    
     public void navx_turn(double angle) {
         try {
+        navx_device.zeroYaw();
             yawPIDController.setSetpoint(angle);
+            navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
+
             while (!yawPIDResult.isOnTarget()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
                     double output = yawPIDResult.getOutput();
-                    output = Math.max(NAVX_MIN_TURN_POWER, output);
+                    output = Math.max(NAVX_MIN_TURN_POWER, output)*Math.signum(yawPIDController.getSetpoint());
                     leftFrontDrive.setPower(output);
                     leftBackDrive.setPower(output);
                     rightFrontDrive.setPower(-output);
                     rightBackDrive.setPower(-output);
+		    telemetry.addData(">","yaw setpoint: %.1f, error %.1f",yawPIDController.get(),yawPIDController.getError());
+		    telemetry.addData(">","current yaw: %.1f", gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+		    telemetry.addData(">","Should point to %.1f", angle);
+
                     telemetry.addData("PIDOutput", "power %.1f, %.1f", output, -output);
                     telemetry.update();
                 }
@@ -302,6 +382,7 @@ public class OurLinearOpBase extends LinearOpMode {
         /* Configure the PID controller */
         //        yawPIDController.setSetpoint(TARGET_ANGLE_DEGREES);
         yawPIDController.setContinuous(true);
+	yawPIDController.setInputRange(-180.0,180.0);
         yawPIDController.setOutputRange(MIN_MOTOR_OUTPUT_VALUE, MAX_MOTOR_OUTPUT_VALUE);
         yawPIDController.setTolerance(navXPIDController.ToleranceType.ABSOLUTE, TOLERANCE_DEGREES);
         yawPIDController.setPID(YAW_PID_P, YAW_PID_I, YAW_PID_D);
@@ -321,7 +402,7 @@ public class OurLinearOpBase extends LinearOpMode {
             }
         }
         navx_device.zeroYaw();
-        yawPIDResult = new navXPIDController.PIDResult();
+	//        yawPIDResult = new navXPIDController.PIDResult();
 
     }
 
@@ -330,6 +411,7 @@ public class OurLinearOpBase extends LinearOpMode {
         PixelLift.setDirection(DcMotor.Direction.REVERSE);
         PixelLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         PixelLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	PixelLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void setup_intake() {
@@ -337,10 +419,11 @@ public class OurLinearOpBase extends LinearOpMode {
         Intake.setDirection(DcMotor.Direction.FORWARD);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void setup_pixel_bucket() {
-        CRservo = hardwareMap.get(Servo.class, "pixelbucket");
+        BucketServo = hardwareMap.get(Servo.class, "pixelbucket");
     }
 
     public void pixel_release() {
@@ -388,5 +471,45 @@ public class OurLinearOpBase extends LinearOpMode {
         //ColorFinder.drawthr();
         RedFinder.Selected myselect = RedFinder.Selected.NONE;
 
+    }
+    public void setup_pixeltransport()
+    {
+        PixelTransport = hardwareMap.get(DcMotor.class, "pixeltransport");
+    }	
+
+    public void setup_planeservo()
+    {
+        PlaneServo = hardwareMap.get(Servo.class, "plane");
+    }
+    public void launch_plane()
+    {
+	if (!plane_launched) {
+                    PlaneServo.setPosition(PLANE_LAUNCH);
+                    plane_launched = true;
+                } else {
+                    PlaneServo.setPosition(PLANE_LOAD);
+                    plane_launched = false;
+                }
+    }
+    
+    public void setup_elevator()
+    {
+        ElevatorServo = hardwareMap.get(Servo.class, "hook");
+        ElevatorLimit = hardwareMap.get(TouchSensor.class, "elevatorlimit");
+        ElapsedTime ElevatorTimer = new ElapsedTime();
+	
+    }
+
+    public void setup_hanger()
+    {
+        Hanger = hardwareMap.get(DcMotor.class, "hanger");
+        Hanger.setDirection(DcMotor.Direction.FORWARD);	
+    }
+    
+    public void hang_the_bot()
+    {
+	
+                double hangerpower = 0.8;
+                Hanger.setPower(hangerpower);
     }
 }

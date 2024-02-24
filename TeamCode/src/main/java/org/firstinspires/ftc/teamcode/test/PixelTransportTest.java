@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.test;
 
+import org.firstinspires.ftc.teamcode.OurLinearOpBase;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -50,20 +51,19 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 @TeleOp(name = "Test: Pixel Transport Test", group = "ZTest")
 //@Disabled
-public class PixelTransportTest extends LinearOpMode {
+public class PixelTransportTest extends OurLinearOpBase {
 
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor PixelTransport = null;
 
     @Override
     public void runOpMode() {
 
        telemetry.addData("Status", "Initialized");
-
+       setup_intake();
+       setup_pixeltransport();
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        PixelTransport = hardwareMap.get(DcMotor.class, "pixeltransport");
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
         // Wait for the start button
@@ -77,11 +77,15 @@ public class PixelTransportTest extends LinearOpMode {
         while (opModeIsActive()) {
 
          double Power = gamepad1.left_stick_y;
+         double PowerI = gamepad1.right_stick_y;
 	 PixelTransport.setPower(Power);
-
-        telemetry.addData(">", "Left Joystick y: push up");
-        telemetry.addData(">", "Left Joystick y: push down");
-        telemetry.addData(">", "Power %.1f: ", Power);
+	 Intake.setPower(-PowerI*.75);
+        telemetry.addData(">", "Left Joystick y: (transport) move pixel up");
+        telemetry.addData(">", "Right Joystick y: (Intake) in");
+        telemetry.addData(">", "Left Joystick y: (transport) move pixel down");
+        telemetry.addData(">", "Rightt Joystick y: (Intake) out");
+        telemetry.addData(">", "Power transport %.1f: ", Power);
+        telemetry.addData(">", "Power intake %.1f: ", -PowerI);
 
             telemetry.update();
 

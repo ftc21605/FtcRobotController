@@ -30,10 +30,12 @@
 package org.firstinspires.ftc.teamcode.test;
 
 import org.firstinspires.ftc.teamcode.OurLinearOpBase;
+
 import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.navXPIDController;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -51,7 +53,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 
-@TeleOp(name="Test: Angle Turn Test", group="ZTest")
+@TeleOp(name = "Test: Angle Turn Test", group = "ZTest")
 //@Disabled
 public class AngleTurnTest extends OurLinearOpBase {
 
@@ -59,13 +61,23 @@ public class AngleTurnTest extends OurLinearOpBase {
     private ElapsedTime runtime = new ElapsedTime();
     boolean x_pushed = false;
     boolean y_pushed = false;
+    boolean a_pushed = false;
+    boolean b_pushed = false;
+    int n_bpushed = 0;
     double TURN_SPEED = 0.2;
+
     @Override
     public void runOpMode() {
-	setup_drive_motors();
+        setup_drive_motors();
 	setup_imu();
-        double turn_speed_local = 0.2;
-	double current_angle = 0;
+        // navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
+        // gyro = (IntegratingGyroscope) navxMicro;
+        // navx_device = AHRS.getInstance(navxMicro,
+        //         AHRS.DeviceDataType.kProcessedData,
+        //         NAVX_DEVICE_UPDATE_RATE_HZ);
+	// //        setup_imu();
+        // double turn_speed_local = 0.2;
+        double current_angle = 0;
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -78,43 +90,76 @@ public class AngleTurnTest extends OurLinearOpBase {
 
             // Setup a variable for each drive wheel to save power level for telemetry
             if (gamepad1.b) {
-                left_turn(25);
+                if (!b_pushed) {
+		    if (n_bpushed == 4)
+			{
+		    navx_turn_right(90);
+		    n_bpushed++;
+			}
+		    else if (n_bpushed == 3)
+			{
+		    navx_turn_left(90);
+		    n_bpushed++;
+			}
+		    else if (n_bpushed == 2)
+			{
+		    navx_turn_right(90);
+		    n_bpushed++;
+			}
+		    else if (n_bpushed == 1)
+			{
+		    navx_turn_right(25);
+		    n_bpushed++;
+			}
+		    else if (n_bpushed == 0)
+			{
+		    navx_turn_left(25);
+		    n_bpushed++;
+			}
+                    b_pushed = true;
+                }
+            } else {
+                b_pushed = false;
             }
             if (gamepad1.a) {
-                right_turn(25);
+                if (!a_pushed) {
+                    right_turn(25);
+                    a_pushed = true;
+                }
+            } else {
+                a_pushed = false;
             }
-	    if (gamepad1.x && !x_pushed)
-		{
-		    double drive_to_angle = current_angle + 25.;
-		    navx_turn(drive_to_angle);
-		    current_angle += + 25.;
-		    x_pushed = true;
-		}
-	    else
-		{
-		    x_pushed = false;
-		}
-	    if (gamepad1.y && !y_pushed)
-		{
-		    double drive_to_angle = current_angle - 25.;
-		    navx_turn(drive_to_angle);
-		    current_angle -= + 25.;
-		    y_pushed = true;
+            if (gamepad1.x) {
+                if (!x_pushed) {
+                    navx_turn_right(25);
+                    x_pushed = true;
+                }
+            } else {
+                x_pushed = false;
+            }
+            if (gamepad1.y) {
+                if (!y_pushed) {
+                    navx_turn_left(25);
+                    y_pushed = true;
 
-		}
-	    else
-		{
-		    y_pushed = false;
-		}
-	    telemetry.addData(">","push x to turn +25deg");
-	    telemetry.addData(">","push y to turn -25deg");
-	    telemetry.addData(">","current yaw: %.1f", gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-	telemetry.addData(">","Should point to %.1f", current_angle);
-	telemetry.update();
+                }
+            } else {
+                y_pushed = false;
+            }
+            telemetry.addData(">", "push x to turn +25deg");
+            telemetry.addData(">", "push y to turn -25deg");
+            telemetry.addData(">", "push a to turn +25deg");
+            telemetry.addData(">", "push b to turn -25deg");
+	    //            telemetry.addData(">", "yaw setpoint: %.1f, val: %.1ferror %.1f", yawPIDController.getSetpoint(), yawPIDController.get(), yawPIDController.getError());
+	    //            telemetry.addData(">", "current yaw: %.1f", gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+            telemetry.addData(">", "Should point to %.1f", current_angle);
+	    telemetry.addData(">", "angle we should have %.1f, sum yaw: %.1f", angle_we_should_have, real_yaw);
+            telemetry.update();
 
-	}
+        }
     }
-    void left_turn(double ANGLE){
+
+    void left_turn(double ANGLE) {
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double current_angle = angles.firstAngle;
         double driveto_angle = current_angle + ANGLE;
@@ -127,7 +172,7 @@ public class AngleTurnTest extends OurLinearOpBase {
         rightBackDrive.setPower(TURN_SPEED);
         if (driveto_angle > 180) {
             while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) < 0 || current_angle > (driveto_angle - 360)) {
-                telemetry.addData(">", "angle %.1f", current_angle);
+                telemetry.addData(">", "angle %.1f, drive to large angle %.1f", current_angle, driveto_angle);
                 telemetry.update();
                 sleep(1);
             }
@@ -135,7 +180,7 @@ public class AngleTurnTest extends OurLinearOpBase {
         } else {
             while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) < driveto_angle) {
 //            orientation = imu.getRobotYawPitchRollAngles();
-                telemetry.addData(">", "angle %.1f", current_angle);
+                telemetry.addData(">", "angle %.1f, drive to %.1f", current_angle, driveto_angle);
                 telemetry.update();
                 sleep(1);
             }
@@ -154,7 +199,8 @@ public class AngleTurnTest extends OurLinearOpBase {
         // }
         drivemotors_off();
     }
-    void right_turn ( double ANGLE){
+
+    void right_turn(double ANGLE) {
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double current_angle = angles.firstAngle;
         double driveto_angle = current_angle - ANGLE;
@@ -167,13 +213,13 @@ public class AngleTurnTest extends OurLinearOpBase {
         if (driveto_angle < -180) {
             //current_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) < 0 || current_angle > (driveto_angle + 360)) {
-                telemetry.addData(">", "angle %.1f", current_angle);
+                telemetry.addData(">", "angle %.1f, drive to small angle %.1f", current_angle, driveto_angle);
                 telemetry.update();
                 sleep(1);
             }
         } else {
             while ((current_angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) > driveto_angle) {
-                telemetry.addData(">", "angle %.1f", current_angle);
+                telemetry.addData(">", "angle %.1f, drive to angle %.1f", current_angle, driveto_angle);
                 telemetry.update();
                 sleep(1);
             }
@@ -192,6 +238,7 @@ public class AngleTurnTest extends OurLinearOpBase {
         // }
         drivemotors_off();
     }
+
 }
 
 
