@@ -80,7 +80,7 @@ public class ApriltagDriveTest extends OurLinearOpBase {
 	    {
 		visionPortal.setProcessorEnabled(RedColorFinder, false);
 	    }
-		int DESIRED_TAG_ID = 4;    // Choose the tag you want to approach or set to -1 for ANY tag.
+		int DESIRED_TAG_ID = 6;    // Choose the tag you want to approach or set to -1 for ANY tag.
         boolean targetFound = false;
         double angle = 0;
         double distance = 0;
@@ -116,14 +116,21 @@ public class ApriltagDriveTest extends OurLinearOpBase {
             }
             telemetry.update();
         }
-	wait_for_button_pushed(0);
-	try{
-	navx_reverse_drive_to(angle,distance);
-	}
-	catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-        sleep(10000);
+       	wait_for_button_pushed(0);
+	if (angle > 0)
+	    {
+	    navx_drive_backward_left(0.5,angle,distance);
+	    }
+	else if (angle < 0)
+	    {
+	    navx_drive_backward_right(0.5,-angle,distance);
+	    }
+	else
+	    	    {
+	    navx_drive_backward_straight(0.5,distance);
+	    }
+
+	    sleep(10000);
     }
 
 }

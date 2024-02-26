@@ -61,7 +61,7 @@ import java.text.DecimalFormat;
 @TeleOp(name = "Test: NavX Drive Straight PID Test", group = "ZTest")
 //@Disabled //Comment this in to remove this from the Driver Station OpMode List
 public class NavXDriveStraightPIDTest extends OurLinearOpBase {
-
+    /*
     private AHRS navx_device;
     private navXPIDController yawPIDController;
     private ElapsedTime runtime = new ElapsedTime();
@@ -86,7 +86,7 @@ public class NavXDriveStraightPIDTest extends OurLinearOpBase {
     public double limit(double a) {
         return Math.min(Math.max(a, MIN_MOTOR_OUTPUT_VALUE), MAX_MOTOR_OUTPUT_VALUE);
     }
-
+    */
     @Override
     public void runOpMode() {
 	setup_drive_motors();
@@ -104,7 +104,20 @@ public class NavXDriveStraightPIDTest extends OurLinearOpBase {
         navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
 
         /* Drive straight forward at 1/2 of full drive speed */
-        double drive_speed = 0.5;
-	drive_backward(0.5,-50,20);
+        double drive_speed = 0.3;
+	navx_drive_backward_straight(0.5,20);
+        int leftfronttics = leftFrontDrive.getCurrentPosition();
+        int rightfronttics = rightFrontDrive.getCurrentPosition();
+        int leftbacktics = leftBackDrive.getCurrentPosition();
+        int rightbacktics = rightBackDrive.getCurrentPosition();
+	telemetry.addData(">","left front tics: %d, inches: %.1f",leftfronttics,leftfronttics/COUNTS_PER_INCH);
+	telemetry.addData(">","right front tics: %d, inches: %.1f",rightfronttics,rightfronttics/COUNTS_PER_INCH);
+	telemetry.addData(">","left back tics: %d, inches: %.1f",leftbacktics,leftbacktics/COUNTS_PER_INCH);
+	telemetry.addData(">","right back tics: %d, inches: %.1f",rightbacktics,rightbacktics/COUNTS_PER_INCH);
+	telemetry.update();
+	while(! gamepad1.a)
+	    {
+		sleep(1);
+	    }
     }
 }

@@ -91,8 +91,8 @@ public class OurLinearOpBase extends LinearOpMode {
     public static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
     public static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
     public static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
-    public static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * Math.PI);
+    public static final double COUNTS_PER_INCH = 40;//experimental, instead of (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /(WHEEL_DIAMETER_INCHES * Math.PI);
+    //public static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /(WHEEL_DIAMETER_INCHES * Math.PI);
     public static final int DEVICE_TIMEOUT_MS = 500;
     public static final double NAVX_DRIVE_SPEED = 0.4;
     public static final double NAVX_MIN_TURN_POWER = 0.2;
@@ -374,6 +374,10 @@ public class OurLinearOpBase extends LinearOpMode {
     }
 
     public void setup_drive_motors() {
+	setup_drive_motors(true);
+    }
+
+	public void setup_drive_motors(boolean reset_decoders) {
         // Initialize the drive system variables.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
         leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
@@ -389,6 +393,10 @@ public class OurLinearOpBase extends LinearOpMode {
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+	if (reset_decoders)
+	    {
+	reset_motor_decoders();
+	    }
     }
 
     public void setup_imu() {
@@ -534,7 +542,17 @@ public class OurLinearOpBase extends LinearOpMode {
                 double hangerpower = 0.8;
                 Hanger.setPower(hangerpower);
     }
-    public void drive_forward(double power, double angle, double inches)
+    public void navx_drive_forward_straight(double power, double inches)
+    {
+	navx_drive_forward_right(power, 0, inches);
+    }
+    public void navx_drive_forward_leftt(double power, double angle, double inches)
+    {
+	navx_drive_forward_right(power, -angle, inches);
+    }
+
+    
+	public void navx_drive_forward_right(double power, double angle, double inches)
     {
 	double drive_speed = power;
 	
@@ -571,22 +589,40 @@ public class OurLinearOpBase extends LinearOpMode {
         catch(InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
-	
+        drivemotors_off();
     }
 
-    public void drive_backward(double power, double angle, double inches)
+    public void navx_drive_backward_straight(double power, double inches)
+    {
+	navx_drive_backward_right(power, 0, inches);
+    }
+    public void navx_drive_backward_left(double power, double angle, double inches)
+    {
+	navx_drive_backward_right(power, -angle, inches);
+    }
+    
+	public void navx_drive_backward_right(double power, double angle, double inches)
     {
 	double drive_speed = -power;
 	
 	try{
             navx_device.zeroYaw();
-            int current_left_position = leftFrontDrive.getCurrentPosition();
-            int current_right_position = rightFrontDrive.getCurrentPosition();
+            int current_left_front_position = leftFrontDrive.getCurrentPosition();
+            int current_right_front_position = rightFrontDrive.getCurrentPosition();
+            int current_left_back_position = leftBackDrive.getCurrentPosition();
+            int current_right_back_position = rightBackDrive.getCurrentPosition();
             yawPIDController.setSetpoint(angle);
             navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
-            while (inches >  Math.abs(((leftFrontDrive.getCurrentPosition()-current_left_position + rightFrontDrive.getCurrentPosition() - current_right_position)/2./ COUNTS_PER_INCH)) &&
+	    double counts_to_go = inches*COUNTS_PER_INCH;
+	    double counts_done = 0;
+            while (counts_to_go >  (counts_done = Math.abs(((leftFrontDrive.getCurrentPosition()-current_left_front_position + rightFrontDrive.getCurrentPosition() - current_right_front_position + leftBackDrive.getCurrentPosition() - current_left_back_position + rightBackDrive.getCurrentPosition()-current_right_back_position)/4.))) &&
                     !Thread.currentThread().isInterrupted()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
+		    double counts_left = counts_to_go - counts_done;
+		    if (counts_to_go - counts_done < 200)
+			{
+			    drive_speed = -0.2;
+			}
                     if (yawPIDResult.isOnTarget()) {
                         leftBackDrive.setPower(drive_speed);
                         leftFrontDrive.setPower(drive_speed);
@@ -611,6 +647,19 @@ public class OurLinearOpBase extends LinearOpMode {
         catch(InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
-	
+        drivemotors_off();
     }
+    
+    public void reset_motor_decoders()
+    {
+        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    
 }
