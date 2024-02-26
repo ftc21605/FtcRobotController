@@ -98,8 +98,8 @@ public class OurLinearOpBase extends LinearOpMode {
     public static final double NAVX_MIN_TURN_POWER = 0.2;
 
     public boolean calibration_complete = false;
-    public double angle_we_should_have = 0.;
-    public double real_yaw = 0.;
+    public double total_angle = 0.;
+    public double total_yaw = 0.;
 
     // Vision
     public VisionPortal visionPortal;
@@ -147,6 +147,7 @@ public class OurLinearOpBase extends LinearOpMode {
     public AprilTagDetection desiredTag = null;// Used to hold the data for a detected AprilTag
 
     int debuglevel = 0;
+    boolean navxturn_telemetry = true;
 
     @Override
     public void runOpMode() {
@@ -264,44 +265,44 @@ public class OurLinearOpBase extends LinearOpMode {
         }
 
     }
+
+    // interesting coordinate system -> left turns are positive yaw, right turns are negative yaw
+    // This only plays a role when calculating the total angle where left turn angles need to be added
+    // and right turn angles are substracted
     public void navx_turn_left(double angle)
     {
-	double adjusted_angle = angle_we_should_have - real_yaw;
-	if (adjusted_angle > 180)
-	    {
-		adjusted_angle -= 360;
-	    }
-	else if (adjusted_angle < -180)
-	    {
-		adjusted_angle += 360;
-	    }
-	angle = angle - adjusted_angle;
+	navxturn_telemetry = false;
+	// double yaw_in = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+	// double adjusted_angle = total_angle - total_yaw;
+	// adjusted_angle = map_angle(adjusted_angle);
+	// double angle_turn = angle - adjusted_angle;
 	navx_turn(-angle);
-	angle_we_should_have -= angle;
-	double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-	telemetry.addData(">", "adjusted angle: %.1f",adjusted_angle);
-	telemetry.addData(">", "yaw: %.1f",yaw_buff);
-			  real_yaw -= yaw_buff;
+	// total_angle += angle;
+	// total_angle = map_angle(total_angle);
+	// double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+	// total_yaw -= yaw_buff;
+	// total_yaw = map_angle(total_yaw);
+	// telemetry.addData(">", "angle: %.1f, adjustment angle: %.1f, angle turn: %.1f",angle, adjusted_angle, angle_turn);
+	// telemetry.addData(">", "yaw in %.1f, end: %.1f, sum: %.1f",yaw_in, yaw_buff, total_yaw);
+	// telemetry.update();
     }
     
     public void navx_turn_right(double angle)
     {
-	double adjusted_angle = angle_we_should_have - real_yaw;
-	if (adjusted_angle > 180)
-	    {
-		adjusted_angle -= 360;
-	    }
-	else if (adjusted_angle < -180)
-	    {
-		adjusted_angle += 360;
-	    }
-	angle = angle - adjusted_angle;
+	navxturn_telemetry = false;
+       	// double yaw_in = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+	// double adjusted_angle = total_angle - total_yaw;
+	// adjusted_angle = map_angle(adjusted_angle);
+	// double angle_turn = angle - adjusted_angle;
 	navx_turn(angle);
-	angle_we_should_have += angle;
-	double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-	telemetry.addData(">", "adjusted angle: %.1f",adjusted_angle);
-	telemetry.addData(">", "yaw: %.1f",yaw_buff);
-	real_yaw += yaw_buff;
+	// total_angle -= angle;
+	// total_angle = map_angle(total_angle);
+	// double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+	// total_yaw += yaw_buff;
+	// total_yaw = map_angle(total_yaw);
+	// telemetry.addData(">", "angle: %.1f, total angle: %.1f, adjustment angle: %.1f, angle turn: %.1f",angle, total_angle, adjusted_angle, angle_turn);
+	// telemetry.addData(">", "yaw in %.1f, end: %.1f, total yaw: %.1f",yaw_in, yaw_buff, total_yaw);
+	// telemetry.update();
     }
     
     public void navx_turn(double angle) {
@@ -318,18 +319,36 @@ public class OurLinearOpBase extends LinearOpMode {
                     leftBackDrive.setPower(output);
                     rightFrontDrive.setPower(-output);
                     rightBackDrive.setPower(-output);
-		    telemetry.addData(">","yaw setpoint: %.1f, error %.1f",yawPIDController.get(),yawPIDController.getError());
+		    if (navxturn_telemetry)
+			{
+			    telemetry.addData(">","yaw setpoint: %.1f, value: %.1f, error %.1f",yawPIDController.getSetpoint(),yawPIDController.get(), yawPIDController.getError());
 		    telemetry.addData(">","current yaw: %.1f", gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
 		    telemetry.addData(">","Should point to %.1f", angle);
 
                     telemetry.addData("PIDOutput", "power %.1f, %.1f", output, -output);
                     telemetry.update();
-                }
-            }
+			}
+
+		}
+	    }
         } catch (InterruptedException ex) {
             telemetry.addData("reveived interrupt", "");
         }
         drivemotors_off();
+    }
+
+    // maps angles to range -180 to 180
+    double map_angle(double angle)
+    {
+	if (angle > 180)
+	    {
+		return angle-360;
+	    }
+	if (angle < -180)
+	    {
+		return angle + 360;
+	    }
+	return angle;
     }
 
     public void drivemotors_off() {
@@ -342,9 +361,12 @@ public class OurLinearOpBase extends LinearOpMode {
 
     public void wait_for_button_pushed(int dbglvl) {
         if (dbglvl <= debuglevel) {
-            while (!gamepad1.a) {
                 telemetry.addData(">", "Press A to proceed");
                 telemetry.update();
+            while (!gamepad1.a) {
+                sleep(10);
+            }
+            while (gamepad1.a) {
                 sleep(10);
             }
         }
@@ -382,7 +404,7 @@ public class OurLinearOpBase extends LinearOpMode {
         /* Configure the PID controller */
         //        yawPIDController.setSetpoint(TARGET_ANGLE_DEGREES);
         yawPIDController.setContinuous(true);
-	yawPIDController.setInputRange(-180.0,180.0);
+	//yawPIDController.setInputRange(-180.0,180.0);
         yawPIDController.setOutputRange(MIN_MOTOR_OUTPUT_VALUE, MAX_MOTOR_OUTPUT_VALUE);
         yawPIDController.setTolerance(navXPIDController.ToleranceType.ABSOLUTE, TOLERANCE_DEGREES);
         yawPIDController.setPID(YAW_PID_P, YAW_PID_I, YAW_PID_D);
@@ -511,5 +533,84 @@ public class OurLinearOpBase extends LinearOpMode {
 	
                 double hangerpower = 0.8;
                 Hanger.setPower(hangerpower);
+    }
+    public void drive_forward(double power, double angle, double inches)
+    {
+	double drive_speed = power;
+	
+	try{
+            navx_device.zeroYaw();
+            int current_left_position = leftFrontDrive.getCurrentPosition();
+            int current_right_position = rightFrontDrive.getCurrentPosition();
+            yawPIDController.setSetpoint(angle);
+            navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
+            while (inches >  ((leftFrontDrive.getCurrentPosition()-current_left_position + rightFrontDrive.getCurrentPosition() - current_right_position)/2./ COUNTS_PER_INCH) &&
+                    !Thread.currentThread().isInterrupted()) {
+                if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
+                    if (yawPIDResult.isOnTarget()) {
+                        leftBackDrive.setPower(drive_speed);
+                        leftFrontDrive.setPower(drive_speed);
+                        rightFrontDrive.setPower(drive_speed);
+                        rightBackDrive.setPower(drive_speed);
+                        telemetry.addData(">","PIDOutput %.1f, %.1f", drive_speed, drive_speed);
+                    } else {
+                        double output = yawPIDResult.getOutput();
+                        leftFrontDrive.setPower(drive_speed + output);
+                        leftBackDrive.setPower(drive_speed + output);
+                        rightBackDrive.setPower(drive_speed - output);
+                        rightFrontDrive.setPower(drive_speed - output);
+                        telemetry.addData(">","PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
+                    }
+                    telemetry.addData(">", "Yaw %.1f", navx_device.getYaw());
+                } else{
+			        /* A timeout occurred */
+                    telemetry.addData("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
+                }
+            }
+        }
+        catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+	
+    }
+
+    public void drive_backward(double power, double angle, double inches)
+    {
+	double drive_speed = -power;
+	
+	try{
+            navx_device.zeroYaw();
+            int current_left_position = leftFrontDrive.getCurrentPosition();
+            int current_right_position = rightFrontDrive.getCurrentPosition();
+            yawPIDController.setSetpoint(angle);
+            navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
+            while (inches >  Math.abs(((leftFrontDrive.getCurrentPosition()-current_left_position + rightFrontDrive.getCurrentPosition() - current_right_position)/2./ COUNTS_PER_INCH)) &&
+                    !Thread.currentThread().isInterrupted()) {
+                if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
+                    if (yawPIDResult.isOnTarget()) {
+                        leftBackDrive.setPower(drive_speed);
+                        leftFrontDrive.setPower(drive_speed);
+                        rightFrontDrive.setPower(drive_speed);
+                        rightBackDrive.setPower(drive_speed);
+                        telemetry.addData(">","PIDOutput %.1f, %.1f", drive_speed, drive_speed);
+                    } else {
+                        double output = yawPIDResult.getOutput();//*Math.signum(drive_speed);
+                        leftFrontDrive.setPower(drive_speed + output);
+                        leftBackDrive.setPower(drive_speed + output);
+                        rightBackDrive.setPower(drive_speed - output);
+                        rightFrontDrive.setPower(drive_speed - output);
+                        telemetry.addData(">","PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
+                    }
+                    telemetry.addData(">", "Yaw %.1f", navx_device.getYaw());
+                } else{
+			        /* A timeout occurred */
+                    telemetry.addData("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
+                }
+            }
+        }
+        catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+	
     }
 }

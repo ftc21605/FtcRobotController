@@ -123,7 +123,16 @@ public class AngleTurnTest extends OurLinearOpBase {
             }
             if (gamepad1.a) {
                 if (!a_pushed) {
-                    right_turn(25);
+		    for (int i=0; i<20; i++)
+			{
+                    navx_turn_right(25);
+		    sleep(1000);
+			}
+		    for (int i=0; i<20; i++)
+			{
+                    navx_turn_left(25);
+		    sleep(1000);
+			}
                     a_pushed = true;
                 }
             } else {
@@ -146,6 +155,7 @@ public class AngleTurnTest extends OurLinearOpBase {
             } else {
                 y_pushed = false;
             }
+	    /*
             telemetry.addData(">", "push x to turn +25deg");
             telemetry.addData(">", "push y to turn -25deg");
             telemetry.addData(">", "push a to turn +25deg");
@@ -154,8 +164,7 @@ public class AngleTurnTest extends OurLinearOpBase {
 	    //            telemetry.addData(">", "current yaw: %.1f", gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
             telemetry.addData(">", "Should point to %.1f", current_angle);
 	    telemetry.addData(">", "angle we should have %.1f, sum yaw: %.1f", angle_we_should_have, real_yaw);
-            telemetry.update();
-
+	    */
         }
     }
 
