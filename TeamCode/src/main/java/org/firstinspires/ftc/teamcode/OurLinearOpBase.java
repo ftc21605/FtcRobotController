@@ -107,7 +107,7 @@ public class OurLinearOpBase extends LinearOpMode {
 
     public BlueFinder BlueColorFinder = null;// = null;
     public RedFinder RedColorFinder = null;// = null;
-
+    public RedFinder.Selected redselect;
     // pixel lift
     public DcMotor PixelLift = null;
 
@@ -179,7 +179,7 @@ public class OurLinearOpBase extends LinearOpMode {
         LogitechWebCam = hardwareMap.get(WebcamName.class, "Webcam 1");
         MicrosoftWebCam = hardwareMap.get(WebcamName.class, "Webcam 2");
         CameraName switchableCamera = ClassFactory.getInstance()
-                .getCameraManager().nameForSwitchableCamera(LogitechWebCam, MicrosoftWebCam);
+	    .getCameraManager().nameForSwitchableCamera(MicrosoftWebCam, LogitechWebCam);
 
         initAprilTag();
         // Create the vision portal by using a builder.
@@ -499,7 +499,7 @@ public class OurLinearOpBase extends LinearOpMode {
     public void setup_redfinder() {
         RedColorFinder = new RedFinder();
         //ColorFinder.drawthr();
-        RedFinder.Selected myselect = RedFinder.Selected.NONE;
+        RedFinder.Selected redselect = RedFinder.Selected.NONE;
 
     }
     public void setup_pixeltransport()
@@ -558,13 +558,22 @@ public class OurLinearOpBase extends LinearOpMode {
 	
 	try{
             navx_device.zeroYaw();
-            int current_left_position = leftFrontDrive.getCurrentPosition();
-            int current_right_position = rightFrontDrive.getCurrentPosition();
+            int current_left_front_position = leftFrontDrive.getCurrentPosition();
+            int current_right_front_position = rightFrontDrive.getCurrentPosition();
+            int current_left_back_position = leftBackDrive.getCurrentPosition();
+            int current_right_back_position = rightBackDrive.getCurrentPosition();
             yawPIDController.setSetpoint(angle);
             navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
-            while (inches >  ((leftFrontDrive.getCurrentPosition()-current_left_position + rightFrontDrive.getCurrentPosition() - current_right_position)/2./ COUNTS_PER_INCH) &&
+	    double counts_to_go = inches*COUNTS_PER_INCH;
+	    double counts_done = 0;
+            while (counts_to_go >  (counts_done = Math.abs(((leftFrontDrive.getCurrentPosition()-current_left_front_position + rightFrontDrive.getCurrentPosition() - current_right_front_position + leftBackDrive.getCurrentPosition() - current_left_back_position + rightBackDrive.getCurrentPosition()-current_right_back_position)/4.))) &&
                     !Thread.currentThread().isInterrupted()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
+		    double counts_left = counts_to_go - counts_done;
+		    if (counts_to_go - counts_done < 200)
+			{
+			    drive_speed = 0.2;
+			}
                     if (yawPIDResult.isOnTarget()) {
                         leftBackDrive.setPower(drive_speed);
                         leftFrontDrive.setPower(drive_speed);
