@@ -55,8 +55,12 @@ public class TeleOpNew extends OurLinearOpBase {
 	setup_intake();
 	setup_hanger();
 	setup_pixel_lift();
+	setup_pixel_bucket();
+	setup_pixel_transport();
+ 	setup_bucketback();
+	setup_bucketfront();
 
-        // Wait for the game to start (driver presses PLAY)
+	// Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -81,6 +85,13 @@ public class TeleOpNew extends OurLinearOpBase {
             telemetry.addData(">", "Press Right Bumper for Intake continuous in");
             telemetry.addData(">", "Press Left Bumper for Intake continuous out");
 	    
+            telemetry.addData(">", "Pad2: Press A tilt bucket forward");
+            telemetry.addData(">", "Pad2: Press B tile bucket backward");
+            telemetry.addData(">", "Pad2: Press X release forward");
+            telemetry.addData(">", "Pad2: Press Y lock forward");
+            telemetry.addData(">", "Pad2: Press left bumper release back");
+            telemetry.addData(">", "Pad2: Press right bumper lock back");
+
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
 	    if (Math.abs(axial) < 0.15)
@@ -211,13 +222,41 @@ public class TeleOpNew extends OurLinearOpBase {
 
            if (gamepad1.right_bumper)
            {
-            Intake.setPower(0.4);
+            PixelTransport.setPower(-0.5);
             }
            if (gamepad1.left_bumper)
             {
-                Intake.setPower(-0.4);
+                PixelTransport.setPower(0.5);
            }
-            //grabber.setPosition(grabber_position);
+	   if (!gamepad1.left_bumper && !gamepad1.right_bumper)
+	       {
+		   PixelTransport.setPower(0);
+	       }
+		   if (gamepad2.a)
+	       {
+		   bucket_tilt_forward();
+	       }
+	   if (gamepad2.b)
+	       {
+		   bucket_tilt_backward();
+	       }
+	   if (gamepad2.x)
+	       {
+		   bucketfront_release();
+	       }
+	   if (gamepad2.y)
+	       {
+		   bucketfront_lock();
+	       }
+	   if (gamepad2.right_bumper)
+	       {
+		   bucketback_lock();
+	       }
+	   if (gamepad2.left_bumper)
+	       {
+		   bucketback_release();
+	       }
+	   //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();

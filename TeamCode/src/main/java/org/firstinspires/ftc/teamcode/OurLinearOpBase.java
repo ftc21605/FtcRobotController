@@ -117,8 +117,18 @@ public class OurLinearOpBase extends LinearOpMode {
     // pixel transport
     public DcMotor PixelTransport = null;
 
-    public Servo BucketServo;
+    public Servo BucketTurnServo;
+    public double BUCKETTURNSERVO_MAXPOS = 0.23;
+	public double BUCKETTURNSERVO_MINPOS = 0.85;
 
+    public Servo BucketBackServo;
+    public final double bucketback_release = 0.6;
+    public final double bucketback_catch = 0.3;
+
+    public Servo BucketFrontServo;
+    public final double bucketfront_release = 0.6;
+    public final double bucketfront_catch = 0.2;
+    
     // Plane servo and its parameters
     public Servo PlaneServo;
 
@@ -453,7 +463,7 @@ public class OurLinearOpBase extends LinearOpMode {
     }
 
     public void setup_pixel_bucket() {
-        BucketServo = hardwareMap.get(Servo.class, "pixelbucket");
+        BucketTurnServo = hardwareMap.get(Servo.class, "pixelbucket");
     }
 
     public void pixel_release() {
@@ -502,7 +512,7 @@ public class OurLinearOpBase extends LinearOpMode {
         RedFinder.Selected redselect = RedFinder.Selected.NONE;
 
     }
-    public void setup_pixeltransport()
+    public void setup_pixel_transport()
     {
         PixelTransport = hardwareMap.get(DcMotor.class, "pixeltransport");
     }	
@@ -671,4 +681,46 @@ public class OurLinearOpBase extends LinearOpMode {
         rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     
+    public void setup_bucketback()
+    {
+	        BucketBackServo = hardwareMap.get(Servo.class, "back");
+    }
+    public void bucketback_release()
+    {
+	BucketBackServo.setPosition(bucketback_release);
+    }
+    public void bucketback_lock()
+    {
+	BucketBackServo.setPosition(bucketback_catch);
+    }
+//     public void bucketfront_toggle()
+//     {
+// 	if (!bucket_front_locked)
+// 	    {
+// 	BucketFrontServo.setPosition(bucketfront_release);
+// 	bucket_front_locked = true;
+// 	    }
+// 	    }
+// }
+    public void bucketfront_release()
+    {
+	BucketFrontServo.setPosition(bucketfront_release);
+    }
+    public void bucketfront_lock()
+    {
+	BucketFrontServo.setPosition(bucketfront_catch);
+    }
+    public void setup_bucketfront()
+    {
+	        BucketFrontServo = hardwareMap.get(Servo.class, "front");
+    }
+    public void bucket_tilt_forward()
+    {
+	BucketTurnServo.setPosition(BUCKETTURNSERVO_MAXPOS);
+    }
+    public void bucket_tilt_backward()
+    {
+	BucketTurnServo.setPosition(BUCKETTURNSERVO_MINPOS);
+    }
+	
 }

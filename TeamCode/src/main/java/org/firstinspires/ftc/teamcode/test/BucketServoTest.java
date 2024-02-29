@@ -31,8 +31,9 @@ package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.OurLinearOpBase;
 
 /*
  * This OpMode scans a single servo back and forward until Stop is pressed.
@@ -48,77 +49,63 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Test: Pixel Lift and Drop Test", group = "ZTest")
+@TeleOp(name = "Test: Bucket Servo Test", group = "ZTest")
 //@Disabled
-public class PixelLiftAndDropTest extends LinearOpMode {
+public class BucketServoTest extends OurLinearOpBase {
 
-    static final double MAX_POS = 0.23;     // Maximum rotational position
-    static final double MIN_POS = 0.85;     // Minimum rotational position
+    static final double INCREMENT   = 0.1;     // amount to slew servo each CYCLE_MS cycle
+    static final int    CYCLE_MS    =   2000;     // period of each cycle
+    static final double MAX_POS     =  1.0;     // Maximum rotational position
+    static final double MIN_POS     =  0.0;     // Minimum rotational position
 
     // Define class members
-    Servo CRservo;
+    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    boolean rampUp = true;
 
-    private DcMotor PixelLift = null;
 
     @Override
     public void runOpMode() {
-
+	setup_bucketback();
+	setup_bucketfront();
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        CRservo = hardwareMap.get(Servo.class, "pixelbucket");
-        PixelLift  = hardwareMap.get(DcMotor.class, "pixellift");
-
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        PixelLift.setDirection(DcMotor.Direction.FORWARD);
-
+  
         // Wait for the start button
-        telemetry.addData(">", "Press X for max pos.");
-        telemetry.addData(">", "Press Y for min pos.");
+        telemetry.addData(">", "Press Start to scan Servo." );
         telemetry.update();
         waitForStart();
 
 
         // Scan servo till stop pressed.
-        while (opModeIsActive()) {
-
-            // slew the servo, according to the rampUp (direction) variable.
-            if (gamepad1.x) {
-                CRservo.setPosition(MAX_POS);
-            }
-            if (gamepad1.y) {
-                CRservo.setPosition(MIN_POS);
-            }
-
-            double Power;
-            if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0)
-            {
-                Power = gamepad1.right_trigger;
-            }
-            else if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0)
-            {
-                Power = -gamepad1.left_trigger;
-            }
-            else {
-                Power = 0;
-            }
-
-            PixelLift.setPower(Power);
-
-            telemetry.addData(">", "Press X for max pos.");
-            telemetry.addData(">", "Press Y for min pos.");
-            telemetry.addData(">", "Press right trigger for lift up");
-            telemetry.addData(">", "Press left trigger for lift down");
-
+        while(opModeIsActive()){
+	    if (gamepad1.a)
+		{
+		    BucketBackServo.setPosition(bucketback_release);
+		}
+	    if (gamepad1.b)
+		{
+		    BucketBackServo.setPosition(bucketback_catch);
+		}
+	    if (gamepad1.x)
+		{
+		    BucketFrontServo.setPosition(bucketfront_release);
+		}
+	    if (gamepad1.y)
+		{
+		    BucketFrontServo.setPosition(bucketfront_catch);
+		}
+            // Display the current value
+            telemetry.addData(">", "Press A for back release." );
+            telemetry.addData(">", "Press B for back catch." );
+            telemetry.addData(">", "Press X for front release." );
+            telemetry.addData(">", "Press Y for front catch." );
             telemetry.update();
 
-             // Set the servo to the new position and pause;
-         }
+            idle();
+        }
 
         // Signal done;
         telemetry.addData(">", "Done");
         telemetry.update();
     }
 }
-
