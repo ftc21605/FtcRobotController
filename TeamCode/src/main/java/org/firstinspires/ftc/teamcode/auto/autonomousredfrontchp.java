@@ -127,7 +127,13 @@ public class autonomousredfrontchp extends OurLinearOpBase {
              //   while (!gamepad1.a){
              //       sleep(1);
              //   }
-                navx_turn_left(90);
+                telemetry.addData("> r85", "angle: %.1f", navx_device.getYaw());
+                telemetry.update();
+                while (!gamepad1.a){
+                    sleep(1);
+                }
+
+                navx_turn_left(95);
                 telemetry.addData("> r85", "angle: %.1f", navx_device.getYaw());
                 telemetry.update();
                 while (!gamepad1.a){

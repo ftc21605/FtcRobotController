@@ -124,10 +124,12 @@ public class OurLinearOpBase extends LinearOpMode {
     public Servo BucketBackServo;
     public final double bucketback_release = 0.6;
     public final double bucketback_catch = 0.3;
+    boolean bucket_back_locked = true;
 
     public Servo BucketFrontServo;
     public final double bucketfront_release = 0.6;
     public final double bucketfront_catch = 0.2;
+    boolean bucket_front_locked = true;
     
     // Plane servo and its parameters
     public Servo PlaneServo;
@@ -281,7 +283,7 @@ public class OurLinearOpBase extends LinearOpMode {
     // and right turn angles are substracted
     public void navx_turn_left(double angle)
     {
-	navxturn_telemetry = false;
+	navxturn_telemetry = true;
 	// double yaw_in = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 	// double adjusted_angle = total_angle - total_yaw;
 	// adjusted_angle = map_angle(adjusted_angle);
@@ -318,6 +320,7 @@ public class OurLinearOpBase extends LinearOpMode {
     public void navx_turn(double angle) {
         try {
         navx_device.zeroYaw();
+        sleep(1000);
             yawPIDController.setSetpoint(angle);
             navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
 
@@ -345,6 +348,7 @@ public class OurLinearOpBase extends LinearOpMode {
             telemetry.addData("reveived interrupt", "");
         }
         drivemotors_off();
+        sleep(5000);
     }
 
     // maps angles to range -180 to 180
@@ -467,31 +471,35 @@ public class OurLinearOpBase extends LinearOpMode {
     }
 
     public void pixel_release() {
-        double Power = 0.3;
+        double Power = 0.4;
         int tics = -16;
-        //   tics = Intake.getCurrentPosition() + tics;
-        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+           tics = Intake.getCurrentPosition() + tics;
+	        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setTargetPosition(tics);
         Intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Intake.setPower(Power);
-        while (Intake.isBusy()) {
-            sleep(1);
-        }
+         while (Intake.isBusy()) {
+             sleep(1);
+         }
         Intake.setPower(0);
+         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
     }
 
     public void pixel_lock() {
-        double Power = -0.2;
-        int tics = 8;
-        //  tics = Intake.getCurrentPosition() - tics;
-        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Intake.setPower(Power);
-        while (Intake.getCurrentPosition() < tics) {
-            sleep(1);
-        }
+        double Power = -0.4;
+         int tics = 16;
+          tics = Intake.getCurrentPosition() - tics;
+         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+         Intake.setPower(Power);
+         while (Intake.getCurrentPosition() < tics) {
+             sleep(1);
+         }
         Intake.setPower(0);
+         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void setup_distance_sensor() {
@@ -693,16 +701,35 @@ public class OurLinearOpBase extends LinearOpMode {
     {
 	BucketBackServo.setPosition(bucketback_catch);
     }
-//     public void bucketfront_toggle()
-//     {
-// 	if (!bucket_front_locked)
-// 	    {
-// 	BucketFrontServo.setPosition(bucketfront_release);
-// 	bucket_front_locked = true;
-// 	    }
-// 	    }
-// }
-    public void bucketfront_release()
+
+    public void bucketback_toggle()
+    {
+ 	if (bucket_back_locked)
+ 	    {
+		bucketback_release();
+		bucket_back_locked = false;
+ 	    }
+	else
+	    {
+		bucketback_lock();
+		bucket_back_locked = true;
+	    }		
+    }
+    public void bucketfront_toggle()
+    {
+ 	if (bucket_front_locked)
+ 	    {
+		bucketfront_release();
+		bucket_front_locked = false;
+ 	    }
+	else
+	    {
+		bucketfront_lock();
+		bucket_front_locked = true;
+	    }		
+    }
+
+public void bucketfront_release()
     {
 	BucketFrontServo.setPosition(bucketfront_release);
     }

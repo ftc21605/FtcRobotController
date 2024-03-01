@@ -41,11 +41,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //@Disabled
 public class TeleOpNew extends OurLinearOpBase {
 
-     boolean x_pushed = false;
-     boolean a_pushed = false;
+     boolean pad1_x_pushed = false;
+     boolean pad1_a_pushed = false;
 
-    boolean y_pushed = false;
-    boolean b_pushed = false;
+    boolean pad1_y_pushed = false;
+    boolean pad1_b_pushed = false;
+
+    boolean pad2_leftbumper_pressed = false;
+    boolean pad2_rightbumper_pressed = false;
+    boolean pad2_dpad_pressed = false;
 
     @Override
     public void runOpMode() {
@@ -84,28 +88,25 @@ public class TeleOpNew extends OurLinearOpBase {
             telemetry.addData(">", "Press DPad Right for moving sideways to the right");
             telemetry.addData(">", "Press Right Bumper for Intake continuous in");
             telemetry.addData(">", "Press Left Bumper for Intake continuous out");
-	    
+
             telemetry.addData(">", "Pad2: Press A tilt bucket forward");
             telemetry.addData(">", "Pad2: Press B tile bucket backward");
-            telemetry.addData(">", "Pad2: Press X release forward");
-            telemetry.addData(">", "Pad2: Press Y lock forward");
-            telemetry.addData(">", "Pad2: Press left bumper release back");
-            telemetry.addData(">", "Pad2: Press right bumper lock back");
+            telemetry.addData(">", "Pad2: Press left bumper toggle back lock");
+            telemetry.addData(">", "Pad2: Press right bumper toggle front lock");
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-	    if (Math.abs(axial) < 0.15)
-		{
-		    axial = 0.;
-		}
-            axial = axial*0.7;  // Note: pushing stick forward gives negative value
+            if (Math.abs(axial) < 0.15) {
+                axial = 0.;
+            }
+            axial = axial * 0.7;  // Note: pushing stick forward gives negative value
             double lateral = 0.;
             if (Math.abs(gamepad1.left_stick_x) > 0.8) {
                 if (Math.abs(gamepad1.left_stick_y) < 0.3) {
                     lateral = gamepad1.left_stick_x;
                 }
             }
-            double yaw = gamepad1.right_stick_x*0.6;
+            double yaw = gamepad1.right_stick_x * 0.6;
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -126,30 +127,29 @@ public class TeleOpNew extends OurLinearOpBase {
                 rightBackPower /= max;
             }
 
-            if (gamepad1.dpad_right){
-                 leftFrontPower =  0.3;
-                 rightFrontPower = - 0.3;
-                 leftBackPower = - 0.3;
-                 rightBackPower =   0.3;
+            if (gamepad1.dpad_right) {
+                leftFrontPower = 0.3;
+                rightFrontPower = -0.3;
+                leftBackPower = -0.3;
+                rightBackPower = 0.3;
             }
-            if (gamepad1.dpad_left){
-                leftFrontPower = - 0.3;
-                rightFrontPower =  0.3;
-                leftBackPower =  0.3;
-                rightBackPower = - 0.3;
+            if (gamepad1.dpad_left) {
+                leftFrontPower = -0.3;
+                rightFrontPower = 0.3;
+                leftBackPower = 0.3;
+                rightBackPower = -0.3;
             }
-            if (gamepad1.dpad_down){
+            if (gamepad1.dpad_down) {
                 PixelLift.setPower(-0.2);
-            }
-            else {
+            } else {
                 PixelLift.setPower(0);
             }
 
             // Send calculated power to wheels
-            leftFrontDrive.setPower(leftFrontPower);
-            rightFrontDrive.setPower(rightFrontPower);
-            leftBackDrive.setPower(leftBackPower);
-            rightBackDrive.setPower(rightBackPower);
+            //    leftFrontDrive.setPower(leftFrontPower);
+            //    rightFrontDrive.setPower(rightFrontPower);
+            //    leftBackDrive.setPower(leftBackPower);
+            //    rightBackDrive.setPower(rightBackPower);
 
             double intake_power = 0;
             if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0) {
@@ -160,45 +160,44 @@ public class TeleOpNew extends OurLinearOpBase {
             }
             Intake.setPower(intake_power);
 
-            if (gamepad1.x && !x_pushed) {
-                x_pushed = true;
-		launch_plane();
+            if (gamepad1.x && !pad1_x_pushed) {
+                pad1_x_pushed = true;
+                launch_plane();
             }
             if (!gamepad1.x) {
-                x_pushed = false;
+                pad1_x_pushed = false;
             }
 
 //            telemetry.addData(">", "Y Button" + String.valueOf(gamepad1.y));
-            //           telemetry.addData(">", "y_pushed " + String.valueOf(y_pushed));
+            //           telemetry.addData(">", "pad1_y_pushed " + String.valueOf(pad1_y_pushed));
             //         telemetry.addData(">", "moving_up " + String.valueOf(moving_up));
             //       telemetry.addData(">", "moving_down "+ String.valueOf(moving_down));
             //     telemetry.addData(">", "elevator time " + ElevatorTimer.toString());
-            if (gamepad1.y && !y_pushed) {
+            if (gamepad1.y && !pad1_y_pushed) {
 
-                y_pushed = true;
+                pad1_y_pushed = true;
 
-                    ElevatorServo.setPosition(MOVE_UP);
-                    moving_up = true;
-                    moving_down = false;
+                ElevatorServo.setPosition(MOVE_UP);
+                moving_up = true;
+                moving_down = false;
             }
             if (!gamepad1.y) {
-                y_pushed = false;
+                pad1_y_pushed = false;
             }
 
-            if (gamepad1.b && !b_pushed) {
+            if (gamepad1.b && !pad1_b_pushed) {
 
-                b_pushed = true;
+                pad1_b_pushed = true;
 
-                    moving_down = true;
+                moving_down = true;
                 moving_up = false;
-                    ElevatorServo.setPosition(MOVE_DOWN);
-                    ElevatorTimer.reset();
-
+                ElevatorServo.setPosition(MOVE_DOWN);
+                ElevatorTimer.reset();
 
 
             }
             if (!gamepad1.b) {
-                b_pushed = false;
+                pad1_b_pushed = false;
             }
 
             if (ElevatorLimit.isPressed() && !moving_down) {
@@ -215,51 +214,149 @@ public class TeleOpNew extends OurLinearOpBase {
             }
             if (gamepad1.dpad_up) {
                 // set hanger power
-		hang_the_bot();
+                hang_the_bot();
             } else {
                 Hanger.setPower(0);
             }
 
-           if (gamepad1.right_bumper)
-           {
-            PixelTransport.setPower(-0.5);
+            if (gamepad1.right_bumper) {
+                PixelTransport.setPower(-0.5);
             }
-           if (gamepad1.left_bumper)
-            {
+            if (gamepad1.left_bumper) {
                 PixelTransport.setPower(0.5);
-           }
-	   if (!gamepad1.left_bumper && !gamepad1.right_bumper)
-	       {
-		   PixelTransport.setPower(0);
-	       }
-		   if (gamepad2.a)
-	       {
-		   bucket_tilt_forward();
-	       }
-	   if (gamepad2.b)
-	       {
-		   bucket_tilt_backward();
-	       }
-	   if (gamepad2.x)
-	       {
-		   bucketfront_release();
-	       }
-	   if (gamepad2.y)
-	       {
-		   bucketfront_lock();
-	       }
-	   if (gamepad2.right_bumper)
-	       {
-		   bucketback_lock();
-	       }
-	   if (gamepad2.left_bumper)
-	       {
-		   bucketback_release();
-	       }
-	   //grabber.setPosition(grabber_position);
+            }
+
+            if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
+                PixelTransport.setPower(0);
+            }
+            if (gamepad2.a) {
+                bucket_tilt_forward();
+            }
+
+
+            // HERE IS GAMEPAD 2
+            if (gamepad2.right_bumper) {
+                if (!pad2_rightbumper_pressed) {
+                    pad2_rightbumper_pressed = true;
+                    bucketfront_toggle();
+                }
+            } else {
+                pad2_rightbumper_pressed = false;
+            }
+
+            if (gamepad2.left_bumper) {
+                if (!pad2_leftbumper_pressed) {
+                    pad2_leftbumper_pressed = true;
+                    bucketback_toggle();
+                }
+            } else {
+                pad2_leftbumper_pressed = false;
+            }
+
+
+            if (gamepad2.b) {
+                bucket_tilt_backward();
+            }
+            if (gamepad2.x) {
+                bucketfront_release();
+            }
+            if (gamepad2.y) {
+                bucketfront_lock();
+            }
+            //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
+            telemetry.addData(">", "Pad2: left bumper toggles bucket back lock servo");
+            telemetry.addData(">", "Pad2: right bumper toggles bucket front lock servo");
+            if (gamepad2.right_bumper) {
+                if (!pad2_rightbumper_pressed) {
+                    pad2_rightbumper_pressed = true;
+                    bucketfront_toggle();
+                }
+            } else {
+                pad2_rightbumper_pressed = false;
+            }
+
+            if (gamepad2.left_bumper) {
+                if (!pad2_leftbumper_pressed) {
+                    pad2_leftbumper_pressed = true;
+                    bucketback_toggle();
+                }
+            } else {
+                pad2_leftbumper_pressed = false;
+            }
+            double Power;
+            if (gamepad2.right_trigger > 0 && gamepad2.left_trigger == 0) {
+                Power = gamepad2.right_trigger;
+            } else if (gamepad2.left_trigger > 0 && gamepad2.right_trigger == 0) {
+                Power = -gamepad2.left_trigger;
+            } else {
+                Power = 0;
+            }
+
+            PixelLift.setPower(Power);
+
+            telemetry.addData(">", "Press Stop to end test.");
+            telemetry.update();
+
+            if (gamepad2.a) {
+                bucket_tilt_forward();
+            }
+            if (gamepad2.b) {
+                bucket_tilt_backward();
+            }
+            pad2_dpad_pressed = false;
+            if (gamepad2.dpad_right) {
+                pad2_dpad_pressed = true;
+                leftFrontPower = 0.3;
+                rightFrontPower = -0.3;
+                leftBackPower = -0.3;
+                rightBackPower = 0.3;
+            }
+            if (gamepad2.dpad_left) {
+                pad2_dpad_pressed = true;
+                leftFrontPower = -0.3;
+                rightFrontPower = 0.3;
+                leftBackPower = 0.3;
+                rightBackPower = -0.3;
+            }
+            if (gamepad2.dpad_down) {
+                pad2_dpad_pressed = true;
+                leftFrontPower = -0.3;
+                rightFrontPower = -0.3;
+                leftBackPower = -0.3;
+                rightBackPower = -0.3;
+
+            }
+            if (gamepad2.dpad_up) {
+                pad2_dpad_pressed = true;
+                leftFrontPower = 0.3;
+                rightFrontPower = 0.3;
+                leftBackPower = 0.3;
+                rightBackPower = 0.3;
+
+            }
+            if (Math.abs(gamepad2.right_stick_x) > 0.1 ) {
+                yaw = gamepad2.right_stick_x * 0.3;
+
+                // Combine the joystick requests for each axis-motion to determine each wheel's power.
+                // Set up a variable for each drive wheel to save the power level for telemetry.
+                leftFrontPower = +yaw;
+                rightFrontPower = -yaw;
+                leftBackPower = +yaw;
+                rightBackPower = -yaw;
+            }
+
+                if (!pad2_dpad_pressed) {
+                    //    drivemotors_off();
+                }
+                leftFrontDrive.setPower(leftFrontPower);
+                rightFrontDrive.setPower(rightFrontPower);
+                leftBackDrive.setPower(leftBackPower);
+                rightBackDrive.setPower(rightBackPower);
+
+
         }
     }
     public void pixel_release() {

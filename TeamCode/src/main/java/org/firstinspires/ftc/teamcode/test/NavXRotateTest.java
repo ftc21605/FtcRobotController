@@ -53,7 +53,7 @@ import java.text.DecimalFormat;
  * Note that for the best accuracy, a reasonably high update rate
  * for the navX-Model sensor should be used.
  */
-@TeleOp(name = "Test: NavX Rotate Test", group = "ZTest")
+@TeleOp(name = "Test: Navx Rotate Test", group = "ZTest")
 //@Disabled // Comment this in to remove this from the Driver Station OpMode List
 public class NavXRotateTest extends LinearOpMode {
     private DcMotor leftFrontDrive = null;
