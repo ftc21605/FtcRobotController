@@ -66,12 +66,13 @@ public class ApriltagDriveTest extends OurLinearOpBase {
                 rightFrontDrive.getCurrentPosition());
         telemetry.update();
 	        // Wait for the game to start (driver presses PLAY)
+
         waitForStart();
         runtime.reset();
 
+	doCameraSwitching(LogitechWebCam);
         //BlueFinder.Selected selected;
         // here is what happens after we hit start
-        doCameraSwitching(MicrosoftWebCam);
 	if (BlueColorFinder != null)
 	    {
 		visionPortal.setProcessorEnabled(BlueColorFinder, false);
@@ -80,7 +81,7 @@ public class ApriltagDriveTest extends OurLinearOpBase {
 	    {
 		visionPortal.setProcessorEnabled(RedColorFinder, false);
 	    }
-		int DESIRED_TAG_ID = 6;    // Choose the tag you want to approach or set to -1 for ANY tag.
+		int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
         boolean targetFound = false;
         double angle = 0;
         double distance = 0;
@@ -116,6 +117,11 @@ public class ApriltagDriveTest extends OurLinearOpBase {
             }
             telemetry.update();
         }
+	    sleep(5000);
+	if (!gamepad1.a)
+	    {
+		sleep(1);
+	    }
        	wait_for_button_pushed(0);
 	if (angle > 0)
 	    {

@@ -51,6 +51,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -95,7 +96,7 @@ public class OurLinearOpBase extends LinearOpMode {
     //public static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /(WHEEL_DIAMETER_INCHES * Math.PI);
     public static final int DEVICE_TIMEOUT_MS = 500;
     public static final double NAVX_DRIVE_SPEED = 0.4;
-    public static final double NAVX_MIN_TURN_POWER = 0.2;
+    public static final double NAVX_MIN_TURN_POWER = 0.3;
 
     public boolean calibration_complete = false;
     public double total_angle = 0.;
@@ -119,7 +120,7 @@ public class OurLinearOpBase extends LinearOpMode {
 
     public Servo BucketTurnServo;
     public double BUCKETTURNSERVO_MAXPOS = 0.23;
-	public double BUCKETTURNSERVO_MINPOS = 0.85;
+    public double BUCKETTURNSERVO_MINPOS = 0.85;
 
     public Servo BucketBackServo;
     public final double bucketback_release = 0.6;
@@ -130,7 +131,7 @@ public class OurLinearOpBase extends LinearOpMode {
     public final double bucketfront_release = 0.6;
     public final double bucketfront_catch = 0.2;
     boolean bucket_front_locked = true;
-    
+
     // Plane servo and its parameters
     public Servo PlaneServo;
 
@@ -147,10 +148,10 @@ public class OurLinearOpBase extends LinearOpMode {
     public boolean moving_up = false;
     public boolean moving_down = false;
     public ElapsedTime ElevatorTimer = new ElapsedTime();
-   
+
     // Hanger winch
     public DcMotor Hanger = null;
-   
+
     public DistanceSensor sensorDistance;
 
     public ElapsedTime runtime = new ElapsedTime();
@@ -158,7 +159,7 @@ public class OurLinearOpBase extends LinearOpMode {
     public AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     public AprilTagDetection desiredTag = null;// Used to hold the data for a detected AprilTag
 
-    int debuglevel = 0;
+    public int debuglevel = 0;
     boolean navxturn_telemetry = true;
 
     @Override
@@ -168,8 +169,17 @@ public class OurLinearOpBase extends LinearOpMode {
     public void doCameraSwitching(WebcamName webcam) {
         if (visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
             if (!visionPortal.getActiveCamera().equals(webcam)) {
+		// telemetry.addData(">","camera switch to %s", webcam);
+		// telemetry.update();
+		// sleep(5000);
                 visionPortal.setActiveCamera(webcam);
             }
+	    // else
+	    // 	{
+	    // 	telemetry.addData(">","camera is already switched to %s", webcam);
+	    // 	telemetry.update();
+	    // 	sleep(5000);
+	    // 	}		    
         }
     }   // end method doCameraSwitching()
 
@@ -191,7 +201,7 @@ public class OurLinearOpBase extends LinearOpMode {
         LogitechWebCam = hardwareMap.get(WebcamName.class, "Webcam 1");
         MicrosoftWebCam = hardwareMap.get(WebcamName.class, "Webcam 2");
         CameraName switchableCamera = ClassFactory.getInstance()
-	    .getCameraManager().nameForSwitchableCamera(MicrosoftWebCam, LogitechWebCam);
+                .getCameraManager().nameForSwitchableCamera(MicrosoftWebCam, LogitechWebCam);
 
         initAprilTag();
         // Create the vision portal by using a builder.
@@ -281,88 +291,80 @@ public class OurLinearOpBase extends LinearOpMode {
     // interesting coordinate system -> left turns are positive yaw, right turns are negative yaw
     // This only plays a role when calculating the total angle where left turn angles need to be added
     // and right turn angles are substracted
-    public void navx_turn_left(double angle)
-    {
-	navxturn_telemetry = true;
-	// double yaw_in = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-	// double adjusted_angle = total_angle - total_yaw;
-	// adjusted_angle = map_angle(adjusted_angle);
-	// double angle_turn = angle - adjusted_angle;
-	navx_turn(-angle);
-	// total_angle += angle;
-	// total_angle = map_angle(total_angle);
-	// double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-	// total_yaw -= yaw_buff;
-	// total_yaw = map_angle(total_yaw);
-	// telemetry.addData(">", "angle: %.1f, adjustment angle: %.1f, angle turn: %.1f",angle, adjusted_angle, angle_turn);
-	// telemetry.addData(">", "yaw in %.1f, end: %.1f, sum: %.1f",yaw_in, yaw_buff, total_yaw);
-	// telemetry.update();
+    public void navx_turn_left(double angle) {
+        navxturn_telemetry = true;
+        // double yaw_in = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        // double adjusted_angle = total_angle - total_yaw;
+        // adjusted_angle = map_angle(adjusted_angle);
+        // double angle_turn = angle - adjusted_angle;
+        navx_turn(-angle);
+        // total_angle += angle;
+        // total_angle = map_angle(total_angle);
+        // double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        // total_yaw -= yaw_buff;
+        // total_yaw = map_angle(total_yaw);
+        // telemetry.addData(">", "angle: %.1f, adjustment angle: %.1f, angle turn: %.1f",angle, adjusted_angle, angle_turn);
+        // telemetry.addData(">", "yaw in %.1f, end: %.1f, sum: %.1f",yaw_in, yaw_buff, total_yaw);
+        // telemetry.update();
     }
-    
-    public void navx_turn_right(double angle)
-    {
-	navxturn_telemetry = false;
-       	// double yaw_in = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-	// double adjusted_angle = total_angle - total_yaw;
-	// adjusted_angle = map_angle(adjusted_angle);
-	// double angle_turn = angle - adjusted_angle;
-	navx_turn(angle);
-	// total_angle -= angle;
-	// total_angle = map_angle(total_angle);
-	// double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-	// total_yaw += yaw_buff;
-	// total_yaw = map_angle(total_yaw);
-	// telemetry.addData(">", "angle: %.1f, total angle: %.1f, adjustment angle: %.1f, angle turn: %.1f",angle, total_angle, adjusted_angle, angle_turn);
-	// telemetry.addData(">", "yaw in %.1f, end: %.1f, total yaw: %.1f",yaw_in, yaw_buff, total_yaw);
-	// telemetry.update();
+
+    public void navx_turn_right(double angle) {
+        navxturn_telemetry = false;
+        // double yaw_in = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        // double adjusted_angle = total_angle - total_yaw;
+        // adjusted_angle = map_angle(adjusted_angle);
+        // double angle_turn = angle - adjusted_angle;
+        navx_turn(angle);
+        // total_angle -= angle;
+        // total_angle = map_angle(total_angle);
+        // double yaw_buff = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        // total_yaw += yaw_buff;
+        // total_yaw = map_angle(total_yaw);
+        // telemetry.addData(">", "angle: %.1f, total angle: %.1f, adjustment angle: %.1f, angle turn: %.1f",angle, total_angle, adjusted_angle, angle_turn);
+        // telemetry.addData(">", "yaw in %.1f, end: %.1f, total yaw: %.1f",yaw_in, yaw_buff, total_yaw);
+        // telemetry.update();
     }
-    
+
     public void navx_turn(double angle) {
         try {
-        navx_device.zeroYaw();
-        sleep(1000);
+            navx_device.zeroYaw();
             yawPIDController.setSetpoint(angle);
             navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
 
             while (!yawPIDResult.isOnTarget()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
                     double output = yawPIDResult.getOutput();
-                    output = Math.max(NAVX_MIN_TURN_POWER, output)*Math.signum(yawPIDController.getSetpoint());
+                    output = Math.max(NAVX_MIN_TURN_POWER, output) * Math.signum(yawPIDController.getSetpoint());
                     leftFrontDrive.setPower(output);
                     leftBackDrive.setPower(output);
                     rightFrontDrive.setPower(-output);
                     rightBackDrive.setPower(-output);
-		    if (navxturn_telemetry)
-			{
-			    telemetry.addData(">","yaw setpoint: %.1f, value: %.1f, error %.1f",yawPIDController.getSetpoint(),yawPIDController.get(), yawPIDController.getError());
-		    telemetry.addData(">","current yaw: %.1f", gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-		    telemetry.addData(">","Should point to %.1f", angle);
+                    if (navxturn_telemetry) {
+                        telemetry.addData(">", "yaw setpoint: %.1f, value: %.1f, error %.1f", yawPIDController.getSetpoint(), yawPIDController.get(), yawPIDController.getError());
+                        telemetry.addData(">", "current yaw: %.1f", gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+                        telemetry.addData(">", "Should point to %.1f", angle);
 
-                    telemetry.addData("PIDOutput", "power %.1f, %.1f", output, -output);
-                    telemetry.update();
-			}
+                        telemetry.addData("PIDOutput", "power %.1f, %.1f", output, -output);
+                        telemetry.update();
+                    }
 
-		}
-	    }
+                }
+            }
         } catch (InterruptedException ex) {
             telemetry.addData("reveived interrupt", "");
         }
         drivemotors_off();
-        sleep(5000);
     }
 
     // maps angles to range -180 to 180
-    double map_angle(double angle)
-    {
-	if (angle > 180)
-	    {
-		return angle-360;
-	    }
-	if (angle < -180)
-	    {
-		return angle + 360;
-	    }
-	return angle;
+    double map_angle(double angle) {
+        if (angle > 180) {
+            return angle - 360;
+        }
+        if (angle < -180) {
+            return angle + 360;
+        }
+        return angle;
     }
 
     public void drivemotors_off() {
@@ -375,8 +377,8 @@ public class OurLinearOpBase extends LinearOpMode {
 
     public void wait_for_button_pushed(int dbglvl) {
         if (dbglvl <= debuglevel) {
-                telemetry.addData(">", "Press A to proceed");
-                telemetry.update();
+            telemetry.addData(">", "Press A to proceed");
+            telemetry.update();
             while (!gamepad1.a) {
                 sleep(10);
             }
@@ -388,10 +390,10 @@ public class OurLinearOpBase extends LinearOpMode {
     }
 
     public void setup_drive_motors() {
-	setup_drive_motors(true);
+        setup_drive_motors(true);
     }
 
-	public void setup_drive_motors(boolean reset_decoders) {
+    public void setup_drive_motors(boolean reset_decoders) {
         // Initialize the drive system variables.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
         leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
@@ -407,10 +409,9 @@ public class OurLinearOpBase extends LinearOpMode {
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-	if (reset_decoders)
-	    {
-	reset_motor_decoders();
-	    }
+        if (reset_decoders) {
+            reset_motor_decoders();
+        }
     }
 
     public void setup_imu() {
@@ -426,7 +427,7 @@ public class OurLinearOpBase extends LinearOpMode {
         /* Configure the PID controller */
         //        yawPIDController.setSetpoint(TARGET_ANGLE_DEGREES);
         yawPIDController.setContinuous(true);
-	//yawPIDController.setInputRange(-180.0,180.0);
+        //yawPIDController.setInputRange(-180.0,180.0);
         yawPIDController.setOutputRange(MIN_MOTOR_OUTPUT_VALUE, MAX_MOTOR_OUTPUT_VALUE);
         yawPIDController.setTolerance(navXPIDController.ToleranceType.ABSOLUTE, TOLERANCE_DEGREES);
         yawPIDController.setPID(YAW_PID_P, YAW_PID_I, YAW_PID_D);
@@ -446,7 +447,7 @@ public class OurLinearOpBase extends LinearOpMode {
             }
         }
         navx_device.zeroYaw();
-	//        yawPIDResult = new navXPIDController.PIDResult();
+        //        yawPIDResult = new navXPIDController.PIDResult();
 
     }
 
@@ -455,7 +456,7 @@ public class OurLinearOpBase extends LinearOpMode {
         PixelLift.setDirection(DcMotor.Direction.REVERSE);
         PixelLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         PixelLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-	PixelLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        PixelLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void setup_intake() {
@@ -463,7 +464,7 @@ public class OurLinearOpBase extends LinearOpMode {
         Intake.setDirection(DcMotor.Direction.FORWARD);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-	Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void setup_pixel_bucket() {
@@ -471,35 +472,40 @@ public class OurLinearOpBase extends LinearOpMode {
     }
 
     public void pixel_release() {
-        double Power = 0.4;
-        int tics = -16;
-           tics = Intake.getCurrentPosition() + tics;
-	        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        double Power = 0.3;
+        int tics = 20;
+	Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        tics = Intake.getCurrentPosition() + tics;
         Intake.setTargetPosition(tics);
         Intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Intake.setPower(Power);
-         while (Intake.isBusy()) {
-             sleep(1);
-         }
+        while (Intake.isBusy()) {
+            sleep(1);
+        }
         Intake.setPower(0);
-         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
     }
 
     public void pixel_lock() {
-        double Power = -0.4;
-         int tics = 16;
-          tics = Intake.getCurrentPosition() - tics;
-         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        double Power = -0.3;
+        int tics = 20;
+	Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        tics = Intake.getCurrentPosition() - tics;
+        Intake.setTargetPosition(tics);
         Intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-         Intake.setPower(Power);
-         while (Intake.getCurrentPosition() < tics) {
-             sleep(1);
-         }
+        Intake.setPower(Power);
+        while (Intake.isBusy()) {
+            sleep(1);
+        }
         Intake.setPower(0);
-         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void setup_distance_sensor() {
@@ -520,61 +526,56 @@ public class OurLinearOpBase extends LinearOpMode {
         RedFinder.Selected redselect = RedFinder.Selected.NONE;
 
     }
-    public void setup_pixel_transport()
-    {
-        PixelTransport = hardwareMap.get(DcMotor.class, "pixeltransport");
-    }	
 
-    public void setup_planeservo()
-    {
+    public void setup_pixel_transport() {
+        PixelTransport = hardwareMap.get(DcMotor.class, "pixeltransport");
+    }
+
+    public void setup_planeservo() {
         PlaneServo = hardwareMap.get(Servo.class, "plane");
     }
-    public void launch_plane()
-    {
-	if (!plane_launched) {
-                    PlaneServo.setPosition(PLANE_LAUNCH);
-                    plane_launched = true;
-                } else {
-                    PlaneServo.setPosition(PLANE_LOAD);
-                    plane_launched = false;
-                }
+
+    public void launch_plane() {
+        if (!plane_launched) {
+            PlaneServo.setPosition(PLANE_LAUNCH);
+            plane_launched = true;
+        } else {
+            PlaneServo.setPosition(PLANE_LOAD);
+            plane_launched = false;
+        }
     }
-    
-    public void setup_elevator()
-    {
+
+    public void setup_elevator() {
         ElevatorServo = hardwareMap.get(Servo.class, "hook");
         ElevatorLimit = hardwareMap.get(TouchSensor.class, "elevatorlimit");
         ElapsedTime ElevatorTimer = new ElapsedTime();
-	
+
     }
 
-    public void setup_hanger()
-    {
+    public void setup_hanger() {
         Hanger = hardwareMap.get(DcMotor.class, "hanger");
-        Hanger.setDirection(DcMotor.Direction.FORWARD);	
-    }
-    
-    public void hang_the_bot()
-    {
-	
-                double hangerpower = 0.8;
-                Hanger.setPower(hangerpower);
-    }
-    public void navx_drive_forward_straight(double power, double inches)
-    {
-	navx_drive_forward_right(power, 0, inches);
-    }
-    public void navx_drive_forward_leftt(double power, double angle, double inches)
-    {
-	navx_drive_forward_right(power, -angle, inches);
+        Hanger.setDirection(DcMotor.Direction.FORWARD);
     }
 
-    
-	public void navx_drive_forward_right(double power, double angle, double inches)
-    {
-	double drive_speed = power;
-	
-	try{
+    public void hang_the_bot() {
+
+        double hangerpower = 0.8;
+        Hanger.setPower(hangerpower);
+    }
+
+    public void navx_drive_forward_straight(double power, double inches) {
+        navx_drive_forward_right(power, 0, inches);
+    }
+
+    public void navx_drive_forward_leftt(double power, double angle, double inches) {
+        navx_drive_forward_right(power, -angle, inches);
+    }
+
+
+    public void navx_drive_forward_right(double power, double angle, double inches) {
+        double drive_speed = power;
+
+        try {
             navx_device.zeroYaw();
             int current_left_front_position = leftFrontDrive.getCurrentPosition();
             int current_right_front_position = rightFrontDrive.getCurrentPosition();
@@ -582,57 +583,54 @@ public class OurLinearOpBase extends LinearOpMode {
             int current_right_back_position = rightBackDrive.getCurrentPosition();
             yawPIDController.setSetpoint(angle);
             navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
-	    double counts_to_go = inches*COUNTS_PER_INCH;
-	    double counts_done = 0;
-            while (counts_to_go >  (counts_done = Math.abs(((leftFrontDrive.getCurrentPosition()-current_left_front_position + rightFrontDrive.getCurrentPosition() - current_right_front_position + leftBackDrive.getCurrentPosition() - current_left_back_position + rightBackDrive.getCurrentPosition()-current_right_back_position)/4.))) &&
+            double counts_to_go = inches * COUNTS_PER_INCH;
+            double counts_done = 0;
+            while (counts_to_go > (counts_done = Math.abs(((leftFrontDrive.getCurrentPosition() - current_left_front_position + rightFrontDrive.getCurrentPosition() - current_right_front_position + leftBackDrive.getCurrentPosition() - current_left_back_position + rightBackDrive.getCurrentPosition() - current_right_back_position) / 4.))) &&
                     !Thread.currentThread().isInterrupted()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
-		    double counts_left = counts_to_go - counts_done;
-		    if (counts_to_go - counts_done < 200)
-			{
-			    drive_speed = 0.2;
-			}
+                    double counts_left = counts_to_go - counts_done;
+                    if (counts_to_go - counts_done < 200) {
+                        drive_speed = 0.2;
+                    }
                     if (yawPIDResult.isOnTarget()) {
                         leftBackDrive.setPower(drive_speed);
                         leftFrontDrive.setPower(drive_speed);
                         rightFrontDrive.setPower(drive_speed);
                         rightBackDrive.setPower(drive_speed);
-                        telemetry.addData(">","PIDOutput %.1f, %.1f", drive_speed, drive_speed);
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", drive_speed, drive_speed);
                     } else {
                         double output = yawPIDResult.getOutput();
                         leftFrontDrive.setPower(drive_speed + output);
                         leftBackDrive.setPower(drive_speed + output);
                         rightBackDrive.setPower(drive_speed - output);
                         rightFrontDrive.setPower(drive_speed - output);
-                        telemetry.addData(">","PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
                     }
                     telemetry.addData(">", "Yaw %.1f", navx_device.getYaw());
-                } else{
-			        /* A timeout occurred */
+                } else {
+                    /* A timeout occurred */
                     telemetry.addData("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
                 }
             }
-        }
-        catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
         drivemotors_off();
     }
 
-    public void navx_drive_backward_straight(double power, double inches)
-    {
-	navx_drive_backward_right(power, 0, inches);
+   
+    public void navx_drive_backward_straight(double power, double inches) {
+        navx_drive_backward_right(power, 0, inches);
     }
-    public void navx_drive_backward_left(double power, double angle, double inches)
-    {
-	navx_drive_backward_right(power, -angle, inches);
+
+    public void navx_drive_backward_left(double power, double angle, double inches) {
+        navx_drive_backward_right(power, -angle, inches);
     }
-    
-	public void navx_drive_backward_right(double power, double angle, double inches)
-    {
-	double drive_speed = -power;
-	
-	try{
+
+    public void navx_drive_backward_right(double power, double angle, double inches) {
+        double drive_speed = -power;
+
+        try {
             navx_device.zeroYaw();
             int current_left_front_position = leftFrontDrive.getCurrentPosition();
             int current_right_front_position = rightFrontDrive.getCurrentPosition();
@@ -640,45 +638,86 @@ public class OurLinearOpBase extends LinearOpMode {
             int current_right_back_position = rightBackDrive.getCurrentPosition();
             yawPIDController.setSetpoint(angle);
             navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
-	    double counts_to_go = inches*COUNTS_PER_INCH;
-	    double counts_done = 0;
-            while (counts_to_go >  (counts_done = Math.abs(((leftFrontDrive.getCurrentPosition()-current_left_front_position + rightFrontDrive.getCurrentPosition() - current_right_front_position + leftBackDrive.getCurrentPosition() - current_left_back_position + rightBackDrive.getCurrentPosition()-current_right_back_position)/4.))) &&
+            double counts_to_go = inches * COUNTS_PER_INCH;
+            double counts_done = 0;
+            while (counts_to_go > (counts_done = Math.abs(((leftFrontDrive.getCurrentPosition() - current_left_front_position + rightFrontDrive.getCurrentPosition() - current_right_front_position + leftBackDrive.getCurrentPosition() - current_left_back_position + rightBackDrive.getCurrentPosition() - current_right_back_position) / 4.))) &&
                     !Thread.currentThread().isInterrupted()) {
                 if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
-		    double counts_left = counts_to_go - counts_done;
-		    if (counts_to_go - counts_done < 200)
-			{
-			    drive_speed = -0.2;
-			}
+                    double counts_left = counts_to_go - counts_done;
+                    if (counts_to_go - counts_done < 200) {
+                        drive_speed = -0.2;
+                    }
                     if (yawPIDResult.isOnTarget()) {
                         leftBackDrive.setPower(drive_speed);
                         leftFrontDrive.setPower(drive_speed);
                         rightFrontDrive.setPower(drive_speed);
                         rightBackDrive.setPower(drive_speed);
-                        telemetry.addData(">","PIDOutput %.1f, %.1f", drive_speed, drive_speed);
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", drive_speed, drive_speed);
                     } else {
                         double output = yawPIDResult.getOutput();//*Math.signum(drive_speed);
                         leftFrontDrive.setPower(drive_speed + output);
                         leftBackDrive.setPower(drive_speed + output);
                         rightBackDrive.setPower(drive_speed - output);
                         rightFrontDrive.setPower(drive_speed - output);
-                        telemetry.addData(">","PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
                     }
                     telemetry.addData(">", "Yaw %.1f", navx_device.getYaw());
-                } else{
-			        /* A timeout occurred */
+                } else {
+                    /* A timeout occurred */
                     telemetry.addData("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
                 }
             }
-        }
-        catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
         drivemotors_off();
     }
-    
-    public void reset_motor_decoders()
-    {
+
+        public void navx_drive_backward_distsensor_right(double power, double angle) {
+        double drive_speed = -power;
+
+        try {
+            navx_device.zeroYaw();
+            int current_left_front_position = leftFrontDrive.getCurrentPosition();
+            int current_right_front_position = rightFrontDrive.getCurrentPosition();
+            int current_left_back_position = leftBackDrive.getCurrentPosition();
+            int current_right_back_position = rightBackDrive.getCurrentPosition();
+            yawPIDController.setSetpoint(angle);
+            navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
+            while ((sensorDistance.getDistance(DistanceUnit.INCH) > 4) &&
+                    !Thread.currentThread().isInterrupted()) {
+                if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
+		    
+                    // if (distleft < 10) {
+                    //     drive_speed = -0.2;
+                    // }
+                    if (yawPIDResult.isOnTarget()) {
+                        leftBackDrive.setPower(drive_speed);
+                        leftFrontDrive.setPower(drive_speed);
+                        rightFrontDrive.setPower(drive_speed);
+                        rightBackDrive.setPower(drive_speed);
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", drive_speed, drive_speed);
+                    } else {
+                        double output = yawPIDResult.getOutput();//*Math.signum(drive_speed);
+                        leftFrontDrive.setPower(drive_speed + output);
+                        leftBackDrive.setPower(drive_speed + output);
+                        rightBackDrive.setPower(drive_speed - output);
+                        rightFrontDrive.setPower(drive_speed - output);
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
+                    }
+                    telemetry.addData(">", "Yaw %.1f", navx_device.getYaw());
+                } else {
+                    /* A timeout occurred */
+                    telemetry.addData("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
+                }
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        drivemotors_off();
+    }
+
+    public void reset_motor_decoders() {
         leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -688,66 +727,134 @@ public class OurLinearOpBase extends LinearOpMode {
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+
+    public void setup_bucketback() {
+        BucketBackServo = hardwareMap.get(Servo.class, "back");
+    }
+
+    public void bucketback_release() {
+        BucketBackServo.setPosition(bucketback_release);
+    }
+
+    public void bucketback_lock() {
+        BucketBackServo.setPosition(bucketback_catch);
+    }
+
+    public void bucketback_toggle() {
+        if (bucket_back_locked) {
+            bucketback_release();
+            bucket_back_locked = false;
+        } else {
+            bucketback_lock();
+            bucket_back_locked = true;
+        }
+    }
+
+    public void bucketfront_toggle() {
+        if (bucket_front_locked) {
+            bucketfront_release();
+            bucket_front_locked = false;
+        } else {
+            bucketfront_lock();
+            bucket_front_locked = true;
+        }
+    }
+
+    public void bucketfront_release() {
+        BucketFrontServo.setPosition(bucketfront_release);
+    }
+
+    public void bucketfront_lock() {
+        BucketFrontServo.setPosition(bucketfront_catch);
+    }
+
+    public void setup_bucketfront() {
+        BucketFrontServo = hardwareMap.get(Servo.class, "front");
+    }
+
+    public void bucket_tilt_forward() {
+        BucketTurnServo.setPosition(BUCKETTURNSERVO_MAXPOS);
+    }
+
+    public void bucket_tilt_backward() {
+        BucketTurnServo.setPosition(BUCKETTURNSERVO_MINPOS);
+    }
+    public void prep_pixel_drop()
+    {
+        PixelLift.setTargetPosition(1100);
+        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        PixelLift.setPower(0.5);
+	bucket_tilt_forward();
+    }
     
-    public void setup_bucketback()
-    {
-	        BucketBackServo = hardwareMap.get(Servo.class, "back");
-    }
-    public void bucketback_release()
-    {
-	BucketBackServo.setPosition(bucketback_release);
-    }
-    public void bucketback_lock()
-    {
-	BucketBackServo.setPosition(bucketback_catch);
-    }
-
-    public void bucketback_toggle()
-    {
- 	if (bucket_back_locked)
- 	    {
-		bucketback_release();
-		bucket_back_locked = false;
- 	    }
-	else
-	    {
-		bucketback_lock();
-		bucket_back_locked = true;
-	    }		
-    }
-    public void bucketfront_toggle()
-    {
- 	if (bucket_front_locked)
- 	    {
-		bucketfront_release();
-		bucket_front_locked = false;
- 	    }
-	else
-	    {
-		bucketfront_lock();
-		bucket_front_locked = true;
-	    }		
-    }
-
-public void bucketfront_release()
-    {
-	BucketFrontServo.setPosition(bucketfront_release);
-    }
-    public void bucketfront_lock()
-    {
-	BucketFrontServo.setPosition(bucketfront_catch);
-    }
-    public void setup_bucketfront()
-    {
-	        BucketFrontServo = hardwareMap.get(Servo.class, "front");
-    }
-    public void bucket_tilt_forward()
-    {
-	BucketTurnServo.setPosition(BUCKETTURNSERVO_MAXPOS);
-    }
-    public void bucket_tilt_backward()
-    {
-	BucketTurnServo.setPosition(BUCKETTURNSERVO_MINPOS);
-    }
+public void drop_pixel(){
+	bucketfront_release();
+        sleep(1000);
+	navx_drive_forward_straight(0.3,5);
+        PixelLift.setTargetPosition(600);
+        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+         PixelLift.setPower(0.2);
+         while (PixelLift.isBusy()) {
+             sleep(10);
+        }
+	bucket_tilt_backward();
+        sleep(1000);
 	
+        PixelLift.setTargetPosition(50);
+        PixelLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+         PixelLift.setPower(0.2);
+         while (PixelLift.isBusy()) {
+             sleep(10);
+        }
+        PixelLift.setPower(0);
+    }
+    
+   public void  navx_drive_sideways(double inches)
+    {
+	double drive_speed = -0.4*Math.signum(inches);
+
+        try {
+            navx_device.zeroYaw();
+            int current_left_front_position = leftFrontDrive.getCurrentPosition();
+            int current_right_front_position = rightFrontDrive.getCurrentPosition();
+            int current_left_back_position = leftBackDrive.getCurrentPosition();
+            int current_right_back_position = rightBackDrive.getCurrentPosition();
+            yawPIDController.setSetpoint(0.);
+            navXPIDController.PIDResult yawPIDResult = new navXPIDController.PIDResult();
+            double counts_to_go = Math.abs(inches)*100;
+            double counts_done = 0;
+            while (counts_to_go > (counts_done = Math.abs(leftFrontDrive.getCurrentPosition() - current_left_front_position)) &&
+                    !Thread.currentThread().isInterrupted()) {
+                if (yawPIDController.waitForNewUpdate(yawPIDResult, DEVICE_TIMEOUT_MS)) {
+                    double counts_left = counts_to_go - counts_done;
+                    if (counts_to_go - counts_done < 200) {
+                        drive_speed = -0.2*Math.signum(inches);
+                    }
+                    if (yawPIDResult.isOnTarget()) {
+                        leftBackDrive.setPower(-drive_speed);
+                        leftFrontDrive.setPower(drive_speed);
+                        rightFrontDrive.setPower(-drive_speed);
+                        rightBackDrive.setPower(drive_speed);
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", drive_speed, drive_speed);
+                    } else {
+                        double output = yawPIDResult.getOutput();//*Math.signum(drive_speed);
+                        leftFrontDrive.setPower(drive_speed + output);
+                        leftBackDrive.setPower(-drive_speed + output);
+                        rightBackDrive.setPower(drive_speed - output);
+                        rightFrontDrive.setPower(-drive_speed - output);
+                        telemetry.addData(">", "PIDOutput %.1f, %.1f", (drive_speed + output), (drive_speed - output));
+                    }
+                    telemetry.addData(">", "Yaw %.1f", navx_device.getYaw());
+                } else {
+                    /* A timeout occurred */
+                    telemetry.addData("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
+                }
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        drivemotors_off();
+    }
+
+
 }

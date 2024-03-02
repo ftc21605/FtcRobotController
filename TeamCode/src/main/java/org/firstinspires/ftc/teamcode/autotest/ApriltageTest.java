@@ -104,7 +104,7 @@ public class ApriltageTest extends LinearOpMode {
         // here is what happens after we hit start
         doCameraSwitching(MicrosoftWebCam);
         visionPortal.setProcessorEnabled(ColorFinder, false);
-        int DESIRED_TAG_ID = 4;    // Choose the tag you want to approach or set to -1 for ANY tag.
+        int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
         boolean targetFound = false;
         double angle = 0;
         double distance = 0;
