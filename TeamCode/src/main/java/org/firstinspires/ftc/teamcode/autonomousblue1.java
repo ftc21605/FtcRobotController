@@ -78,7 +78,7 @@ import java.util.Objects;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "autonomous blue front", group = "Wallace")
+@Autonomous(name = "autonomous blue front tfod", group = "Wallace")
 @Disabled
 public class autonomousblue1 extends LinearOpMode {
 

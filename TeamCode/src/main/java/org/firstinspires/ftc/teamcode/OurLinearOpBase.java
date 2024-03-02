@@ -107,6 +107,7 @@ public class OurLinearOpBase extends LinearOpMode {
     public WebcamName LogitechWebCam, MicrosoftWebCam;
 
     public BlueFinder BlueColorFinder = null;// = null;
+    public BlueFinder.Selected blueselect;
     public RedFinder RedColorFinder = null;// = null;
     public RedFinder.Selected redselect;
     // pixel lift
