@@ -72,6 +72,7 @@ public class autonomousredback extends OurLinearOpBase {
 	setup_intake();
 	setup_pixel_bucket();
 	setup_bucketfront();
+	setup_bucketback();
 
 	setup_distance_sensor();
 	bucketfront_lock(); // start with locked bucket
@@ -112,7 +113,7 @@ public class autonomousredback extends OurLinearOpBase {
           //      while (!gamepad1.a){
           //         sleep(1);
           //      }
-                navx_drive_backward_straight(DRIVE_SPEED, 5);
+                navx_drive_backward_straight(DRIVE_SPEED, 6);
 		//	wait_for_button_pushed(1);
              //   while (!gamepad1.a){
              //       sleep(1);
@@ -147,18 +148,18 @@ public class autonomousredback extends OurLinearOpBase {
       //  while (!gamepad1.a) {
       //      sleep(1);
       //  }
-        navx_drive_forward_straight(DRIVE_SPEED, 12); 
+        navx_drive_forward_straight(DRIVE_SPEED, 11); 
         pixel_release();
-        navx_drive_backward_straight(DRIVE_SPEED, 8);
-        navx_turn_left(45);
+        navx_drive_backward_straight(DRIVE_SPEED, 10);
+        navx_turn_left(48);
         navx_drive_forward_straight(0.5, 33);
 	navx_turn_right(93);
        navx_drive_forward_straight(0.5, 80);
 	navx_turn_left(90);
 		prep_pixel_drop();
-       navx_drive_backward_straight(0.5, 30);
+       navx_drive_backward_straight(0.3, 30);
 		
-	navx_turn_left(90);
+	navx_turn_left(95);
 
 	navx_drive_backward_distsensor_right(0.25,0);
 		drop_pixel();
@@ -173,15 +174,15 @@ public class autonomousredback extends OurLinearOpBase {
         navx_drive_forward_straight(DRIVE_SPEED, 14);
         pixel_release();// S1: Forward 47
         navx_drive_backward_straight(DRIVE_SPEED, 10);
-	navx_turn_right(39);
+	navx_turn_right(36);
         navx_drive_forward_straight(0.5, 33);
-	navx_turn_right(93);
+	navx_turn_right(94);
        navx_drive_forward_straight(0.5, 80);
 	navx_turn_left(90);
 		prep_pixel_drop();
-       navx_drive_backward_straight(0.5, 13);
+       navx_drive_backward_straight(0.5, 15);
 		
-	navx_turn_left(90);
+	navx_turn_left(93);
 
 	navx_drive_backward_distsensor_right(0.25,0);
 		drop_pixel();

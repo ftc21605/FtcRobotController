@@ -70,6 +70,7 @@ public class autonomousredfront extends OurLinearOpBase {
 	setup_intake();
 	setup_pixel_bucket();
 	setup_bucketfront();
+	setup_bucketback();
 
 	setup_distance_sensor();
 	bucketfront_lock(); // start with locked bucket
@@ -154,7 +155,7 @@ public class autonomousredfront extends OurLinearOpBase {
         //telemetry.addData("> r25", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
         navx_drive_backward_straight((DRIVE_SPEED+0.2), 20);
-        navx_turn_right(35);
+        navx_turn_right(37);
 		prep_pixel_drop();
 		sleep(500);
 		navx_drive_backward_distsensor_right(0.25,0);

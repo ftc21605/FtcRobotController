@@ -35,9 +35,9 @@ import org.firstinspires.ftc.teamcode.OurLinearOpBase;
 import org.firstinspires.ftc.teamcode.processors.BlueFinder;
 
 
-@Autonomous(name = "autonomous blue front", group = "Wallace")
+@Autonomous(name = "autonomous blue back", group = "Wallace")
 //@Disabled
-public class autonomousbluefront extends OurLinearOpBase {
+public class autonomousblueback extends OurLinearOpBase {
 
     boolean skip_opencv = false;
     /* Declare OpMode members. */
@@ -45,17 +45,8 @@ public class autonomousbluefront extends OurLinearOpBase {
     static final double DRIVE_SPEED = 0.2;
     static final double TURN_SPEED = 0.2;
 
-    // private BlueFinder visionProcessor = new BlueFinder();
-    //visionProcessor.drawthr();
-    //BlueFinder.Selected myselect = BlueFinder.Selected.NONE;
    
     private int DESIRED_TAG_ID = -1;    // Choose the tag you want to approach or set to -1 for ANY tag.
-    final double DESIRED_DISTANCE = 5.0; //  this is how close the camera should get to the target (inches)
-
-    //  static final double MAX_POS = 0.15;     // Maximum rotational position
-    //static final double MIN_POS = 0.5;     // Minimum rotational position
-
-    //int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
 
     boolean targetFound = false;
 
@@ -108,15 +99,14 @@ public class autonomousbluefront extends OurLinearOpBase {
                 navx_drive_forward_straight(DRIVE_SPEED, 34); 
                 pixel_release();
 		telemetry.addData(">", "final angle %.1f", navx_device.getYaw());
-                navx_drive_backward_straight(DRIVE_SPEED, 6);
-                navx_turn_right(95);
+                navx_drive_backward_straight(DRIVE_SPEED, 7);
+                navx_turn_right(98);
                 //telemetry.addData("> r85", "angle: %.1f", navx_device.getYaw());
                 //telemetry.update();
+		navx_drive_backward_straight(0.3,20);
 		prep_pixel_drop();
 		navx_drive_backward_distsensor_right(0.3,0);
 		drop_pixel();
-		navx_drive_sideways(-10);
-		navx_drive_backward_straight(0.3,5);
 
 
             }
@@ -128,37 +118,40 @@ public class autonomousbluefront extends OurLinearOpBase {
         telemetry.update();
         navx_drive_forward_straight(DRIVE_SPEED, 11); 
         pixel_release();
-        navx_drive_backward_straight(DRIVE_SPEED, 4);
-        navx_turn_right(85);
-
-        navx_drive_backward_straight((DRIVE_SPEED+0.2), 19);
-        navx_turn_left(35);
+        navx_drive_backward_straight(DRIVE_SPEED, 7);
+        navx_turn_left(48);
+        navx_drive_forward_straight(0.5, 31);
+	navx_turn_left(100);
+       navx_drive_forward_straight(0.5, 80);
+	navx_turn_right(90);
 		prep_pixel_drop();
-		sleep(500);
-		navx_drive_backward_distsensor_right(0.25,0);
+       navx_drive_backward_straight(0.5, 17);
+		
+	navx_turn_right(101);
+
+	navx_drive_backward_distsensor_right(0.25,0);
 		drop_pixel();
-		//		navx_drive_sideways(-10); // when moving to left of board
-		navx_drive_sideways(-16); // default is moving to the right
-		navx_drive_backward_straight(0.3,8);
 
     } else if(blueselect ==BlueFinder.Selected.LEFT)
 
     {
-        navx_drive_forward_straight(DRIVE_SPEED, 4);  // S1: Forward 47
-     //   while (!gamepad1.a) {
-     //       sleep(1);
-      //  }
-        navx_turn_left(20);
-        navx_drive_forward_straight(DRIVE_SPEED, 27);
-        pixel_release();// S1: Forward 47
-        navx_drive_backward_straight(DRIVE_SPEED, 10);
-	navx_turn_right(120);
+        navx_drive_forward_straight(DRIVE_SPEED, 18);  // S1: Forward 47
+        navx_turn_left(45);
+        navx_drive_forward_straight(DRIVE_SPEED, 14);
+        pixel_release();
+        navx_drive_backward_straight(DRIVE_SPEED, 8);
+	navx_turn_right(45);
+       navx_drive_forward_straight(0.5, 28);
+	navx_turn_left(99);
+       navx_drive_forward_straight(0.5, 80);
+	navx_turn_right(95);
 		prep_pixel_drop();
-		navx_drive_backward_distsensor_right(0.25,0);
+       navx_drive_backward_straight(0.5, 35);
+		
+	navx_turn_right(95);
+
+	navx_drive_backward_distsensor_right(0.25,0);
 		drop_pixel();
-		//		navx_drive_sideways(-10); // when moving to left of board
-		navx_drive_sideways(-8); // default is moving to the right
-		navx_drive_backward_straight(0.3,5);
     }
 
     }
