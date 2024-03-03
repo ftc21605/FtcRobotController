@@ -67,6 +67,7 @@ public class BucketServoTest extends OurLinearOpBase {
     public void runOpMode() {
 	setup_bucketback();
 	setup_bucketfront();
+	setup_pixel_bucket();
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
   
@@ -94,11 +95,22 @@ public class BucketServoTest extends OurLinearOpBase {
 		{
 		    BucketFrontServo.setPosition(bucketfront_catch);
 		}
+	    if (gamepad1.left_bumper)
+		{
+	          bucket_tilt_forward();
+		}		    
+	    if (gamepad1.right_bumper)
+		{
+	         bucket_tilt_backward();
+		}		    
             // Display the current value
             telemetry.addData(">", "Press A for back release." );
             telemetry.addData(">", "Press B for back catch." );
             telemetry.addData(">", "Press X for front release." );
             telemetry.addData(">", "Press Y for front catch." );
+            telemetry.addData(">", "Press left bumper for bucket tilt forward." );
+            telemetry.addData(">", "Press right bumper for bucket tilt backward." );
+	    
             telemetry.update();
 
             idle();

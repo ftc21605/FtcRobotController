@@ -30,16 +30,14 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.OurLinearOpBase;
 import org.firstinspires.ftc.teamcode.processors.RedFinder;
 
 
-@Autonomous(name = "autonomous red front", group = "Wallace")
+@Autonomous(name = "autonomous red back", group = "Wallace")
 //@Disabled
-public class autonomousredfront extends OurLinearOpBase {
+public class autonomousredback extends OurLinearOpBase {
 
     boolean skip_opencv = false;
     /* Declare OpMode members. */
@@ -51,11 +49,15 @@ public class autonomousredfront extends OurLinearOpBase {
     //visionProcessor.drawthr();
     //RedFinder.Selected myselect = RedFinder.Selected.NONE;
    
+    private int DESIRED_TAG_ID = -1;    // Choose the tag you want to approach or set to -1 for ANY tag.
+    final double DESIRED_DISTANCE = 5.0; //  this is how close the camera should get to the target (inches)
 
     //  static final double MAX_POS = 0.15;     // Maximum rotational position
     //static final double MIN_POS = 0.5;     // Minimum rotational position
 
-    int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
+    //int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
+
+    boolean targetFound = false;
 
     @Override
     public void runOpMode() {
@@ -102,7 +104,7 @@ public class autonomousredfront extends OurLinearOpBase {
         if (redselect == RedFinder.Selected.MIDDLE) {
             DESIRED_TAG_ID = 2;
             if (!skip_opencv) {
-                navx_drive_forward_straight(DRIVE_SPEED, 34); 
+                navx_drive_forward_straight(DRIVE_SPEED, 35); 
                 pixel_release();
 		telemetry.addData(">", "final angle %.1f", navx_device.getYaw());
 
@@ -110,7 +112,7 @@ public class autonomousredfront extends OurLinearOpBase {
           //      while (!gamepad1.a){
           //         sleep(1);
           //      }
-                navx_drive_backward_straight(DRIVE_SPEED, 7);
+                navx_drive_backward_straight(DRIVE_SPEED, 5);
 		//	wait_for_button_pushed(1);
              //   while (!gamepad1.a){
              //       sleep(1);
@@ -118,14 +120,15 @@ public class autonomousredfront extends OurLinearOpBase {
 		//  telemetry.addData("> r85", "angle: %.1f", navx_device.getYaw());
 		// telemetry.update();
 
-                navx_turn_left(93);
+                navx_turn_left(96);
                 //telemetry.addData("> r85", "angle: %.1f", navx_device.getYaw());
                 //telemetry.update();
+		navx_drive_backward_straight(0.3,20);
 		prep_pixel_drop();
 		navx_drive_backward_distsensor_right(0.3,0);
 		drop_pixel();
-		navx_drive_sideways(10);
-		navx_drive_backward_straight(0.3,5);
+		//navx_drive_sideways(10);
+		//navx_drive_backward_straight(0.3,5);
 
 
             }
@@ -134,53 +137,57 @@ public class autonomousredfront extends OurLinearOpBase {
             // telemetry.update();
             // sleep(1000);
 
-    } else if(redselect ==RedFinder.Selected.LEFT)
-
-    {
-        navx_drive_forward_straight(DRIVE_SPEED, 18);
-        navx_turn_left(45);
-        //telemetry.addData("> l25", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-        telemetry.update();
-      //  while (!gamepad1.a) {
-      //      sleep(1);
-      //  }
-        navx_drive_forward_straight(DRIVE_SPEED, 13); 
-        pixel_release();
-        navx_drive_backward_straight(DRIVE_SPEED, 5);
-   //     while (!gamepad1.a) {
-    //        sleep(1);
-     //   }
-        navx_turn_left(85);
-        //telemetry.addData("> r25", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-        telemetry.update();
-        navx_drive_backward_straight((DRIVE_SPEED+0.2), 20);
-        navx_turn_right(35);
-		prep_pixel_drop();
-		sleep(500);
-		navx_drive_backward_distsensor_right(0.25,0);
-		drop_pixel();
-		//		navx_drive_sideways(-10); // when moving to left of board
-		navx_drive_sideways(18); // default is moving to the right
-		navx_drive_backward_straight(0.3,5);
-
+            return;
     } else if(redselect ==RedFinder.Selected.RIGHT)
 
     {
-        navx_drive_forward_straight(DRIVE_SPEED, 4);  // S1: Forward 47
-     //   while (!gamepad1.a) {
-     //       sleep(1);
+        navx_drive_forward_straight(DRIVE_SPEED, 18);
+        navx_turn_right(45);
+        //telemetry.addData("> l25", "angle: %.1f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+      //  while (!gamepad1.a) {
+      //      sleep(1);
       //  }
-        navx_turn_right(18);
-        navx_drive_forward_straight(DRIVE_SPEED, 27);
-        pixel_release();// S1: Forward 47
-        navx_drive_backward_straight(DRIVE_SPEED, 9);
-	navx_turn_left(113);
+        navx_drive_forward_straight(DRIVE_SPEED, 12); 
+        pixel_release();
+        navx_drive_backward_straight(DRIVE_SPEED, 8);
+        navx_turn_left(45);
+        navx_drive_forward_straight(0.5, 33);
+	navx_turn_right(93);
+       navx_drive_forward_straight(0.5, 80);
+	navx_turn_left(90);
 		prep_pixel_drop();
-		navx_drive_backward_distsensor_right(0.25,0);
+       navx_drive_backward_straight(0.5, 30);
+		
+	navx_turn_left(90);
+
+	navx_drive_backward_distsensor_right(0.25,0);
 		drop_pixel();
 		//		navx_drive_sideways(-10); // when moving to left of board
-		navx_drive_sideways(8); // default is moving to the right
-		navx_drive_backward_straight(0.3,5);
+		//	navx_drive_sideways(8); // default is moving to the right
+
+    } else if(redselect ==RedFinder.Selected.LEFT)
+
+    {
+        navx_drive_forward_straight(DRIVE_SPEED, 17);
+        navx_turn_left(40);
+        navx_drive_forward_straight(DRIVE_SPEED, 14);
+        pixel_release();// S1: Forward 47
+        navx_drive_backward_straight(DRIVE_SPEED, 10);
+	navx_turn_right(39);
+        navx_drive_forward_straight(0.5, 33);
+	navx_turn_right(93);
+       navx_drive_forward_straight(0.5, 80);
+	navx_turn_left(90);
+		prep_pixel_drop();
+       navx_drive_backward_straight(0.5, 13);
+		
+	navx_turn_left(90);
+
+	navx_drive_backward_distsensor_right(0.25,0);
+		drop_pixel();
+		//		navx_drive_sideways(-10); // when moving to left of board
+		//	navx_drive_sideways(8); // default is moving to the right
+		//navx_drive_backward_straight(0.3,5);
     }
 
     }

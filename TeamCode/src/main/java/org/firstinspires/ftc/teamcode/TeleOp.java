@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -65,7 +66,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp", group = "AWallace")
-//@Disabled
+@Disabled
 public class TeleOp extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.

@@ -106,8 +106,11 @@ public class TeleOpNew extends OurLinearOpBase {
                     lateral = gamepad1.left_stick_x;
                 }
             }
-            double yaw = gamepad1.right_stick_x * 0.6;
-
+            double yaw = 0;
+	    if (Math.abs(gamepad1.right_stick_x) > 0.15)
+	    {
+		yaw = gamepad1.right_stick_x * 0.6;
+	    }
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
             double leftFrontPower = axial + lateral + yaw;
@@ -258,10 +261,11 @@ public class TeleOpNew extends OurLinearOpBase {
                 bucket_tilt_backward();
             }
             if (gamepad2.x) {
-                bucketfront_release();
+                bucketfront_lock();
+                bucketback_release();
             }
             if (gamepad2.y) {
-                bucketfront_lock();
+                bucketback_release();
             }
             //grabber.setPosition(grabber_position);
             // Show the elapsed game time and wheel power.

@@ -120,8 +120,8 @@ public class OurLinearOpBase extends LinearOpMode {
     public DcMotor PixelTransport = null;
 
     public Servo BucketTurnServo;
-    public double BUCKETTURNSERVO_MAXPOS = 0.23;
-    public double BUCKETTURNSERVO_MINPOS = 0.85;
+    public double BUCKETTURNSERVO_MAXPOS = 0.27;
+    public double BUCKETTURNSERVO_MINPOS = 0.87;
 
     public Servo BucketBackServo;
     public final double bucketback_release = 0.6;
