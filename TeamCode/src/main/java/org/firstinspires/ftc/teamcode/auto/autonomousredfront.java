@@ -119,7 +119,7 @@ public class autonomousredfront extends OurLinearOpBase {
 		//  telemetry.addData("> r85", "angle: %.1f", navx_device.getYaw());
 		// telemetry.update();
 
-                navx_turn_left(93);
+                navx_turn_left(97);
                 //telemetry.addData("> r85", "angle: %.1f", navx_device.getYaw());
                 //telemetry.update();
 		prep_pixel_drop();
@@ -175,7 +175,7 @@ public class autonomousredfront extends OurLinearOpBase {
         navx_drive_forward_straight(DRIVE_SPEED, 27);
         pixel_release();// S1: Forward 47
         navx_drive_backward_straight(DRIVE_SPEED, 9);
-	navx_turn_left(113);
+	navx_turn_left(115);
 		prep_pixel_drop();
 		navx_drive_backward_distsensor_right(0.25,0);
 		drop_pixel();

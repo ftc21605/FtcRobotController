@@ -63,6 +63,7 @@ public class TeleOpNew extends OurLinearOpBase {
 	setup_pixel_transport();
  	setup_bucketback();
 	setup_bucketfront();
+        bucketback_release();
 
 	// Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");

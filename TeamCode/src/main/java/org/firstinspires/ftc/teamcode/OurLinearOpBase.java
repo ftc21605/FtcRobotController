@@ -735,10 +735,12 @@ public class OurLinearOpBase extends LinearOpMode {
 
     public void bucketback_release() {
         BucketBackServo.setPosition(bucketback_release);
+        bucket_back_locked = false;
     }
 
     public void bucketback_lock() {
         BucketBackServo.setPosition(bucketback_catch);
+            bucket_back_locked = true;
     }
 
     public void bucketback_toggle() {
@@ -763,10 +765,12 @@ public class OurLinearOpBase extends LinearOpMode {
 
     public void bucketfront_release() {
         BucketFrontServo.setPosition(bucketfront_release);
+            bucket_front_locked = false;
     }
 
     public void bucketfront_lock() {
         BucketFrontServo.setPosition(bucketfront_catch);
+            bucket_front_locked = true;
     }
 
     public void setup_bucketfront() {
