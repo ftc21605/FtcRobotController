@@ -100,7 +100,7 @@ public class TeleOpNew extends OurLinearOpBase {
             if (Math.abs(axial) < 0.15) {
                 axial = 0.;
             }
-            axial = axial * 0.7;  // Note: pushing stick forward gives negative value
+            axial = axial * 1;  // Note: pushing stick forward gives negative value
             double lateral = 0.;
             if (Math.abs(gamepad1.left_stick_x) > 0.8) {
                 if (Math.abs(gamepad1.left_stick_y) < 0.3) {
