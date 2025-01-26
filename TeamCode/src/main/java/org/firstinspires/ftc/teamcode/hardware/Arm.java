@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class Arm {
     /* Declare OpMode members. */
     private final LinearOpMode myOpMode;   // gain access to methods in the calling OpMode.
-    long arm_drop_position = 1790;
-    long arm_slow_position = 1500;
-    long startposition = 818;
+    int arm_drop_position = 1790;
+    int arm_slow_position = 1500;
+    int startposition = 818;
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
     private DcMotor Arm = null;
 
@@ -55,15 +55,15 @@ public class Arm {
 		        Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    public long getCurrentPosition() {
+    public int getCurrentPosition() {
         return Arm.getCurrentPosition();
     }
 
-    public long getArmDropPosition() {
+    public int getArmDropPosition() {
         return arm_drop_position;
     }
 
-    public long getArmSlowPosition() {
+    public int getArmSlowPosition() {
 	return arm_slow_position;
     }
     public void Reset(){
@@ -72,16 +72,21 @@ public class Arm {
     }
     public void MoveTo(int ticks)
     {
-        Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+	//        Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 	Arm.setTargetPosition(ticks);
-	Arm.setPower(-0.2);
-	    while(Arm.isBusy())
-		{
-		    myOpMode.sleep(1);
-		}
-	Arm.setPower(0);
-        Arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+       	Arm.setPower(0.3);
+    }
+    public void MoveTo(int ticks, double power)
+    {
+	//        Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	Arm.setTargetPosition(ticks);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+       	Arm.setPower(power);
+    }
+    public boolean isBusy()
+    {
+	return Arm.isBusy();
     }
     public void Stop()
     {

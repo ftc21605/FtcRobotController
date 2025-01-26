@@ -121,10 +121,10 @@ public class AprilTagTest extends LinearOpMode
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must match the names assigned during the robot configuration.
         // step (using the FTC Robot Controller app on the phone).
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "left_back");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontright");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "backright");
 
         // Set the direction for each motor.
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);

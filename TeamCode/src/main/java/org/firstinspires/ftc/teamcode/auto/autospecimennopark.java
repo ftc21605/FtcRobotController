@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.hardware.Arm;
 import org.firstinspires.ftc.teamcode.hardware.Grabber;
 import org.firstinspires.ftc.teamcode.hardware.Rotator;
 import org.firstinspires.ftc.teamcode.hardware.Slide;
+import org.firstinspires.ftc.teamcode.hardware.Distance;
+import org.firstinspires.ftc.teamcode.hardware.DistanceBack;
 
 @Autonomous(name = "auto specimen no parking", group = "Wallace")
 //@Disabled
@@ -49,11 +51,15 @@ public class autospecimennopark extends LinearOpMode {
     Rotator rotator = new Rotator(this);
     Grabber grabber = new Grabber(this);
     Slide slide = new Slide(this);
+    private Distance distance = new Distance(this);
+    private DistanceBack distance_back = new DistanceBack(this);
 
 
     @Override
     public void runOpMode() {
 
+        distance.init();
+        distance_back.init();
        arm.init();
         slide.init();
        grabber.init();
@@ -107,57 +113,38 @@ public class autospecimennopark extends LinearOpMode {
         }
 	    moveRobot_forward(DRIVE_SPEED+0.1,0,5);
 	//arm.Float();
-	arm.move(-0.4);
-	while(arm.getCurrentPosition() > -200)
-	    {
-		sleep(1);
-	    }
-	arm.Stop();
+	    arm.MoveTo(570,0.5);
             // while (!gamepad1.a) {
             //     sleep(1);
             // }
-	sleep(3000);
 
 	//	left_turn(92);
 	//arm.Brake();
-	arm.Reset();
-         telemetry.addData("armpos:", "%10d", arm.getCurrentPosition());
-            telemetry.addData("slidepos:", "%10df", slide.getCurrentPosition());
-            telemetry.update();
-            // while (!gamepad1.a) {
-            //     sleep(1);
-            // }
-	
-	arm.move(0.4);
-	while(arm.getCurrentPosition() < 1530)
-	    {
-		sleep(1);
-	    }
-	arm.move(0.05);
 	rotator.setposition(0.45);
             // while (!gamepad1.a) {
             //     sleep(1);
             // }
-	slide.move(0.4);
-	while(slide.getCurrentPosition() < 950)
+	slide.MoveTo(1000);
+            leftFrontDrive.setPower((-DRIVE_SPEED));
+            rightFrontDrive.setPower((-DRIVE_SPEED));
+            leftBackDrive.setPower((-DRIVE_SPEED));
+            rightBackDrive.setPower((-DRIVE_SPEED));
+            while (distance.getDistanceMM() > 120) {
+                sleep(1);
+            }
+            leftFrontDrive.setPower((0));
+            rightFrontDrive.setPower((0));
+            leftBackDrive.setPower((0));
+            rightBackDrive.setPower((0));
+	    sleep(1000);
+	    long startpos = slide.getCurrentPosition();
+	slide.MoveTo(-500);
+	while(slide.isBusy())
 	    {
 		sleep(1);
 	    }
 	slide.move(0.05);
-	    moveRobot_forward(DRIVE_SPEED,0,31);
-	                leftFrontDrive.setPower(0.05);
-            rightFrontDrive.setPower(0.05);
-            leftBackDrive.setPower(0.05);
-            rightBackDrive.setPower(0.05);
-	    sleep(1000);
-	    long startpos = slide.getCurrentPosition();
-	slide.move(-0.4);
-	while(slide.getCurrentPosition() > (startpos - 500))
-	    { 
-		sleep(1);
-	    }
-	slide.move(0.05);
-	sleep(1000);
+	sleep(500);
 	grabber.release();
 	//	            encoderDrive(DRIVE_SPEED, 12, 12, 5.0);
 	moveRobot_backward(DRIVE_SPEED,0,5);

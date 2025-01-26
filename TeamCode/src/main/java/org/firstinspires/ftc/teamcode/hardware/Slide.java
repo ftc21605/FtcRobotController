@@ -75,4 +75,22 @@ public class Slide {
 	Slide.setTargetPosition(position);
 	Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
+    public void MoveTo(int ticks)
+    {
+	//        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	Slide.setTargetPosition(ticks);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+       	Slide.setPower(0.3);
+    }
+    public void MoveTo(int ticks, double power)
+    {
+	//        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	Slide.setTargetPosition(ticks);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+       	Slide.setPower(power);
+    }
+    public boolean isBusy()
+    {
+	return Slide.isBusy();
+    }
 }
