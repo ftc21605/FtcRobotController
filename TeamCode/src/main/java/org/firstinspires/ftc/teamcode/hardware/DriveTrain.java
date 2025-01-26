@@ -98,6 +98,27 @@ public class DriveTrain {
         return leftFrontDrive.getCurrentPosition();
     }
 
+    public void moveRobot(double x, double yaw) {
+        // Calculate left and right wheel powers.
+        myOpMode.telemetry.addData("Manual","Drive %5.2f, Turn %5.2f", x, yaw);
+        double leftPower = -(x + yaw);
+        double rightPower = -(x - yaw);
+        myOpMode.telemetry.addData("Manual","Drive %5.2f, Turn %5.2f", leftPower, rightPower);
+
+        // Normalize wheel powers to ensure they are between -1 and 1.
+        double max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+        if (max > 1.0) {
+            leftPower /= max;
+            rightPower /= max;
+        }
+
+        // Apply the calculated power to all four motors.
+        leftFrontDrive.setPower(leftPower);
+        rightFrontDrive.setPower(rightPower);
+        leftBackDrive.setPower(leftPower);
+        rightBackDrive.setPower(rightPower);
+    }
+
     public void off() {
         leftFrontDrive.setPower(0);
         rightFrontDrive.setPower(0);
