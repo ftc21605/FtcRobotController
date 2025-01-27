@@ -54,7 +54,7 @@ public class autospecimennopark extends LinearOpMode {
     private Distance distance = new Distance(this);
     private DistanceBack distance_back = new DistanceBack(this);
 
-
+    SlideBusyThread slidebusy = new SlideBusyThread();
     @Override
     public void runOpMode() {
 
@@ -64,8 +64,8 @@ public class autospecimennopark extends LinearOpMode {
         slide.init();
        grabber.init();
        rotator.init();
-	sleep(1000);
-	rotator.initpos();
+	sleep(500);
+	//	rotator.initpos();
 	grabber.grab();
        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontleft");
         leftBackDrive = hardwareMap.get(DcMotor.class, "backleft");
@@ -111,20 +111,25 @@ public class autospecimennopark extends LinearOpMode {
 	arm.move(0.1);
         while (!isStarted() && !isStopRequested()) {
         }
-	    moveRobot_forward(DRIVE_SPEED+0.1,0,5);
+	rotator.setposition(0.45);
+	//	    moveRobot_forward(DRIVE_SPEED+0.1,0,5);
 	//arm.Float();
-	    arm.MoveTo(570,0.5);
+	    arm.MoveTo(520,0.5);
             // while (!gamepad1.a) {
             //     sleep(1);
             // }
 
 	//	left_turn(92);
 	//arm.Brake();
-	rotator.setposition(0.45);
             // while (!gamepad1.a) {
             //     sleep(1);
             // }
-	slide.MoveTo(1000);
+	slide.MoveTo(1100);
+	telemetry.addData("slide power before busy: ", "%5.2f", slide.getPower());
+	//	slidebusy.run();
+	telemetry.addData("slide power right after busy: ", "%5.2f", slide.getPower());
+	telemetry.addData("slide power after a: ", "%5.2f", slide.getPower());
+
             leftFrontDrive.setPower((-DRIVE_SPEED));
             rightFrontDrive.setPower((-DRIVE_SPEED));
             leftBackDrive.setPower((-DRIVE_SPEED));
@@ -136,14 +141,19 @@ public class autospecimennopark extends LinearOpMode {
             rightFrontDrive.setPower((0));
             leftBackDrive.setPower((0));
             rightBackDrive.setPower((0));
-	    sleep(1000);
+	telemetry.addData("slide power after a: ", "%5.2f", slide.getPower());
+        telemetry.update();
+	while(!gamepad1.a)
+	    {
+		sleep(1);
+	    }
+	sleep(1000);
 	    long startpos = slide.getCurrentPosition();
-	slide.MoveTo(-500);
+	slide.MoveTo(500);
 	while(slide.isBusy())
 	    {
 		sleep(1);
 	    }
-	slide.move(0.05);
 	sleep(500);
 	grabber.release();
 	//	            encoderDrive(DRIVE_SPEED, 12, 12, 5.0);
@@ -403,6 +413,21 @@ rotator.setposition(0.45);
         return driveto_angle;
     }
 
+
+
+
+private class SlideBusyThread implements Runnable{
+    public SlideBusyThread(){
+        //Anything you need to do in a constructor
+    }
+
+    public void run(){
+        while(slide.isBusy())
+	    {
+		sleep(5);
+	    }
+	slide.move(0.05);
+        //Anything you need to do in the background. Put a while loop in here if you need it to loop. Maybe while the op mod is still active.
+    }
 }
-
-
+}

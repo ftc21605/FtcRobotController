@@ -108,17 +108,24 @@ public class AprilTagTest extends LinearOpMode
             // If Left Bumper is being pressed, AND we have found the desired target, Drive to target Automatically .
             if (gamepad1.left_bumper && targetFound) {
 
-                // Determine heading and range error so we can use them to control the robot automatically.
+		if(!run_with_distance_sensor)
+		    {
+		    // Determine heading and range error so we can use them to control the robot automatically.
                 double  rangeError   = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                 double  headingError = desiredTag.ftcPose.bearing;
 
                 // Use the speed and turn "gains" to calculate how we want the robot to move.  Clip it to the maximum
                 drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
                 turn  = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
+	    if (desiredTag.ftcPose.range < 20)
+		{
+		    run_with_distance_sensor = true;
+		}
 
                 telemetry.addData("Auto","Drive %5.2f, Turn %5.2f", drive, turn);
                 telemetry.addData("Range/heading error","Range %5.2f, Heading %5.2f", rangeError, headingError);
-            } else {
+		    }
+		    } else {
 
                 // drive using manual POV Joystick mode.
                 drive = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
@@ -130,10 +137,6 @@ public class AprilTagTest extends LinearOpMode
 		    run_with_distance_sensor = false;
 		}
             // Apply desired axes motions to the drivetrain.
-	    if (desiredTag.ftcPose.range < 15)
-		{
-		    run_with_distance_sensor = true;
-		}
 	    if (run_with_distance_sensor)
 		{
 		    if (distance_back.getDistanceMM() > 20)
@@ -143,6 +146,7 @@ public class AprilTagTest extends LinearOpMode
 		    else
 			{
 			    drive = 0;
+			    run_with_distance_sensor = false;
 			}
 			}
             drive_train.moveRobot(drive, turn);

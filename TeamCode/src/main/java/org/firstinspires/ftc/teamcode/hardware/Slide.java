@@ -93,4 +93,8 @@ public class Slide {
     {
 	return Slide.isBusy();
     }
+    public double getPower()
+    {
+	return Slide.getPower();
+    }
 }

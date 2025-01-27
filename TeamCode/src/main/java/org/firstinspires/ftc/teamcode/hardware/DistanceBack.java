@@ -29,7 +29,7 @@ public class DistanceBack {
      public void init() {
         sensorDistance = myOpMode.hardwareMap.get(DistanceSensor.class, "distance_back");
         Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
-        myOpMode.telemetry.addData(">", "Rev 2m distance sensor Initialized");
+        myOpMode.telemetry.addData(">", "Backward Rev 2m distance sensor Initialized");
     }
 
     public double getDistanceMM()
