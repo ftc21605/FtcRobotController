@@ -14,6 +14,7 @@ public class DriveTrain {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    double TURN_SPEED = -0.2;
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public DriveTrain(LinearOpMode opmode) {
@@ -142,14 +143,51 @@ public class DriveTrain {
 	return rightBackDrive;
     }
     
-    public void left_turn_counter(long ticks) {
-    double TURN_SPEED = -0.2;
+    public void left_turn_counter(int ticks) {
+	left_turn_counter(ticks,TURN_SPEED);
+	return;
+    }
+	public void left_turn_counter(int ticks, double power) {
 	long toposition = leftFrontDrive.getCurrentPosition() - ticks;
-        leftFrontDrive.setPower(TURN_SPEED);
-        rightFrontDrive.setPower(-TURN_SPEED);
-        leftBackDrive.setPower(TURN_SPEED);
-        rightBackDrive.setPower(-TURN_SPEED);
+        leftFrontDrive.setPower(power);
+        rightFrontDrive.setPower(-power);
+        leftBackDrive.setPower(power);
+        rightBackDrive.setPower(-power);
 	while(	leftFrontDrive.getCurrentPosition() > toposition)
+	    {
+		myOpMode.sleep(1);
+	    }
+        leftFrontDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightBackDrive.setPower(0);
+	return;
+    }
+
+    public void right_turn_counter(int ticks) {
+	right_turn_counter(ticks,TURN_SPEED);
+	return;
+    }
+
+    public void right_turn_angle(double angle) {
+	int ticks = (int) (angle*4.*770./360.);
+	right_turn_counter(ticks,TURN_SPEED);
+	return;
+    }
+
+    public void left_turn_angle(double angle) {
+	int ticks = (int)(angle*4.*740./360.);
+	left_turn_counter(ticks,TURN_SPEED);
+	return;
+    }
+
+    public void right_turn_counter(int ticks, double power) {
+	long toposition = leftFrontDrive.getCurrentPosition() + ticks;
+        leftFrontDrive.setPower(-power);
+        rightFrontDrive.setPower(power);
+        leftBackDrive.setPower(-power);
+        rightBackDrive.setPower(power);
+	while(	leftFrontDrive.getCurrentPosition() < toposition)
 	    {
 		myOpMode.sleep(1);
 	    }

@@ -54,6 +54,21 @@ public class MecanumDrive extends LinearOpMode {
 		    telemetry.addData("right back", "%10d", drive.getRightBackDrive().getCurrentPosition());
 		    drive.getRightBackDrive().setPower(0.5);
 		}
+	    if (gamepad1.y)
+		{
+		    telemetry.addData("right back", "%10d", drive.getRightBackDrive().getCurrentPosition());
+		    drive.getRightBackDrive().setPower(0.5);
+		}
+	    if (gamepad1.left_bumper)
+		{
+		    drive.left_turn_angle(90.);
+		}
+	    if (gamepad1.right_bumper)
+		{
+		    drive.right_turn_angle(90.);
+		}
+	    telemetry.addData(">", "Press left bumper for 90deg left turn");
+	    telemetry.addData(">", "Press right bumper for 90deg right turn");
 	    telemetry.addData("left ticks", "%10d", drive.getCurrentLeftFrontPosition());
 	    telemetry.update();
         }
