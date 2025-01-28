@@ -1,30 +1,16 @@
-
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.hardware.Arm;
 import org.firstinspires.ftc.teamcode.hardware.Distance;
 import org.firstinspires.ftc.teamcode.hardware.DistanceBack;
@@ -32,86 +18,91 @@ import org.firstinspires.ftc.teamcode.hardware.DriveTrain;
 import org.firstinspires.ftc.teamcode.hardware.Grabber;
 import org.firstinspires.ftc.teamcode.hardware.Rotator;
 import org.firstinspires.ftc.teamcode.hardware.Slide;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "auto apriltag", group = "Wallace")
 //@Disabled
 public class autoapriltag extends LinearOpMode {
 
+    static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
+    static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * Math.PI) * .85;
+    static final double DRIVE_SPEED = -0.3;
+    static final double TURN_SPEED = -0.2;
+    static final double MAX_POS = 0.15;     // Maximum rotational position
+    static final double MIN_POS = 0.5;     // Minimum rotational position
+    private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
+    private static final int DESIRED_TAG_ID = -1;    // Choose the tag you want to approach or set to -1 for ANY tag.
+    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_TURN = 0.25;  //  Clip the turn speed to this max value (adjust for your robot)
+    final double SPEED_GAIN = 0.02;   //  Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
+    final double TURN_GAIN = 0.01;   //  Turn Control "Gain".  e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+    final double DESIRED_DISTANCE = 10.0; //  this is how close the camera should get to the target (inches)
     private final ElapsedTime runtime = new ElapsedTime();
     boolean skip_opencv = false;
     /* Declare OpMode members. */
     IntegratingGyroscope gyro;
     NavxMicroNavigationSensor navxMicro;
-    static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
-    static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * Math.PI)*.85;
-    static final double DRIVE_SPEED = -0.3;
-    static final double TURN_SPEED = -0.2;
-
-
-    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_TURN = 0.25;  //  Clip the turn speed to this max value (adjust for your robot)
-    static final double MAX_POS = 0.15;     // Maximum rotational position
-    static final double MIN_POS = 0.5;     // Minimum rotational position
-
-    private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static final int DESIRED_TAG_ID = 11;    // Choose the tag you want to approach or set to -1 for ANY tag.
-    private VisionPortal visionPortal;               // Used to manage the video source.
-    private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
-    private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
     boolean run_with_distance_sensor = false;
-    final double SPEED_GAIN =   0.02 ;   //  Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
-    final double TURN_GAIN  =   0.01 ;   //  Turn Control "Gain".  e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
-    final double DESIRED_DISTANCE = 1.0; //  this is how close the camera should get to the target (inches)
-
-    
     //int DESIRED_TAG_ID = 5;    // Choose the tag you want to approach or set to -1 for ANY tag.
-     DriveTrain drive_train = new DriveTrain(this);
-     Arm arm = new Arm(this);
+    DriveTrain drive_train = new DriveTrain(this);
+    Arm arm = new Arm(this);
     Rotator rotator = new Rotator(this);
     Grabber grabber = new Grabber(this);
     Slide slide = new Slide(this);
-    private Distance distance = new Distance(this);
-    private DistanceBack distance_back = new DistanceBack(this);
+    private VisionPortal visionPortal;               // Used to manage the video source.
+    private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
+    private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
+    private final Distance distance = new Distance(this);
+    private final DistanceBack distance_back = new DistanceBack(this);
 
     @Override
     public void runOpMode() {
-        boolean targetFound     = false;    // Set to true when an AprilTag target is detected
-        double  drive           = .5;        // Desired forward power/speed (-1 to +1) +ve is forward
-        double  turn            = .5;        // Desired turning power/speed (-1 to +1) +ve is CounterClockwise
+        boolean targetFound = false;    // Set to true when an AprilTag target is detected
+        double drive = .5;        // Desired forward power/speed (-1 to +1) +ve is forward
+        double turn = .5;        // Desired turning power/speed (-1 to +1) +ve is CounterClockwise
 
         drive_train.init();
         distance.init();
         distance_back.init();
-       arm.init();
+        arm.init();
         slide.init();
-       grabber.init();
-       rotator.init();
+        grabber.init();
+        rotator.init();
         initAprilTag();
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
-	sleep(500);
-	//	rotator.initpos();
-	grabber.grab();
+        sleep(500);
+        //	rotator.initpos();
+        grabber.grab();
 
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
-        gyro = (IntegratingGyroscope)navxMicro;
+        gyro = navxMicro;
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-
+	//www.homeefficiencyexperts.com
+	
         // Send telemetry message to indicate successful Encoder reset
         //BlueFinder.Selected selected;
         // here is what happens after we hit start
-	arm.move(0.1);
+        arm.move(0.1);
         while (!isStarted() && !isStopRequested()) {
         }
-            targetFound = false;
-            desiredTag  = null;
-	    int isleep = 0;
+        targetFound = false;
+        desiredTag = null;
+	int detection_id = 0;
+        int isleep = 0;
+        while (!run_with_distance_sensor) {
+	    targetFound = false;
 	    while(!targetFound)
 		{
             // Step through the list of detected tags and look for a matching tag
@@ -133,54 +124,51 @@ public class autoapriltag extends LinearOpMode {
                     // This tag is NOT in the library, so we don't have enough information to track to it.
                     telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
                 }
-		if (!targetFound)
-		    {
-			sleep(1);
-			isleep++;
-		    }
+                if (!targetFound) {
+                    sleep(1);
+                    isleep++;
+                }
             }
-            telemetry.addData("slept", "%d ms", isleep);
-	    telemetry.update();
 		}
+            // Determine heading and range error so we can use them to control the robot automatically.
+            double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+            double headingError = desiredTag.ftcPose.bearing;
 
-	    while(!gamepad1.a)
-		{
-		    sleep(1);
-		}
-		while(!run_with_distance_sensor)
-		    {
-		    // Determine heading and range error so we can use them to control the robot automatically.
-                double  rangeError   = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-                double  headingError = desiredTag.ftcPose.bearing;
-
-                // Use the speed and turn "gains" to calculate how we want the robot to move.  Clip it to the maximum
-                drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-                turn  = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
-	    if (desiredTag.ftcPose.range < 20)
-		{
-		    run_with_distance_sensor = true;
-		}
-
-                telemetry.addData("Auto","Drive %5.2f, Turn %5.2f", drive, turn);
-                telemetry.addData("Range/heading error","Range %5.2f, Heading %5.2f", rangeError, headingError);
+           // Use the speed and turn "gains" to calculate how we want the robot to move.  Clip it to the maximum
+            drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+            turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+ 
+            telemetry.addData("Auto", "Drive %5.2f, Turn %5.2f", drive, turn);
+            telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
+            telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
+            telemetry.update();
+            if (desiredTag.ftcPose.range < 20) {
+                run_with_distance_sensor = true;
+            telemetry.addData("Auto", "Drive %5.2f, Turn %5.2f", drive, turn);
+            telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
+            telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
+            telemetry.addData("all done at", "Range %5.2f", desiredTag.ftcPose.range);
+            telemetry.update();
+		break;
+            }
             drive_train.moveRobot(drive, turn);
-	    sleep(10);
-		    }
-    
-	    while (run_with_distance_sensor)
-		{
-		    if (distance_back.getDistanceMM() > 20)
-			{
-		    drive = MAX_AUTO_SPEED;
-			}
-		    else
-			{
-			    drive = 0;
-			    run_with_distance_sensor = false;
-			}
+            sleep(10);
+        }
+	drive_train.Stop();
+        while (!gamepad1.a) {
+            sleep(1);
+        }
+
+        while (run_with_distance_sensor) {
+            if (distance_back.getDistanceMM() > 20) {
+                drive = MAX_AUTO_SPEED;
+            } else {
+                drive = 0;
+                run_with_distance_sensor = false;
+            }
             drive_train.moveRobot(drive, turn);
-		}
-	    drive_train.off();
+        }
+        drive_train.off();
     }
 
     /**
@@ -214,10 +202,10 @@ public class autoapriltag extends LinearOpMode {
     }
 
     /*
-     Manually set the camera gain and exposure.
-     This can only be called AFTER calling initAprilTag(), and only works for Webcams;
+      Manually set the camera gain and exposure.
+      This can only be called AFTER calling initAprilTag(), and only works for Webcams;
     */
-    private void    setManualExposure(int exposureMS, int gain) {
+    private void setManualExposure(int exposureMS, int gain) {
         // Wait for the camera to be open, then use the controls
 
         if (visionPortal == null) {
@@ -236,14 +224,13 @@ public class autoapriltag extends LinearOpMode {
         }
 
         // Set camera controls unless we are stopping.
-        if (!isStopRequested())
-        {
+        if (!isStopRequested()) {
             ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
                 sleep(50);
             }
-            exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
+            exposureControl.setExposure(exposureMS, TimeUnit.MILLISECONDS);
             sleep(20);
             GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
             gainControl.setGain(gain);

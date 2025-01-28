@@ -126,6 +126,10 @@ public class DriveTrain {
         leftBackDrive.setPower(0);
         rightBackDrive.setPower(0);
     }
+
+    public void Stop() {
+	off();
+    }
     public DcMotor getLeftFrontDrive()
     {
 	return leftFrontDrive;
