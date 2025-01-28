@@ -141,4 +141,23 @@ public class DriveTrain {
     {
 	return rightBackDrive;
     }
+    
+    public void left_turn_counter(long ticks) {
+    double TURN_SPEED = -0.2;
+	long toposition = leftFrontDrive.getCurrentPosition() - ticks;
+        leftFrontDrive.setPower(TURN_SPEED);
+        rightFrontDrive.setPower(-TURN_SPEED);
+        leftBackDrive.setPower(TURN_SPEED);
+        rightBackDrive.setPower(-TURN_SPEED);
+	while(	leftFrontDrive.getCurrentPosition() > toposition)
+	    {
+		myOpMode.sleep(1);
+	    }
+        leftFrontDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightBackDrive.setPower(0);
+	return;
+    }
+    
 }

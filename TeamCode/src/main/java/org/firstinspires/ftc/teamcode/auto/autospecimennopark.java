@@ -134,19 +134,18 @@ public class autospecimennopark extends LinearOpMode {
             rightFrontDrive.setPower((-DRIVE_SPEED));
             leftBackDrive.setPower((-DRIVE_SPEED));
             rightBackDrive.setPower((-DRIVE_SPEED));
-            while (distance.getDistanceMM() > 120) {
+	    //            while (distance.getDistanceMM() > 120) {
+            while (distance.getDistanceMM() > 180) {
                 sleep(1);
             }
             leftFrontDrive.setPower((0));
             rightFrontDrive.setPower((0));
             leftBackDrive.setPower((0));
             rightBackDrive.setPower((0));
+	    	grabber.release();
+
 	telemetry.addData("slide power after a: ", "%5.2f", slide.getPower());
         telemetry.update();
-	while(!gamepad1.a)
-	    {
-		sleep(1);
-	    }
 	sleep(1000);
 	    long startpos = slide.getCurrentPosition();
 	slide.MoveTo(500);
@@ -158,18 +157,9 @@ public class autospecimennopark extends LinearOpMode {
 	grabber.release();
 	//	            encoderDrive(DRIVE_SPEED, 12, 12, 5.0);
 	moveRobot_backward(DRIVE_SPEED,0,5);
-	slide.move(-0.3);
-	while(slide.getCurrentPosition() > 60)
-	    {
-		sleep(1);
-	    }
-	slide.move(-0.07);
-	arm.move(0.4);
-	while(arm.getCurrentPosition() < 1700)
-	    {
-		sleep(1);
-	    }
-	arm.move(0.05);
+	slide.MoveTo(60);
+	//	slide.move(-0.07);
+	arm.MoveTo(1700);
 rotator.setposition(0.45);
 
     }
