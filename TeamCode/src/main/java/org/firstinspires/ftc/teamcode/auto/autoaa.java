@@ -25,9 +25,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "auto apriltag", group = "Wallace")
+@Autonomous(name = "auto aa", group = "Wallace")
 //@Disabled
-public class autoapriltag extends LinearOpMode {
+public class autoaa extends LinearOpMode {
 
     static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
@@ -40,13 +40,14 @@ public class autoapriltag extends LinearOpMode {
     static final double MIN_POS = 0.5;     // Minimum rotational position
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     private static final int DESIRED_TAG_ID = -1;    // Choose the tag you want to approach or set to -1 for ANY tag.
-    //    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_SPEED = 0.2;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_TURN = 0.25;  //  Clip the turn speed to this max value (adjust for your robot)
     final double SPEED_GAIN = 0.02;   //  Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
     final double TURN_GAIN = 0.01;   //  Turn Control "Gain".  e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
     final double DESIRED_DISTANCE = 5.0; //  this is how close the camera should get to the target (inches)
     private final ElapsedTime runtime = new ElapsedTime();
+    private final Distance distance = new Distance(this);
+    private final DistanceBack distance_back = new DistanceBack(this);
     boolean skip_opencv = false;
     /* Declare OpMode members. */
     IntegratingGyroscope gyro;
@@ -61,8 +62,6 @@ public class autoapriltag extends LinearOpMode {
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
-    private final Distance distance = new Distance(this);
-    private final DistanceBack distance_back = new DistanceBack(this);
 
     @Override
     public void runOpMode() {
@@ -78,11 +77,10 @@ public class autoapriltag extends LinearOpMode {
         grabber.init();
         rotator.init();
         initAprilTag();
-        if (USE_WEBCAM)
-	    {
+        if (USE_WEBCAM) {
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
-	    }
-	    sleep(500);
+        }
+        sleep(500);
         //	rotator.initpos();
         grabber.grab();
 
@@ -92,8 +90,8 @@ public class autoapriltag extends LinearOpMode {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-	//www.homeefficiencyexperts.com
-	
+        //www.homeefficiencyexperts.com
+
         // Send telemetry message to indicate successful Encoder reset
         //BlueFinder.Selected selected;
         // here is what happens after we hit start
@@ -102,152 +100,84 @@ public class autoapriltag extends LinearOpMode {
         }
         targetFound = false;
         desiredTag = null;
-	int detection_id = 0;
+        int detection_id = 0;
         int isleep = 0;
-	drive_train.coast();
-	telemetry.addData(">","Press A to proceed");
-	telemetry.update();
-	while(!gamepad1.a)
-	    {
-		sleep(1);
-	    }
+        drive_train.coast();
+        telemetry.addData(">", "Press A to proceed");
+        telemetry.update();
         while (!run_with_distance_sensor) {
-	    targetFound = false;
-	    while(!targetFound)
-		{
-		    // Step through the list of detected tags and look for a matching tag
-		    List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-		    for (AprilTagDetection detection : currentDetections) {
-			// Look to see if we have size info on this tag.
-			if (detection.metadata != null) {
-			    //  Check to see if we want to track towards this tag.
-			    if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
-				// Yes, we want to use this tag.
-				targetFound = true;
-				desiredTag = detection;
-				telemetry.addData("found tag ", "%d", detection.id);
-					telemetry.update();
+            targetFound = false;
+            while (!targetFound) {
+                // Step through the list of detected tags and look for a matching tag
+                List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+                for (AprilTagDetection detection : currentDetections) {
+                    // Look to see if we have size info on this tag.
+                    if (detection.metadata != null) {
+                        //  Check to see if we want to track towards this tag.
+                        if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
+                            // Yes, we want to use this tag.
+                            targetFound = true;
+                            desiredTag = detection;
+                            telemetry.addData("found tag ", "%d", detection.id);
+                            telemetry.update();
 
-				break;  // don't look any further.
-			    } else {
-				// This tag is in the library, but we do not want to track it right now.
-				telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
-			    }
-			} else {
-			    // This tag is NOT in the library, so we don't have enough information to track to it.
-			    telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
-			}
-			if (!targetFound) {
-			    sleep(1);
-			    isleep++;
-			}
+                            break;  // don't look any further.
+                        }
+                    }
+                }
+		if (currentDetections == null || currentDetections.isEmpty())
+		    {
+			                telemetry.addData("distance, press A", "%5.2f",  distance_back.getDistanceMM());
+                telemetry.update();
+
+			drive_train.Stop();
+			
+			                if (!gamepad1.a) {
+                    sleep(1);
+                }
+
 		    }
-		}
+		sleep(1); // target not found. sleep and try again
+            }
             // Determine heading and range error so we can use them to control the robot automatically.
             double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
             double headingError = desiredTag.ftcPose.bearing;
 
-	    // Use the speed and turn "gains" to calculate how we want the robot to move.  Clip it to the maximum
+            // Use the speed and turn "gains" to calculate how we want the robot to move.  Clip it to the maximum
             drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
             turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
- 
-	    double dist = distance_back.getDistanceMM();
+
+            double dist = distance_back.getDistanceMM();
             telemetry.addData("Auto", "Drive %5.2f, Turn %5.2f", drive, turn);
             telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
             telemetry.addData("desiredTag.ftcPose.range", "%5.2f", desiredTag.ftcPose.range);
-             telemetry.addData("distance back", "%5.2f", dist);
-             telemetry.update();
- 	    if (dist < 470)
-		{
-		    run_with_distance_sensor = true;
-		    drive_train.brake();
-		    telemetry.addData("distance < 470", "%5.2f", dist);
-		    telemetry.update();
-		    drive_train.Stop();
-		    if (!gamepad1.a)
-			{
-			    sleep(1);
-			}
-		}
-            // if (desiredTag.ftcPose.range < 0) {
-            //     run_with_distance_sensor = true;
-	    // 	telemetry.addData("Auto", "Drive %5.2f, Turn %5.2f", drive, turn);
-	    // 	telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
-	    // 	telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
-	    // 	telemetry.addData("all done at", "Range %5.2f", desiredTag.ftcPose.range);
-	    // 	telemetry.update();
-	    // 	break;
-            // }
-	    drive_train.moveRobot(drive, turn);
-            sleep(10);
-        }
-	drive_train.Stop();
-	if (!gamepad1.a)
-	    {
-		sleep(1);
-	    }
-        while (run_with_distance_sensor) {
-
-		    telemetry.addData("distance: ", "%5.2f", distance_back.getDistanceMM());
-		    telemetry.update();
-            if (distance_back.getDistanceMM() > 20) {
-                drive = MAX_AUTO_SPEED/2.;
-            } else {
-                drive = 0;
-                run_with_distance_sensor = false;
-		drive_train.Stop();
+            telemetry.addData("distance back", "%5.2f", dist);
+            telemetry.update();
+            if (dist < 450) { // 410 april tags out of vision
+                run_with_distance_sensor = true;
+                telemetry.addData("distance < 470, press A", "%5.2f", dist);
+                telemetry.update();
 		break;
             }
-
-	    //            drive_train.moveRobot(drive, turn);
+            // if (desiredTag.ftcPose.range < 0) {
+            //     run_with_distance_sensor = true;
+            // 	telemetry.addData("Auto", "Drive %5.2f, Turn %5.2f", drive, turn);
+            // 	telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
+            // 	telemetry.addData("Range/heading error", "Range %5.2f, Heading %5.2f", rangeError, headingError);
+            // 	telemetry.addData("all done at", "Range %5.2f", desiredTag.ftcPose.range);
+            // 	telemetry.update();
+            // 	break;
+            // }
+            drive_train.moveRobot(drive, turn);
+            sleep(10);
         }
-        rotator.setposition(0.45);
-	sleep(300);
-	double currdist = distance_back.getDistanceMM();
-	drive = -MAX_AUTO_SPEED/2.;
-	drive_train.moveRobot(drive, turn);
-	while(distance_back.getDistanceMM() < currdist+280)
-	    {
-		sleep(1);
-	    }
-	drive_train.off();
-	arm.Reset();
-	arm.MoveTo(10);
-	while(arm.isBusy())
-	    {
-		sleep(1);
-	    }
-	arm.move(0.01);
-	grabber.release();
-	drive_train.left_turn_angle(85.);
-		    
-	slide.MoveTo(1300);
-	while(slide.isBusy())
-	    {
-		sleep(1);
-	    }
-	grabber.grab();
-	sleep(500);
-	slide.MoveTo(60);
-	arm.MoveTo(arm.getArmDropPosition()-200);
-	drive_train.left_turn_angle(135.);
-	slide.MoveTo(slide.maxSlidePosition(arm.getArmDropPosition()));
-	currdist = distance.getDistanceMM();
-	drive = -MAX_AUTO_SPEED/2.;
-	drive_train.moveRobot(drive, turn);
-	while(distance.getDistanceMM() > 170)
-	    {
-		sleep(1);
-	    }
-	drive_train.off();
-	while(slide.isBusy())
-	    {
-		sleep(1);
-	    }
-	slide.move(0.05);
-		    grabber.release();
-		    sleep(500);
-		    
+        drive_train.Stop();
+                 telemetry.addData(">", "All done, press A");
+                telemetry.update();
+               if (!gamepad1.a) {
+                    sleep(1);
+                }
+
     }
 
     /**

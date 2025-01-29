@@ -31,8 +31,8 @@ public class ArmLockTest extends LinearOpMode {
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
             double armpower = 0;
-            long armposition = arm.getCurrentPosition();
-            long slideposition = slide.getCurrentPosition();
+            int armposition = arm.getCurrentPosition();
+            int slideposition = slide.getCurrentPosition();
             if (gamepad1.a) {
                 if (!apushed) {
                     slidepower -= 0.05;  // Note: pushing stick forward gives negative value

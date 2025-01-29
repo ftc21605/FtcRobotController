@@ -12,8 +12,8 @@ public class Slide {
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
     private DcMotor Slide = null;
     // limits
-    long maxslideposition = 2980;
-    long maxslidehorizontalposition = 2000;
+    int maxslideposition = 2980;
+    int maxslidehorizontalposition = 2000;
     double slideholdpower = 0.07; // holds the slide in place
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public Slide(LinearOpMode opmode) {
@@ -42,11 +42,11 @@ public class Slide {
         Slide.setPower(power);
     }
 
-    public long getCurrentPosition() {
+    public int getCurrentPosition() {
         return Slide.getCurrentPosition();
     }
 
-    public long maxSlidePosition(long armposition)
+    public int maxSlidePosition(int armposition)
     {
 	if (armposition > 1000)
 	    {

@@ -157,8 +157,8 @@ public class NewTeleOP extends LinearOpMode {
             if (Math.abs(powerslide) > 0.05) {
                 savepowerslide = powerslide;
             }
-            long armposition = arm.getCurrentPosition();
-            long slideposition = slide.getCurrentPosition();
+            int armposition = arm.getCurrentPosition();
+            int slideposition = slide.getCurrentPosition();
 	    
             if (armposition >= maxarmpos) {
                 armpower = Math.min(armpower, 0);
