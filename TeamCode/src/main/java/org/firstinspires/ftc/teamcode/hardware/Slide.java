@@ -97,4 +97,8 @@ public class Slide {
     {
 	return Slide.getPower();
     }
+    public void RunWithoutEncoder()
+    {
+	Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 }

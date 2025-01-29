@@ -93,5 +93,9 @@ public class Arm {
 	Arm.setPower(0);
     }
 	    
+    public void RunWithoutEncoder()
+    {
+        Arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 	
 }

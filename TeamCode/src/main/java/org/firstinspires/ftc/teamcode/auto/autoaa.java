@@ -84,8 +84,8 @@ public class autoaa extends LinearOpMode {
         //	rotator.initpos();
         grabber.grab();
 
-        navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
-        gyro = navxMicro;
+        // navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
+        // gyro = navxMicro;
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.

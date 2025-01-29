@@ -34,14 +34,17 @@ public class NewTeleOP extends LinearOpMode {
     boolean p1Ypushed = false;
     boolean p1bpushed = false;
     boolean override_arm_safety = false;
+    boolean bumper_right_pushed_arm = false;
+    boolean bumper_right_pushed_slide = false;
+
     @Override
     public void runOpMode() {
         drive.init();
         arm.init();
         grabber.init();
         rotator.init();
-	//sleep(10);
-	//	rotator.initpos();
+        //sleep(10);
+        //	rotator.initpos();
         slide.init();
         telemetry.addData(">", "Press Start to run");
         telemetry.update();
@@ -51,53 +54,50 @@ public class NewTeleOP extends LinearOpMode {
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
             double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral = gamepad1.left_stick_x*0.8;
+            double lateral = gamepad1.left_stick_x * 0.8;
             double yaw = gamepad1.right_stick_x * 0.6;
             double armpower = -gamepad2.left_stick_y;  // Note: pushing stick forward gives negative value
+            int armposition = arm.getCurrentPosition();
+            int slideposition = slide.getCurrentPosition();
             // if (Math.abs(gamepad1.left_stick_x) > 0.8) {
             //     if (Math.abs(gamepad1.left_stick_y) < 0.3) {
             //         lateral = gamepad1.left_stick_x*0.8;
             //     }
             // }
-           drive.driveRobot(axial, lateral, yaw);
-	   if (gamepad1.b){
-	       if (! p1bpushed)
-		   {
-	       arm.Float();
-	       p1bpushed = true;
-		   }
-	   }
-	   p1bpushed = false;
+            drive.driveRobot(axial, lateral, yaw);
+            if (gamepad1.b) {
+                if (!p1bpushed) {
+                    arm.Float();
+                    p1bpushed = true;
+                }
+            }
+            p1bpushed = false;
 
-	   if (gamepad1.x){
-	       if (! p1Xpushed)
-		   {
-		       arm.Brake();
-	       arm.Reset();
-	       p1Xpushed = true;
-		   }
-	   }
-	   p1Xpushed = false;
+            if (gamepad1.x) {
+                if (!p1Xpushed) {
+                    arm.Brake();
+                    arm.Reset();
+                    p1Xpushed = true;
+                }
+            }
+            p1Xpushed = false;
 
-	   if (gamepad1.y){
-	       if (! p1Ypushed)
-		   {
-	       slide.Reset();
-	       p1Ypushed = true;
-		   }
-	   }
-	   p1Ypushed = false;
+            if (gamepad1.y) {
+                if (!p1Ypushed) {
+                    slide.Reset();
+                    p1Ypushed = true;
+                }
+            }
+            p1Ypushed = false;
 
             if (gamepad1.dpad_down) {
-		override_arm_safety = true;
-		armpower = -0.4;
+                override_arm_safety = true;
+                armpower = -0.4;
+            } else {
+                override_arm_safety = false;
             }
-	    else
-		{
-		    override_arm_safety = false;
-		}
-	    
-	    boolean slowbot = false;
+
+            boolean slowbot = false;
             if (gamepad2.y) {
                 grabber.grab();
             }
@@ -106,8 +106,8 @@ public class NewTeleOP extends LinearOpMode {
             }
             if (gamepad2.a) {
                 if (!apushed) {
-		    //                    rotator.rotate_left();
-		    rotator.setposition(0.45);
+                    //                    rotator.rotate_left();
+                    rotator.setposition(0.45);
                     apushed = true;
                 }
             } else {
@@ -139,14 +139,40 @@ public class NewTeleOP extends LinearOpMode {
                 telemetry.addData("Status", "Dpad down pushed ");
                 slowbot = true;
             }
-            if (gamepad2.left_bumper) {
+            if (gamepad2.right_stick_x > 0.5) {
                 yaw = -slowyaw;  // Note: pushing stick forward gives negative value
                 slowbot = true;
             }
-            if (gamepad2.right_bumper) {
+            if (gamepad2.right_stick_x < -0.5) {
                 yaw = slowyaw;  // Note: pushing stick forward gives negative value
                 slowbot = true;
             }
+            if (gamepad2.right_bumper && !bumper_right_pushed_arm && !bumper_right_pushed_slide) {
+                arm.MoveTo(arm.getArmDropPosition());
+                bumper_right_pushed_arm = true;
+                bumper_right_pushed_slide = true;
+                slide.MoveTo(slide.maxSlidePosition(arm.getArmDropPosition()));
+            }
+            if (bumper_right_pushed_arm && !arm.isBusy()) {
+                arm.RunWithoutEncoder();
+                // +- 50 twiddle
+                if (armposition > arm.getArmDropPosition() + 50) {
+                    armpower = -0.1;
+                }
+                if (armposition < arm.getArmDropPosition() - 50) {
+                    armpower = 0.1;
+                }
+                //		    bumper_right_pushed_arm = false;
+            }
+            if (bumper_right_pushed_slide && !slide.isBusy()) {
+                // +- 50 twiddle
+                bumper_right_pushed_slide = false;
+                slide.move(0.05);
+            }
+
+            //     yaw = slowyaw;  // Note: pushing stick forward gives negative value
+            //     slowbot = true;
+            // }
             if (slowbot) {
                 drive.driveRobotSlow(axial, lateral, yaw);
             }
@@ -154,17 +180,16 @@ public class NewTeleOP extends LinearOpMode {
             if (Math.abs(armpower) > 0.05) {
                 savearmpower = armpower;
             }
-            if (Math.abs(powerslide) > 0.05) {
-                savepowerslide = powerslide;
-            }
-            int armposition = arm.getCurrentPosition();
-            int slideposition = slide.getCurrentPosition();
-	    
+
             if (armposition >= maxarmpos) {
                 armpower = Math.min(armpower, 0);
             }
             if (armposition <= 60 && !override_arm_safety) {
                 armpower = Math.max(armpower, 0);
+            }
+
+            if (Math.abs(powerslide) > 0.05) {
+                savepowerslide = powerslide;
             }
             if (slideposition >= slide.maxSlidePosition(armposition)) {
                 powerslide = Math.min(powerslide, 0);
@@ -172,27 +197,25 @@ public class NewTeleOP extends LinearOpMode {
             if (slideposition <= 60) {
                 powerslide = Math.max(powerslide, 0);
             }
+	    
             if (gamepad2.right_trigger > 0) {
                 powerslide = 0.07;
-		if (armposition >  arm.getArmDropPosition()+50)
-		    {
-			armpower = -0.1;
-		    }
-		if (armposition < arm.getArmDropPosition()-50)
-		    {
-			armpower = 0.1;
-		    }
+                if (armposition > arm.getArmDropPosition() + 50) {
+                    armpower = -0.1;
+                }
+                if (armposition < arm.getArmDropPosition() - 50) {
+                    armpower = 0.1;
+                }
             }
             if (gamepad2.left_trigger > 0) {
                 if (armposition < arm.getArmDropPosition()) {
                     armpower = 0.4;
                 }
             }
-	    if (armposition > arm.getArmSlowPosition())
-		{
-		    armpower = Math.min(armpower,0.2);
-		}
-		    slide.move(powerslide);
+            if (armposition > arm.getArmSlowPosition()) {
+                armpower = Math.min(armpower, 0.2);
+            }
+            slide.move(powerslide);
             arm.move(armpower);
 
             telemetry.addData("Status", "Run Time: " + runtime);
