@@ -171,6 +171,19 @@ public class autoaa extends LinearOpMode {
             drive_train.moveRobot(drive, turn);
             sleep(10);
         }
+        while (run_with_distance_sensor) {
+
+		    telemetry.addData("distance: ", "%5.2f", distance_back.getDistanceMM());
+		    telemetry.update();
+            if (distance_back.getDistanceMM() > 30) {
+                drive = MAX_AUTO_SPEED/2.;
+            } else {
+                drive = 0;
+                run_with_distance_sensor = false;
+		drive_train.Stop();
+		break;
+            }
+	}
         drive_train.Stop();
                  telemetry.addData(">", "All done, press A");
                 telemetry.update();
