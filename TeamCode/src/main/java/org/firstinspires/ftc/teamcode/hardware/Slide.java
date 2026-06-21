@@ -13,7 +13,7 @@ public class Slide {
     private DcMotor Slide = null;
     // limits
     int maxslideposition = 3100;
-    int maxslidehorizontalposition = 2000;
+    int maxslidehorizontalposition = 1950;
     int slide_min_position = 60;
 	double slideholdpower = 0.07; // holds the slide in place
     boolean movepos = false; // state of slide MOVE_TO_POSTION -> true

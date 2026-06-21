@@ -18,6 +18,12 @@ public class DriveTrain {
     static final double DPAD_POWER_LATERAL = 0.3;
     static final double DPAD_POWER_AXIAL = 0.2;
     static final double DPAD_POWER_YAW = 0.2;
+    static final double COUNTS_PER_MOTOR_REV = 28;    // eg: REV Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 20.0;     // 4x and 5x gear boxes.
+    static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * Math.PI)*.85;
+
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public DriveTrain(LinearOpMode opmode) {
         myOpMode = opmode;
@@ -120,6 +126,83 @@ public class DriveTrain {
         rightFrontDrive.setPower(rightPower);
         leftBackDrive.setPower(leftPower);
         rightBackDrive.setPower(rightPower);
+    }
+
+    public void moveRobot_forward(double x, double yaw, double distance) {
+        // Calculate left and right wheel powers.
+        double rightPower = -(x - yaw);
+        double leftPower = -(x + yaw);
+
+        // Normalize wheel powers to be less than 1.0
+        double max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+
+        if (max > 1.0) {
+            leftPower /= max;
+            rightPower /= max;
+        }
+        int currpos = leftFrontDrive.getCurrentPosition();
+        Double newData = new Double(distance * COUNTS_PER_INCH);
+        int gohere = currpos + (newData.intValue());
+
+        myOpMode.telemetry.addData("move robot", "%d, %.1f, %.1f, %d", gohere, distance, COUNTS_PER_INCH, currpos);
+        myOpMode.telemetry.update();
+        // while (!gamepad1.a) {
+        //     sleep(1);
+        // }
+        // Send powers to the wheels.
+        leftFrontDrive.setPower(leftPower);
+        leftBackDrive.setPower(leftPower);
+        rightFrontDrive.setPower(rightPower);
+        rightBackDrive.setPower(rightPower);
+
+        while ((currpos = leftFrontDrive.getCurrentPosition()) < gohere) {
+        myOpMode.telemetry.addData("pos robot", "%d, %.1f, %.1f, %d", gohere, distance, COUNTS_PER_INCH, currpos);
+        myOpMode.telemetry.update();
+            myOpMode.sleep(1);
+        }
+        leftFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        rightBackDrive.setPower(0);
+
+    }
+        public void moveRobot_backward(double x, double yaw, double distance) {
+        // Calculate left and right wheel powers.
+	    double rightPower = -(-(x - yaw));
+	    double leftPower = -(-(x + yaw));
+
+        // Normalize wheel powers to be less than 1.0
+        double max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+
+        if (max > 1.0) {
+            leftPower /= max;
+            rightPower /= max;
+        }
+        int currpos = leftFrontDrive.getCurrentPosition();
+        Double newData = new Double(distance * COUNTS_PER_INCH);
+        int gohere = currpos - (newData.intValue());
+
+        myOpMode.telemetry.addData("move robot", "%d, %.1f, %.1f, %d", gohere, distance, COUNTS_PER_INCH, currpos);
+        myOpMode.telemetry.update();
+        // while (!gamepad1.a) {
+        //     sleep(1);
+        // }
+        // Send powers to the wheels.
+        leftFrontDrive.setPower(leftPower);
+        leftBackDrive.setPower(leftPower);
+        rightFrontDrive.setPower(rightPower);
+        rightBackDrive.setPower(rightPower);
+
+        while ((currpos = leftFrontDrive.getCurrentPosition()) > gohere) {
+        myOpMode.telemetry.addData("pos robot", "%d, %.1f, %.1f, %d", gohere, distance, COUNTS_PER_INCH, currpos);
+        myOpMode.telemetry.update();
+            myOpMode.sleep(1);
+        }
+        leftFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        rightBackDrive.setPower(0);
+
     }
 
     public void off() {

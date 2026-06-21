@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.hardware.Distance;
 import org.firstinspires.ftc.teamcode.hardware.DistanceBack;
 
 @Autonomous(name = "auto test specimen", group = "Wallace")
-//@Disabled
+@Disabled
 public class autotestspecimen extends LinearOpMode {
 
     private final ElapsedTime runtime = new ElapsedTime();
