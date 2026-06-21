@@ -12,9 +12,11 @@ public class Slide {
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
     private DcMotor Slide = null;
     // limits
-    int maxslideposition = 2980;
+    int maxslideposition = 3100;
     int maxslidehorizontalposition = 2000;
-    double slideholdpower = 0.07; // holds the slide in place
+    int slide_min_position = 60;
+	double slideholdpower = 0.07; // holds the slide in place
+    boolean movepos = false; // state of slide MOVE_TO_POSTION -> true
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public Slide(LinearOpMode opmode) {
         myOpMode = opmode;
@@ -31,7 +33,7 @@ public class Slide {
         Slide = myOpMode.hardwareMap.get(DcMotor.class, "slide");
 
         Slide.setDirection(DcMotor.Direction.REVERSE);
-        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+	//        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -39,13 +41,26 @@ public class Slide {
     }
 
     public void move(double power) {
+	RunWithoutEncoder();
         Slide.setPower(power);
     }
 
+    public void Float()
+    {
+		        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    }
+    public void Brake()
+    {
+		        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
     public int getCurrentPosition() {
         return Slide.getCurrentPosition();
     }
 
+    public int getSlideMinPosition() {
+	return slide_min_position;
+    }
+    
     public int maxSlidePosition(int armposition)
     {
 	if (armposition > 1000)
@@ -62,7 +77,8 @@ public class Slide {
 	return slideholdpower;
     }
     public void Reset(){
-            Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	movepos = false;
+	Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void Stop()
@@ -71,20 +87,18 @@ public class Slide {
     }
     public void MoveToPosition(int position)
     {
+	movepos = true;
         Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
 	Slide.setTargetPosition(position);
 	Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     public void MoveTo(int ticks)
     {
-	//        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-	Slide.setTargetPosition(ticks);
-        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-       	Slide.setPower(0.3);
+	MoveTo(ticks,0.3);
     }
     public void MoveTo(int ticks, double power)
     {
-	//        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	movepos = true;
 	Slide.setTargetPosition(ticks);
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
        	Slide.setPower(power);
@@ -99,6 +113,7 @@ public class Slide {
     }
     public void RunWithoutEncoder()
     {
+	movepos = false;
 	Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 }

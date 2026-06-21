@@ -29,41 +29,41 @@ public class DpadDrive extends LinearOpMode {
             double axial = 0;
             double lateral = 0;
 	    double yaw = 0;
-	    if (gamepad1.dpad_right)
+	    if (gamepad2.dpad_right)
 		{
-		    lateral = 0.2;  // Note: pushing stick forward gives negative value
+		    lateral = drive.getDpadLateralPower();  // Note: pushing stick forward gives negative value
            telemetry.addData("Status", "Dpad right pushed ");
 		}
-	    if (gamepad1.dpad_left)
+	    if (gamepad2.dpad_left)
 		{
-		    lateral = -0.2;  // Note: pushing stick forward gives negative value
+		    lateral = -drive.getDpadLateralPower();
            telemetry.addData("Status", "Dpad left pushed ");
 		}
-	    if (gamepad1.dpad_up)
+	    if (gamepad2.dpad_up)
 		{
-		    axial = 0.2;  // Note: pushing stick forward gives negative value
+		    axial = drive.getDpadAxialPower();
            telemetry.addData("Status", "Dpad up pushed ");
 		}
-	    if (gamepad1.dpad_down)
+	    if (gamepad2.dpad_down)
 		{
-		    axial = -0.2;  // Note: pushing stick forward gives negative value
+		    axial = -drive.getDpadAxialPower();
            telemetry.addData("Status", "Dpad down pushed ");
 		}
-	    if (gamepad1.left_bumper)
+	    if (gamepad2.right_stick_x < -0.5)
 		{
-		    yaw = -0.15;  // Note: pushing stick forward gives negative value
+		    yaw = drive.getDpadYawPower();  // Note: pushing stick forward gives negative value
            telemetry.addData("Status", "left bumper pushed ");
 		}
-	    if (gamepad1.right_bumper)
+	    if (gamepad2.right_stick_x > 0.5)
 		{
-		    yaw = 0.15;  // Note: pushing stick forward gives negative value
+		    yaw = -drive.getDpadYawPower();
            telemetry.addData("Status", "right bumper pushed ");
 		}
 	                telemetry.addData("axial:", "%5.2f", axial);
 	                telemetry.addData("lateral:", "%5.2f", lateral);
 	                telemetry.addData("yaw:", "%5.2f", yaw);
 
-            //double lateral = gamepad1.left_stick_x;
+            //double lateral = gamepad2.left_stick_x;
             drive.driveRobotSlow(axial, lateral, yaw);
         telemetry.update();
         }

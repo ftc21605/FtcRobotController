@@ -6,12 +6,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.Arm;
+import org.firstinspires.ftc.teamcode.hardware.Slide;
 
 @TeleOp(name = "Test: Arm Position", group = "Test")
 //@Disabled
 public class ArmPosition extends LinearOpMode {
 
     Arm arm = new Arm(this);
+    Slide slide = new Slide(this);
     private ElapsedTime runtime = new ElapsedTime();
     boolean p1Xpushed = false;
 
@@ -19,6 +21,7 @@ public class ArmPosition extends LinearOpMode {
     public void runOpMode() {
 
         arm.init();
+	slide.init();
         telemetry.addData(">", "Press Start to run.");
         telemetry.update();
         waitForStart();
@@ -29,12 +32,15 @@ public class ArmPosition extends LinearOpMode {
 	   if (gamepad1.x){
 	       if (! p1Xpushed)
 		   {
-		       arm.Brake();
+		       		       // arm.Brake();
+		       		       // slide.Brake();
 	       arm.Reset();
+	       slide.Reset();
 	       p1Xpushed = true;
 		   }
 	   }
             telemetry.addData("Arm Position", "%10d", arm.getCurrentPosition());
+            telemetry.addData("Slide Position", "%10d", slide.getCurrentPosition());
             telemetry.addData(">","Push X to reset");
             telemetry.update();
 

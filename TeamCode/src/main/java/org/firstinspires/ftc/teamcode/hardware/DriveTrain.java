@@ -15,7 +15,9 @@ public class DriveTrain {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     double TURN_SPEED = -0.2;
-
+    static final double DPAD_POWER_LATERAL = 0.3;
+    static final double DPAD_POWER_AXIAL = 0.2;
+    static final double DPAD_POWER_YAW = 0.2;
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public DriveTrain(LinearOpMode opmode) {
         myOpMode = opmode;
@@ -217,5 +219,18 @@ public class DriveTrain {
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 	return;
-    }    
+    }
+    public double getDpadLateralPower()
+    {
+	return DPAD_POWER_LATERAL;
+    }
+    public double getDpadAxialPower()
+    {
+	return DPAD_POWER_AXIAL;
+    }
+    public double getDpadYawPower()
+    {
+	return DPAD_POWER_YAW;
+    }
+    
 }
