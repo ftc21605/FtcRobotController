@@ -1,6 +1,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.hardware.Slide;
 import org.firstinspires.ftc.teamcode.hardware.Grabber;
 
 @TeleOp(name="Tank Drive To AprilTag", group = "Concept")
+@Disabled
 public class AprilTagTest extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.

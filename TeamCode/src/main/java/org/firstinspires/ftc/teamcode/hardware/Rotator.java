@@ -34,7 +34,7 @@ public class Rotator {
         // }
         // catch
 
-        myOpMode.telemetry.addData("not using currpos:", "%5.2f", currpos);
+        //myOpMode.telemetry.addData("not using currpos:", "%5.2f", currpos);
         myOpMode.telemetry.addData(">", "Rotator Servo Initialized");
     }
 

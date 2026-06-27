@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,7 +12,7 @@ import org.firstinspires.ftc.teamcode.hardware.Rotator;
 import org.firstinspires.ftc.teamcode.hardware.Slide;
 
 @TeleOp(name = "New TeleOp", group = "AWallace")
-//@Disabled
+@Disabled
 public class NewTeleOP extends LinearOpMode {
 
     private final ElapsedTime runtime = new ElapsedTime();
