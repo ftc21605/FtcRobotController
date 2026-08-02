@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class Arm {
     /* Declare OpMode members. */
     private final LinearOpMode myOpMode;   // gain access to methods in the calling OpMode.
-    int arm_drop_position = 1850;
+    int arm_drop_position =1850;//1850;
     int arm_slow_position = 1500;
     int arm_min_position = 100; // then power off and drop
     int arm_max_position = 1920; // for hanging

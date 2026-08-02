@@ -79,7 +79,7 @@ public class FaireTeleOP extends LinearOpMode {
             }
 
             if (enable_robot) {
-                axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+                axial = -gamepad1.left_stick_y/2.;  // Note: pushing stick forward gives negative value
                 double left_stick_val = gamepad1.left_stick_x;
                 if (Math.abs(left_stick_val) > 0.2) {
                     lateral = gamepad1.left_stick_x * 0.8;
@@ -147,7 +147,7 @@ public class FaireTeleOP extends LinearOpMode {
                 if (gamepad1.right_bumper) {
                     if (!rightbumper) {
                         arm.Brake();
-                        arm.MoveTo(arm.getArmDropPosition() - 400, 1.);
+                        arm.MoveTo(arm.getArmDropPosition() - 300, 1.);
                         rotator.setposition(0.45); // rotate sample horizontal
                         rightbumper = true;
                         armup = true;
@@ -163,7 +163,7 @@ public class FaireTeleOP extends LinearOpMode {
 
 
             if (armup && armposition > 500) {
-                slide.MoveTo(1800, 1.);
+                slide.MoveTo(2000, 1.);
                 armup = false;
                 telemetry.addData(">", "should move slide Press dpad_up to continue");
 
